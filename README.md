@@ -26,6 +26,8 @@ The program writes a CSV beside its image. The mock fixture is deterministic, re
 
 All 72 examples also have self-contained [lmcloud/OpenTofu equivalents](compare/README.md), a small AzureRM configuration, and a [comparison results table](compare/RESULTS.md). Run `compare/run.sh <example>` for the offline comparison. It checks exact created resource names/types, ownership metadata and fingerprints, common outputs, wall time, estimated cost and zero cleanup leftovers. Offline fixture agreement is explicitly separated from AzureRM behavior; every live comparison remains pending user test. The lmcloud repository is not modified.
 
+**[v0.1.3](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.3) — READY TO TEST.** All five platform jobs and release checksums passed. All 72 README autoruns and 72 public comparison URLs passed from fresh caches. The released-binary offline matrix matches resource identities, ownership metadata and common outputs in all 72 cases, with zero fixture leftovers. Cost estimates differ in 16 cases because OpenTofu reserves conservative provider-request allowances; timings are informational. [Verification evidence](durable-memory/07-lmcloud-equivalents.md) and [lmcloud findings](compare/LMCLOUD_ISSUES.md) describe the limits. Live AzureRM comparisons remain pending user test.
+
 ## Host API
 
 Bind lmazure from lmscript with `_dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest"`. The default path is `mock()`:

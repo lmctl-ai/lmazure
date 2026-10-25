@@ -37,8 +37,9 @@ absence ledger. Unknown/foreign leftovers fail. No role/account/infrastructure
 creation is configured. No OIDC or Azure credentials are configured in CI.
 
 The lmcloud repository was only read; no files there were changed. Public v0.1.9
-binary and checksums were used. Its embedded --version reports 0.1.0: the discrepancy
-and API process-local-variable pitfall are reported in compare/LMCLOUD_ISSUES.md.
+binary and checksums were used. The current fresh-cache asset reports the correct
+0.1.9 version; the earlier version discrepancy is no longer reproduced. Findings
+and the process-local-variable pitfall are recorded in compare/LMCLOUD_ISSUES.md.
 Provider mocking via tofu test is not exposed by the current lmcloud API, so no
 real AzureRM offline plan is claimed. HCL syntax was checked without initializing
 an Azure provider; live AzureRM validation/RBAC/results remain for the user.
@@ -47,4 +48,44 @@ Local acceptance: 72 full native/fixture comparisons, 72 generated-config contra
 74 live-admission/source checks, 11 comparison-engine regressions, standard native
 checks and NativeAOT. Five-platform CI now runs the comparison matrix in addition
 to the existing native gallery; comparisons install compiler 0.2.420 after the
-native gallery's pinned 0.2.369 pass. CI/release verification is pending.
+native gallery's pinned 0.2.369 pass. Main and tag five-platform CI passed; v0.1.3 is published.
+
+
+## Published v0.1.3 verification — 2026-10-25
+
+[Main CI](https://github.com/lmctl-ai/lmazure/actions/runs/40202476387) and
+[tag CI/release](https://github.com/lmctl-ai/lmazure/actions/runs/40203481748)
+passed all five NativeAOT platforms, including the 72-case comparison matrix on
+each platform. [v0.1.3](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.3)
+contains all five assets and SHA256SUMS. All five downloaded hashes passed;
+both Linux binaries use glibc only, maximum required ABI 2.34. The published
+Linux x64 executable reports v0.1.3 and passes 120 fake-transport checks.
+
+| Asset | Bytes |
+| --- | ---: |
+| lmazure-linux-arm64 | 20,524,584 |
+| lmazure-linux-x64 | 20,353,752 |
+| lmazure-macos-arm64 | 15,472,312 |
+| lmazure-macos-x64 | 15,805,800 |
+| lmazure-windows-x64.exe | 16,393,216 |
+
+All 72 README raw autoruns passed with a new empty tool cache and LMCTL_HOME,
+no lmazure on PATH, and a separate empty working directory per example. Every
+PNG and expected final estimate was checked. Native ledgers had zero ownership
+and reserved cost; budget refusal dispatched no requests. The installed @latest
+binary's version and SHA256 matched the published Linux x64 v0.1.3 asset.
+All 72 public lmcloud raw comparison URLs independently passed with another
+fresh cache; their fixture outputs, lifecycle return values, estimates and empty
+post-destroy state were checked. The pinned lmcloud asset's hash and embedded
+0.1.9 version match its currently published SHA256SUMS.
+
+The complete offline harness also passed all 72 cases using the downloaded
+v0.1.3 executable: 72 same resource/ownership/common-output results, zero native
+fake and local fixture leftovers, 56 same cost estimates and 16 differing
+request allowances. Wall time differs in all 72 and is informational. These are
+SDK-fake versus builtin-provider fixture comparisons, not AzureRM plans. Every
+live row remains pending user test. No Azure authentication or subscription was
+used, and the lmcloud repository was not edited.
+
+Machine-readable per-example checks, release hashes and timing/cost observations
+are in [v0.1.3-verification.json](v0.1.3-verification.json).

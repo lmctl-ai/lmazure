@@ -1,0 +1,2437 @@
+{
+  "verified_utc": "2026-10-25",
+  "release": "https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.3",
+  "tag_commit": "cd8852bd86be94d1b1e02df256b7750db5546092",
+  "main_ci": "https://github.com/lmctl-ai/lmazure/actions/runs/40202476387",
+  "tag_ci": "https://github.com/lmctl-ai/lmazure/actions/runs/40203481748",
+  "platform_jobs": "all five passed",
+  "release_checks": {
+    "version": "lmazure 0.1.3",
+    "assets": [
+      {
+        "name": "lmazure-linux-arm64",
+        "bytes": 20524584,
+        "sha256": "78dc7a74f0ca010d4f100d1a4695cbe17bf82f7007a0dbe27dc55c5336fbf2f4"
+      },
+      {
+        "name": "lmazure-linux-x64",
+        "bytes": 20353752,
+        "sha256": "af2de11fdda2066faa4a50bfd0f4ca7940de4c56a6ff3c42371672c50d32a55d"
+      },
+      {
+        "name": "lmazure-macos-arm64",
+        "bytes": 15472312,
+        "sha256": "981eda32fba052fb7a71d996211a4f0e5c0cfaaf9a9e0e98d762e59a3eb9f744"
+      },
+      {
+        "name": "lmazure-macos-x64",
+        "bytes": 15805800,
+        "sha256": "b507b162cf1f8f60f19617e28fb9923c674effa557988da6d81d0256438cc206"
+      },
+      {
+        "name": "lmazure-windows-x64.exe",
+        "bytes": 16393216,
+        "sha256": "a7542633260894221c2a02409160c6a59148147bccbd7f26e790f2c9c27ac31c"
+      }
+    ]
+  },
+  "native_self_tests": 120,
+  "linux_maximum_glibc_abi": "2.34",
+  "native_fresh_cache_autoruns": {
+    "count": 72,
+    "version": "lmazure 0.1.3",
+    "binary_sha256": "af2de11fdda2066faa4a50bfd0f4ca7940de4c56a6ff3c42371672c50d32a55d",
+    "mode": "fake",
+    "examples": [
+      {
+        "name": "age_distribution",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/age_distribution.lms",
+        "image_bytes": 27135,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "cleanup_plan",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/cleanup_plan.lms",
+        "image_bytes": 53114,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "compute_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/compute_inventory.lms",
+        "image_bytes": 23297,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "container_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/container_inventory.lms",
+        "image_bytes": 25244,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "database_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/database_inventory.lms",
+        "image_bytes": 23602,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "dns_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/dns_inventory.lms",
+        "image_bytes": 23036,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "encryption_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/encryption_audit.lms",
+        "image_bytes": 28764,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "identity_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/identity_inventory.lms",
+        "image_bytes": 30878,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "monitoring_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/monitoring_inventory.lms",
+        "image_bytes": 31229,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "network_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/network_inventory.lms",
+        "image_bytes": 31664,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "network_topology",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/network_topology.lms",
+        "image_bytes": 55718,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_container_cycle",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_container_cycle.lms",
+        "image_bytes": 53579,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_queue_cycle",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_queue_cycle.lms",
+        "image_bytes": 52762,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "public_resource_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/public_resource_audit.lms",
+        "image_bytes": 25365,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "queue_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/queue_inventory.lms",
+        "image_bytes": 26274,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "queue_pipeline",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/queue_pipeline.lms",
+        "image_bytes": 55262,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "regional_footprint",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/regional_footprint.lms",
+        "image_bytes": 26600,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "resource_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_inventory.lms",
+        "image_bytes": 41826,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "resource_status",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_status.lms",
+        "image_bytes": 27136,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "security_review",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/security_review.lms",
+        "image_bytes": 55884,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "serverless_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/serverless_inventory.lms",
+        "image_bytes": 26647,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "serverless_plan",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/serverless_plan.lms",
+        "image_bytes": 53570,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "service_counts",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/service_counts.lms",
+        "image_bytes": 27084,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "stale_resources",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/stale_resources.lms",
+        "image_bytes": 28494,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "storage_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/storage_inventory.lms",
+        "image_bytes": 31740,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "tagging_compliance",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/tagging_compliance.lms",
+        "image_bytes": 27196,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "vault_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/vault_inventory.lms",
+        "image_bytes": 26381,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "functions_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/functions_inventory.lms",
+        "image_bytes": 67599,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "servicebus_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/servicebus_inventory.lms",
+        "image_bytes": 70814,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "nsg_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/nsg_inventory.lms",
+        "image_bytes": 75216,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "public_ip_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/public_ip_inventory.lms",
+        "image_bytes": 71968,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "route_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/route_inventory.lms",
+        "image_bytes": 70176,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "log_workspace_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/log_workspace_inventory.lms",
+        "image_bytes": 75238,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "metric_alert_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/metric_alert_inventory.lms",
+        "image_bytes": 71897,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "app_service_plan_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/app_service_plan_inventory.lms",
+        "image_bytes": 72714,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "postgresql_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/postgresql_inventory.lms",
+        "image_bytes": 74672,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "registry_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/registry_inventory.lms",
+        "image_bytes": 73829,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "backup_vault_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/backup_vault_inventory.lms",
+        "image_bytes": 76222,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "cosmos_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/cosmos_inventory.lms",
+        "image_bytes": 73983,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "provider_footprint",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/provider_footprint.lms",
+        "image_bytes": 36049,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "resource_age_heatmap",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_age_heatmap.lms",
+        "image_bytes": 54631,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "region_service_matrix",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/region_service_matrix.lms",
+        "image_bytes": 40248,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "regional_tag_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/regional_tag_coverage.lms",
+        "image_bytes": 26059,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "public_surface_by_region",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/public_surface_by_region.lms",
+        "image_bytes": 26806,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "stale_ownership_triage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/stale_ownership_triage.lms",
+        "image_bytes": 22882,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "inventory_observation_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/inventory_observation_graph.lms",
+        "image_bytes": 60621,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "provider_resource_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/provider_resource_graph.lms",
+        "image_bytes": 63391,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "regional_resource_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/regional_resource_graph.lms",
+        "image_bytes": 58074,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "storage_security_matrix",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/storage_security_matrix.lms",
+        "image_bytes": 31336,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "identity_tag_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/identity_tag_coverage.lms",
+        "image_bytes": 22062,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "functions_region_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/functions_region_coverage.lms",
+        "image_bytes": 24545,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "servicebus_region_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/servicebus_region_coverage.lms",
+        "image_bytes": 24589,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "network_security_review",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/network_security_review.lms",
+        "image_bytes": 28827,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "monitoring_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/monitoring_coverage.lms",
+        "image_bytes": 26264,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "database_portfolio",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/database_portfolio.lms",
+        "image_bytes": 32079,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "container_registry_map",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/container_registry_map.lms",
+        "image_bytes": 64195,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "inventory_unknowns_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/inventory_unknowns_audit.lms",
+        "image_bytes": 27126,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_queue_tag_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_queue_tag_audit.lms",
+        "image_bytes": 75936,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_container_tag_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_container_tag_audit.lms",
+        "image_bytes": 76527,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_storage_pair",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_storage_pair.lms",
+        "image_bytes": 76120,
+        "estimated_cost_usd": 0.0008,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_queue_batch",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_queue_batch.lms",
+        "image_bytes": 75410,
+        "estimated_cost_usd": 0.001,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_container_batch",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_container_batch.lms",
+        "image_bytes": 75942,
+        "estimated_cost_usd": 0.001,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_delete_then_cleanup",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_delete_then_cleanup.lms",
+        "image_bytes": 76360,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_sweep_preview",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_sweep_preview.lms",
+        "image_bytes": 76061,
+        "estimated_cost_usd": 0.0006,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_sweep_apply",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_sweep_apply.lms",
+        "image_bytes": 75442,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_mixed_lifecycle",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_mixed_lifecycle.lms",
+        "image_bytes": 75953,
+        "estimated_cost_usd": 0.001,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_ownership_evidence",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_ownership_evidence.lms",
+        "image_bytes": 77456,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "owned_budget_admission",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_budget_admission.lms",
+        "image_bytes": 79330,
+        "estimated_cost_usd": 0,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "cleanup_age_guard",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/cleanup_age_guard.lms",
+        "image_bytes": 74241,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "cleanup_candidate_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/cleanup_candidate_graph.lms",
+        "image_bytes": 74323,
+        "estimated_cost_usd": 0.0006,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "cost_request_breakdown",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/cost_request_breakdown.lms",
+        "image_bytes": 28544,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      },
+      {
+        "name": "cost_teardown_reserve",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/cost_teardown_reserve.lms",
+        "image_bytes": 31507,
+        "estimated_cost_usd": 0.0005,
+        "leftovers": 0,
+        "mode": "fake"
+      }
+    ]
+  },
+  "lmcloud_fresh_cache_autoruns": {
+    "count": 72,
+    "mode": "offline",
+    "examples": [
+      {
+        "name": "age_distribution",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/age_distribution/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "cleanup_plan",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/cleanup_plan/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "compute_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/compute_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "container_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/container_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "database_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/database_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "dns_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/dns_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "encryption_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/encryption_audit/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "identity_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/identity_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "monitoring_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/monitoring_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "network_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/network_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "network_topology",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/network_topology/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_container_cycle",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_container_cycle/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_queue_cycle",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_queue_cycle/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "public_resource_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/public_resource_audit/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "queue_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/queue_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "queue_pipeline",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/queue_pipeline/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "regional_footprint",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/regional_footprint/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "resource_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/resource_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "resource_status",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/resource_status/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "security_review",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/security_review/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "serverless_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/serverless_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "serverless_plan",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/serverless_plan/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "service_counts",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/service_counts/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "stale_resources",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/stale_resources/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "storage_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/storage_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "tagging_compliance",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/tagging_compliance/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "vault_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/vault_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "functions_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/functions_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "servicebus_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/servicebus_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "nsg_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/nsg_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "public_ip_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/public_ip_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "route_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/route_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "log_workspace_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/log_workspace_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "metric_alert_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/metric_alert_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "app_service_plan_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/app_service_plan_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "postgresql_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/postgresql_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "registry_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/registry_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "backup_vault_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/backup_vault_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "cosmos_inventory",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/cosmos_inventory/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "provider_footprint",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/provider_footprint/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "resource_age_heatmap",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/resource_age_heatmap/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "region_service_matrix",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/region_service_matrix/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "regional_tag_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/regional_tag_coverage/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "public_surface_by_region",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/public_surface_by_region/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "stale_ownership_triage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/stale_ownership_triage/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "inventory_observation_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/inventory_observation_graph/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "provider_resource_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/provider_resource_graph/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "regional_resource_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/regional_resource_graph/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "storage_security_matrix",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/storage_security_matrix/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "identity_tag_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/identity_tag_coverage/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "functions_region_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/functions_region_coverage/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "servicebus_region_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/servicebus_region_coverage/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "network_security_review",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/network_security_review/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "monitoring_coverage",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/monitoring_coverage/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "database_portfolio",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/database_portfolio/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "container_registry_map",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/container_registry_map/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "inventory_unknowns_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/inventory_unknowns_audit/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_queue_tag_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_queue_tag_audit/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_container_tag_audit",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_container_tag_audit/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_storage_pair",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_storage_pair/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_queue_batch",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_queue_batch/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_container_batch",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_container_batch/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_delete_then_cleanup",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_delete_then_cleanup/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_sweep_preview",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_sweep_preview/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_sweep_apply",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_sweep_apply/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_mixed_lifecycle",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_mixed_lifecycle/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_ownership_evidence",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_ownership_evidence/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "owned_budget_admission",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_budget_admission/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "none"
+      },
+      {
+        "name": "cleanup_age_guard",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/cleanup_age_guard/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "cleanup_candidate_graph",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/cleanup_candidate_graph/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "cost_request_breakdown",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/cost_request_breakdown/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      },
+      {
+        "name": "cost_teardown_reserve",
+        "url": "https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/cost_teardown_reserve/main.lms",
+        "destroy_ok": true,
+        "executed_provider": "builtin_fixture"
+      }
+    ]
+  },
+  "lmcloud_version": "lmcloud 0.1.9 (opentofu 1.13.2)",
+  "lmcloud_binary_sha256": "b1d7b99f1c53a27d145cb021cb8c8bdd8b8dbe6d4a689b94bd4870927b831c9d",
+  "released_binary_comparisons": [
+    {
+      "example": "age_distribution",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16495786999985285,
+        "lmcloud": 0.2665168650000851
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "cleanup_plan",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1646747389986558,
+        "lmcloud": 0.2662493989992072
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "compute_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1710478229997534,
+        "lmcloud": 0.21545561899984023
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "container_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1674824970014015,
+        "lmcloud": 0.2657001190000301
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "database_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16517656300129602,
+        "lmcloud": 0.2149927199989179
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "dns_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16515303699998185,
+        "lmcloud": 0.21471151399964583
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "encryption_audit",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16455291800048144,
+        "lmcloud": 0.2147392229999241
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "identity_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16709729900139791,
+        "lmcloud": 0.21723146600015752
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "monitoring_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16473336099988956,
+        "lmcloud": 0.2176201750007749
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "network_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1649279329994897,
+        "lmcloud": 0.2694008520011266
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "network_topology",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.21494660999996995,
+        "lmcloud": 0.2655350439999893
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_container_cycle",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1649251649996586,
+        "lmcloud": 0.2151136949996726
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_queue_cycle",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16506881900022563,
+        "lmcloud": 0.22015414300039993
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "public_resource_audit",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16603317199951562,
+        "lmcloud": 0.26481126399994537
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "queue_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16752561499924923,
+        "lmcloud": 0.2177943859987863
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "queue_pipeline",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1646424409991596,
+        "lmcloud": 0.21645805399930396
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "regional_footprint",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1651319180000428,
+        "lmcloud": 0.2647669379985018
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "resource_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16480945500006783,
+        "lmcloud": 0.26508659699902637
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "resource_status",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16494508200048585,
+        "lmcloud": 0.26472651200128894
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "security_review",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1660367460008274,
+        "lmcloud": 0.2651807310012373
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "serverless_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16621461400063708,
+        "lmcloud": 0.21569035300126416
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "serverless_plan",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1649818879996019,
+        "lmcloud": 0.21575629099970683
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "service_counts",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16631975800009968,
+        "lmcloud": 0.26572260600005393
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "stale_resources",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1644599110004492,
+        "lmcloud": 0.2672332469992398
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "storage_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1667055010002514,
+        "lmcloud": 0.21463936600048328
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "tagging_compliance",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16879675400014094,
+        "lmcloud": 0.26514037100059795
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "vault_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16726546499921824,
+        "lmcloud": 0.2249597169993649
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "functions_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.21925839300092775,
+        "lmcloud": 0.21454956699926697
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "servicebus_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1652995739987091,
+        "lmcloud": 0.21648633600125322
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "nsg_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16760768700078188,
+        "lmcloud": 0.21616995600015798
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "public_ip_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16475684299985005,
+        "lmcloud": 0.214649454001119
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "route_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1645362239996757,
+        "lmcloud": 0.26474909900025523
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "log_workspace_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16525366099995153,
+        "lmcloud": 0.21508594099941547
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "metric_alert_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16446192399962456,
+        "lmcloud": 0.21664768699884007
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "app_service_plan_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16485472800013667,
+        "lmcloud": 0.21476067599905946
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "postgresql_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16483463100121298,
+        "lmcloud": 0.2148195459994895
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "registry_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16457650499978627,
+        "lmcloud": 0.21475152800121577
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "backup_vault_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16544504599914944,
+        "lmcloud": 0.2171846179990098
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "cosmos_inventory",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16516527199928532,
+        "lmcloud": 0.21522270199966442
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "provider_footprint",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.2148710769997706,
+        "lmcloud": 0.3173792589986988
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "resource_age_heatmap",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16479225600050995,
+        "lmcloud": 0.2685742699995899
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "region_service_matrix",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.21478165699954843,
+        "lmcloud": 0.2659751339997456
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "regional_tag_coverage",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1646044709996204,
+        "lmcloud": 0.26510405499902845
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "public_surface_by_region",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.2162715289996413,
+        "lmcloud": 0.2684791560004669
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "stale_ownership_triage",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16499187600129517,
+        "lmcloud": 0.2686683310002991
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "inventory_observation_graph",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1646355399989261,
+        "lmcloud": 0.2675617569984752
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "provider_resource_graph",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16608079700017697,
+        "lmcloud": 0.2675152940009866
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "regional_resource_graph",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16476655999940704,
+        "lmcloud": 0.2703400260015769
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "storage_security_matrix",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16486607499973616,
+        "lmcloud": 0.21553370199944766
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "identity_tag_coverage",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16690058300082455,
+        "lmcloud": 0.21502924900050857
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "functions_region_coverage",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1645109910004976,
+        "lmcloud": 0.265954034999595
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "servicebus_region_coverage",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16985023800043564,
+        "lmcloud": 0.21538581399909162
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "network_security_review",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.17081038800097303,
+        "lmcloud": 0.2146228740002698
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "monitoring_coverage",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16458743200018944,
+        "lmcloud": 0.26813889400000335
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "database_portfolio",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16849434000141628,
+        "lmcloud": 0.2679917850000493
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "container_registry_map",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16742185699877155,
+        "lmcloud": 0.26575588900050207
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "inventory_unknowns_audit",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16477491299883695,
+        "lmcloud": 0.26507099000082235
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_queue_tag_audit",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16851317700093205,
+        "lmcloud": 0.2166036630005692
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_container_tag_audit",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1643692600009672,
+        "lmcloud": 0.21481155499895976
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_storage_pair",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1648914710003737,
+        "lmcloud": 0.26697583500026667
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0008,
+        "lmcloud": 0.0128
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_queue_batch",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16841436699905898,
+        "lmcloud": 0.21628552000038326
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.001,
+        "lmcloud": 0.0128
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_container_batch",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16956961500000034,
+        "lmcloud": 0.21486016599919822
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.001,
+        "lmcloud": 0.0128
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_delete_then_cleanup",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.2145680209996499,
+        "lmcloud": 0.26737618999868573
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_sweep_preview",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16982478700083448,
+        "lmcloud": 0.21529940999971586
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0006,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_sweep_apply",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1655639090004115,
+        "lmcloud": 0.2687709609999729
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_mixed_lifecycle",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16526520300067205,
+        "lmcloud": 0.2158125639998616
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.001,
+        "lmcloud": 0.0128
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_ownership_evidence",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16480813100133673,
+        "lmcloud": 0.26496846500049287
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "owned_budget_admission",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16640009299953817,
+        "lmcloud": 0.11922014100127853
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cost_status": "same",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "cleanup_age_guard",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16497696999977052,
+        "lmcloud": 0.21609073400031775
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "cleanup_candidate_graph",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.1645397240008606,
+        "lmcloud": 0.26529855800072255
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0006,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "cost_request_breakdown",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16512969799987331,
+        "lmcloud": 0.2154172299997299
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    },
+    {
+      "example": "cost_teardown_reserve",
+      "resources": "same",
+      "common_outputs": "same",
+      "wall_time_seconds": {
+        "lmazure": 0.16476345299997774,
+        "lmcloud": 0.26592133000121976
+      },
+      "estimated_cost_usd": {
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cost_status": "differs",
+      "cleanup_leftovers": {
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "live": "pending user test"
+    }
+  ],
+  "live_azure_access": false,
+  "lmcloud_repository_edited": false,
+  "limits": "Azure SDK fakes versus executed builtin-provider OpenTofu fixtures; no AzureRM provider plan or live equivalence claimed."
+}

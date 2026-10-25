@@ -23,8 +23,11 @@ The pinned SDK and legal inventory are recorded in [02-sdk-and-legal.md](02-sdk-
 Build commands and runtime constraints are recorded in [03-build-and-runtime.md](03-build-and-runtime.md).
 Release verification for earlier versions is recorded in [04-release.md](04-release.md).
 
-Release v0.1.2, both five-platform NativeAOT matrices, release checksums and
-all 72 fresh-cache README autoruns passed. See [06-expanded-gallery.md](06-expanded-gallery.md); earlier notes retain the v0.1.0/v0.1.1 records.
+Release v0.1.3, both five-platform NativeAOT matrices, all five release checksums,
+72 fresh-cache README autoruns, 72 fresh-cache lmcloud comparison URLs and the
+72-case released-binary offline matrix passed. See
+[07-lmcloud-equivalents.md](07-lmcloud-equivalents.md) and
+[v0.1.3-verification.json](v0.1.3-verification.json). Earlier notes remain historical.
 Status: **READY TO TEST**. No live Azure subscription test has been performed.
 
 The v0.1.1 cost-ledger policy and acceptance checks are recorded in [05-cost-ledger.md](05-cost-ledger.md).
