@@ -11,7 +11,7 @@ if (mode == "live") {
   assert(getenv("LMAZURE_COMPARE_LIVE_APPROVED", "") == "1" && getenv("LMAZURE_LIVE", "") == "1", "user-approved local live testing is required");
   let auth = json_parse(read_file(getenv("LMAZURE_COMPARE_AUTH_FILE", "missing-authorization.json")));
   assert(getstr(auth,"example") == "vault_inventory" && getstr(auth,"run_id") == run_id && getbool(auth,"preflight_complete"), "use compare/run.sh for ownership preflight");
-  
+
   dir = "build/lmcloud_vault_inventory/azure";
 }
 dir = mode == "live" ? "build/lmcloud_vault_inventory/azure" : "build/lmcloud_vault_inventory/offline";

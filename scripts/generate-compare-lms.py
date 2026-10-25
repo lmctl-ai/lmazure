@@ -95,7 +95,7 @@ println("lmcloud comparison complete: {name}; mode="+mode);
 }}
 '''
  money=f"{spec['tofu_estimated_cost_usd']:.4f}" if spec['tofu_estimated_cost_usd'] else '0.00'
- (sp.parent/'main.lms').write_text(prefix+phase+'println(\"estimated cost: $'+money+'\");\n')
+ (sp.parent/'main.lms').write_text('\n'.join(line.rstrip() for line in (prefix+phase+'println(\"estimated cost: $'+money+'\");\n').splitlines())+'\n')
  (sp.parent/'offline.tf').write_text(fixture)
  # Recovery is useful to the Python harness after timeout/exception.
  cleanup=prefix.split('write_file("'+base+'/azure/main.tf"',1)[0]+f'''dir = mode == "live" ? "{base}/azure" : "{base}/offline";
@@ -109,5 +109,5 @@ savedsl(c,"{base}/recovery.dslb");
 r = system(concat(dsl_cli(c),["--dsl","{base}/recovery.dslb"]),180000);
 assert(r.code==0);
 '''
- (sp.parent/'cleanup.lms').write_text(cleanup)
+ (sp.parent/'cleanup.lms').write_text('\n'.join(line.rstrip() for line in cleanup.splitlines())+'\n')
 print('Generated 72 self-contained guarded comparison and recovery programs.')
