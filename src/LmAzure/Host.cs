@@ -17,6 +17,7 @@ public static class Host
         new("Session", "sweep", ["string", "float"], "Table"), new("Session", "sweep_apply", ["string", "float"], "Table"),
         new("Run", "container", ["string"], "Table"), new("Run", "queue", ["string"], "Table"),
         new("Run", "tag", ["string", "string", "string"], "void"), new("Run", "delete", ["string"], "void"), new("Run", "cleanup", [], "void"),
+        new("Run", "cost_cap", ["float"], "void"), new("Run", "estimated_cost", [], "float"), new("Run", "cost_report", ["string"], "void"),
         new("Table", "rows", [], "int"), new("Table", "columns", [], "int"), new("Table", "column", ["int"], "string"),
         new("Table", "text", ["int", "int"], "string"), new("Table", "number", ["int", "int"], "float"),
         new("Table", "csv", ["string"], "void"), new("Table", "json", ["string"], "void"),
@@ -59,6 +60,12 @@ public static class Host
         {
             return Safe(() => { c.Get<RunHandle>(self).Run.Cleanup(); return Value.None; });
         });
+        r.Method("Run", "cost_cap", ["float"], "void", static (c, self, a) =>
+            Safe(() => { c.Get<RunHandle>(self).Run.SetCostCap(a[0].AsFloat()); return Value.None; }));
+        r.Method("Run", "estimated_cost", [], "float", static (c, self, _) =>
+            Safe(() => Value.Float(c.Get<RunHandle>(self).Run.EstimatedCost())));
+        r.Method("Run", "cost_report", ["string"], "void", static (c, self, a) =>
+            Safe(() => { c.Get<RunHandle>(self).Run.CostReport(Text(a[0])); return Value.None; }));
 
         r.Method("Table", "rows", [], "int", static (c, self, _) => Safe(() => Value.Int(c.Get<ResourceTable>(self).Count())));
         r.Method("Table", "columns", [], "int", static (c, self, _) => Safe(() => Value.Int(c.Get<ResourceTable>(self).Columns())));
@@ -109,6 +116,7 @@ public static class Host
         try { return operation(); }
         catch (Error) { throw; }
         catch (OutOfMemoryException) { throw; }
+        catch (CostLimitException e) { throw Error.Host(e.Message); }
         catch (AzureCloudException) { throw Error.Host("Azure operation failed"); }
         catch (Exception) { throw Error.Host("Azure operation failed"); }
     }

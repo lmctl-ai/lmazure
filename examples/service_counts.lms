@@ -33,3 +33,4 @@ savedsl(p, "build/service_counts_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/service_counts_plot.dslb;
 assert(r.code == 0);
 println("wrote images/service_counts.png");
+println("estimated cost: $0.00");

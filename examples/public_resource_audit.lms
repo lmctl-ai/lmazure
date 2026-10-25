@@ -34,3 +34,4 @@ savedsl(p, "build/public_resource_audit_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/public_resource_audit_plot.dslb;
 assert(r.code == 0);
 println("wrote images/public_resource_audit.png");
+println("estimated cost: $0.00");

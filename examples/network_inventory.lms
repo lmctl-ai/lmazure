@@ -20,3 +20,4 @@ savedsl(p, "build/network_inventory_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/network_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/network_inventory.png");
+println("estimated cost: $0.00");

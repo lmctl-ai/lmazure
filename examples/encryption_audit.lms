@@ -34,3 +34,4 @@ savedsl(p, "build/encryption_audit_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/encryption_audit_plot.dslb;
 assert(r.code == 0);
 println("wrote images/encryption_audit.png");
+println("estimated cost: $0.00");

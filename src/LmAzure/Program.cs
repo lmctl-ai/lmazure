@@ -8,7 +8,7 @@ namespace LmAzure;
 
 public static class EntryPoint
 {
-    public const string Version = "0.1.0";
+    public const string Version = "0.1.1";
     public static int Main(string[] args)
     {
         Console.OutputEncoding = new UTF8Encoding(false);
@@ -35,6 +35,8 @@ public static class EntryPoint
                 int checks;
                 try { checks=CoreSelfTests.Run(); } catch { Console.Error.WriteLine("fake transport smoke suite failed"); throw; }
                 try { checks+=SafetySelfTests.Run(); } catch { Console.Error.WriteLine("fake transport safety suite failed"); throw; }
+                try { checks+=CostSelfTests.Run(); } catch { Console.Error.WriteLine("fake transport cost suite failed"); throw; }
+                try { checks+=CostRecoverySelfTests.Run(); } catch { Console.Error.WriteLine("fake transport cost recovery suite failed"); throw; }
                 Console.WriteLine($"lmazure fake-transport checks: {checks} passed"); return 0;
             }
             if (args is ["--dsl", var path]) return Run(path,false);
@@ -73,6 +75,10 @@ public static class EntryPoint
         Writes also require LMAZURE_ALLOW_WRITES=1; only ledger-owned prefixed
         containers and queues may be changed/deleted. Sweep defaults to dry-run.
         LMAZURE_MAX_MEMORY_MB: positive managed allocation budget, default 4096 MiB.
+        Cost ledger: $0.05 per example by default; $0.25 per process hard ceiling.
+        Declare run.cost_cap before creation; run.cost_report exports estimates.
+        Estimates use a conservative price table, not live billing measurements.
+        CI uses fakes only, with no Azure credentials or OIDC.
         No live testing has been performed. See docs/LIVE_TESTING.md.
         """;
 }

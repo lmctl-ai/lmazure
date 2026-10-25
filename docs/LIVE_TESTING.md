@@ -2,6 +2,8 @@
 
 No real Azure subscription has been accessed during development. All 27 gallery examples explicitly use `mock()` and remain fake regardless of environment flags. Run the following live steps yourself only after approving live testing.
 
+Live runs stay local: CI never uses Azure credentials, Azure login or OIDC. Review [the cost model](COSTS.md) before enabling writes. Until a user performs this test, all documented figures are estimated from the price table, not yet measured live.
+
 ## 1. Download and verify (Linux x64)
 
 Use an empty directory. Other platforms use the matching `lmazure-macos-arm64`, `lmazure-macos-x64`, `lmazure-linux-arm64`, or `lmazure-windows-x64.exe` release asset.
@@ -9,7 +11,7 @@ Use an empty directory. Other platforms use the matching `lmazure-macos-arm64`, 
 ```sh
 mkdir lmazure-live-check
 cd lmazure-live-check
-gh release download v0.1.0 --repo lmctl-ai/lmazure --pattern lmazure-linux-x64 --pattern SHA256SUMS
+gh release download v0.1.1 --repo lmctl-ai/lmazure --pattern lmazure-linux-x64 --pattern SHA256SUMS
 sha256sum --ignore-missing --check SHA256SUMS
 chmod +x lmazure-linux-x64
 ./lmazure-linux-x64 --version
@@ -30,6 +32,7 @@ export LMAZURE_LIVE=1
 export AZURE_TOKEN_CREDENTIALS=AzureCliCredential
 unset LMAZURE_ALLOW_WRITES
 ./lmazure-linux-x64 --live --inventory resources > live_inventory.csv
+printf 'estimated cost: $0.00\n'
 ```
 
 Inspect `live_inventory.csv` locally. Resource identifiers are masked; resource names and types remain visible. Generic ARM listings do not establish public-access or encryption policy, so unavailable values are unknown. Do not treat these fields as a security attestation. No secret values, keys, connection strings or private keys are requested.
@@ -53,15 +56,19 @@ mkdir("build");
 azurehost = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
 let azure = live();
 let run = azure.begin_run("build/lmazure-user-smoke.ledger.json");
+run.cost_cap(0.05);
 let queue = run.queue("smoke");
 let container = run.container("smoke");
 queue.csv("build/live-queue.csv");
 container.csv("build/live-container.csv");
 run.cleanup();
+run.cost_report("build/live-write-cost.json");
 end _dsl_
 savedsl(azurehost,"build/live-write.dslb");
 r = system ${dsl_cli(azurehost)} --dsl build/live-write.dslb;
 assert(r.code == 0);
+let cost = json_parse(read_file("build/live-write-cost.json"));
+println(getstr(cost, "estimated_cost_text"));
 ```
 
 Execute it with `lmscript live-write.lms` or `lmctl autorun live-write.lms` only after approving writes. The script's `install=@latest` binding installs the host if it is absent from PATH. Each resource has a generated `lmazure-<run-id>-...` name and `lmazure_test=<run-id>` metadata. The host claims only HTTP 201 creations, checks prefix, metadata and ledger membership before mutation, and cleans up on normal or exceptional VM exit. Existing resources are never claimed.

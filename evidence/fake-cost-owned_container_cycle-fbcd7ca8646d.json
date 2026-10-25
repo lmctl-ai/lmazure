@@ -1,0 +1,74 @@
+{
+  "mode": "fake",
+  "example": "owned_container_cycle",
+  "run_id": "fbcd7ca8646d",
+  "region": "eastus",
+  "measurement": "estimated from price table, not yet measured live",
+  "estimated_cost_text": "estimated cost: $0.0005",
+  "historical_cost_known": true,
+  "estimated_cost_usd": 0.0005,
+  "reserved_cost_usd": 0.0000,
+  "cap_usd": 0.05,
+  "hard_cap_usd": 0.25,
+  "process_estimated_cost_usd": 0.0005,
+  "price_table": {
+    "version": "2026-10-25-planning-v1",
+    "basis": "Conservative local planning allowances; not a provider quote. Prices vary by region and time.",
+    "storage_request_usd": 0.0001,
+    "empty_resource_minute_usd": 0,
+    "scope": "Empty containers and queues only; no objects, messages, storage account creation, data transfer, or existing account charges.",
+    "blob_pricing_url": "https://azure.microsoft.com/en-us/pricing/details/storage/blobs/",
+    "queue_pricing_url": "https://azure.microsoft.com/en-us/pricing/details/storage/queues/"
+  },
+  "resources": [
+    {
+      "resource": "lmazure-fbcd7ca8646d-gallery",
+      "kind": "blob",
+      "owned": false,
+      "created_utc": "2026-10-25T04:22:04.3662889+00:00",
+      "deleted_utc": "2026-10-25T04:22:04.3854109+00:00",
+      "minutes_alive": 0.0003187,
+      "unit_price_usd_per_minute": 0,
+      "unit_price_usd_per_request": 0.0001,
+      "requests": 5,
+      "estimated_cost_usd": 0.0005
+    }
+  ],
+  "requests": [
+    {
+      "resource": "lmazure-fbcd7ca8646d-gallery",
+      "operation": "create",
+      "method": "PUT",
+      "at_utc": "2026-10-25T04:22:04.3616332+00:00",
+      "unit_price_usd": 0.0001
+    },
+    {
+      "resource": "lmazure-fbcd7ca8646d-gallery",
+      "operation": "tag",
+      "method": "GET",
+      "at_utc": "2026-10-25T04:22:04.3759294+00:00",
+      "unit_price_usd": 0.0001
+    },
+    {
+      "resource": "lmazure-fbcd7ca8646d-gallery",
+      "operation": "tag",
+      "method": "PUT",
+      "at_utc": "2026-10-25T04:22:04.3801398+00:00",
+      "unit_price_usd": 0.0001
+    },
+    {
+      "resource": "lmazure-fbcd7ca8646d-gallery",
+      "operation": "cleanup",
+      "method": "GET",
+      "at_utc": "2026-10-25T04:22:04.3830966+00:00",
+      "unit_price_usd": 0.0001
+    },
+    {
+      "resource": "lmazure-fbcd7ca8646d-gallery",
+      "operation": "cleanup",
+      "method": "DELETE",
+      "at_utc": "2026-10-25T04:22:04.3848384+00:00",
+      "unit_price_usd": 0.0001
+    }
+  ]
+}

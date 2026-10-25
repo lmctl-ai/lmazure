@@ -30,3 +30,4 @@ savedsl(p, "build/stale_resources_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/stale_resources_plot.dslb;
 assert(r.code == 0);
 println("wrote images/stale_resources.png");
+println("estimated cost: $0.00");

@@ -52,7 +52,7 @@ public sealed class AzureSession : IDisposable
         var blobEndpoint = OptionalStorageEndpoint("LMAZURE_STORAGE_BLOB_URL", "blob.core.windows.net"); var queueEndpoint = OptionalStorageEndpoint("LMAZURE_STORAGE_QUEUE_URL", "queue.core.windows.net");
         var handler = new HttpClientHandler { AllowAutoRedirect = false }; var hosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "management.azure.com" }; if (Uri.TryCreate(blobEndpoint, UriKind.Absolute, out var blobUri)) hosts.Add(blobUri.Host); if (Uri.TryCreate(queueEndpoint, UriKind.Absolute, out var queueUri)) hosts.Add(queueUri.Host);
         var transport = new HttpClientTransport(new HttpClient(TransportSafety.Wrap(handler, hosts, true)) { Timeout = TimeSpan.FromSeconds(30) }); armOptions.Transport = transport;
-        return new AzureSession(new ArmClient(new DefaultAzureCredential(), subscription, armOptions), subscription, region, false, transport, blobEndpoint, queueEndpoint);
+        return new AzureSession(new ArmClient(new DefaultAzureCredential(new DefaultAzureCredentialOptions { ExcludeWorkloadIdentityCredential = true }), subscription, armOptions), subscription, region, false, transport, blobEndpoint, queueEndpoint);
     }
     public ResourceTable Inventory(string kind)
     {
@@ -72,6 +72,7 @@ public sealed class AzureSession : IDisposable
         if (olderHours < 0 || double.IsNaN(olderHours) || double.IsInfinity(olderHours)) throw new AzureCloudException("olderHours must be nonnegative");
         if (apply) EnsureWrite();
         if (!File.Exists(ledgerPath)) return ResourceTable.Empty();
+        CostLedger? cost = null;
         try {
             byte[] ledgerBytes;
             using (var ledgerStream = new FileStream(ledgerPath, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -86,6 +87,7 @@ public sealed class AzureSession : IDisposable
             var runId = run.GetProperty("run_id").GetString() ?? "";
             if (runId.Length != 12 || runId.Any(c => !IsLowerHex(c)) || !run.TryGetProperty("subscription", out var subscription) || subscription.GetString() != _subscription || !run.TryGetProperty("blob_endpoint", out var blobEndpoint) || blobEndpoint.GetString() != _blobEndpoint || !run.TryGetProperty("queue_endpoint", out var queueEndpoint) || queueEndpoint.GetString() != _queueEndpoint) throw new AzureCloudException("ledger account binding failed");
             if (!run.TryGetProperty("owned", out var owned) || owned.ValueKind != JsonValueKind.Array || owned.GetArrayLength() > 64) throw new AzureCloudException("ledger owned resource limit exceeded");
+            var ownedNames = owned.EnumerateArray().Select(item => (Kind: item.GetProperty("kind").GetString() ?? "", Name: item.GetProperty("name").GetString() ?? "")).ToArray();
             foreach (var item in owned.EnumerateArray())
             {
                 if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty("name", out var rawName) || !item.TryGetProperty("kind", out var rawKind)) throw new AzureCloudException("ledger contains an unsafe resource");
@@ -93,17 +95,22 @@ public sealed class AzureSession : IDisposable
                 if (kind is not ("blob" or "queue") || !SafeResourceName(name) || !name.StartsWith($"lmazure-{runId}-", StringComparison.Ordinal)) throw new AzureCloudException("ledger contains an unsafe resource");
             }
             if ((DateTimeOffset.UtcNow - created).TotalHours < olderHours) return ResourceTable.Empty();
-            var rows = new List<object?[]>(); var remaining = new List<(string Kind, string Name)>(); var failures = new List<string>();
+            var activeRun = _runs.FirstOrDefault(item => item.MatchesLedger(ledgerPath));
+            var costElement = run.TryGetProperty("cost", out var parsedCost) ? parsedCost : default;
+            cost = activeRun?.Cost ?? CostLedger.Restore(runId, Path.GetFileNameWithoutExtension(ledgerPath), _region, _mock, created, costElement, ownedNames);
+            var rows = new List<object?[]>(); var remaining = apply ? new List<(string Kind, string Name)>() : ownedNames.ToList(); var failures = new List<string>();
             foreach (var item in owned.EnumerateArray()) {
                 var name = item.GetProperty("name").GetString() ?? ""; var kind = item.GetProperty("kind").GetString() ?? "";
-                if (kind is not ("blob" or "queue") || !name.StartsWith($"lmazure-{runId}-", StringComparison.Ordinal)) throw new AzureCloudException("ledger contains an unsafe resource");
-                if (!OwnsMetadataAsync(kind, name, runId).GetAwaiter().GetResult()) { remaining.Add((kind, name)); continue; }
-                if (apply) { try { DeleteOwnedAsync(kind, name, runId).GetAwaiter().GetResult(); } catch (RequestFailedException ex) when (ex.Status == 404) { } catch { remaining.Add((kind, name)); failures.Add(name); continue; } }
+                using var operation = cost.BeginOperation(name, apply ? "sweep_cleanup" : "sweep_read", 2, cleanup: true);
+                if (!apply && !OwnsMetadataAsync(kind, name, runId).GetAwaiter().GetResult()) continue;
+                if (apply) { try { DeleteOwnedAsync(kind, name, runId).GetAwaiter().GetResult(); } catch (RequestFailedException ex) when (ex.Status == 404) { } catch { failures.Add(name); continue; } if (activeRun is not null) activeRun.MarkSwept(name); else cost.MarkDeleted(name); }
                 rows.Add(ResourceTable.Row(name, kind, _region, apply ? "deleted" : "candidate", 1, (DateTimeOffset.UtcNow - created).TotalHours, false, false, true, MaskId(name)));
             }
-            if (apply) { if (remaining.Count == 0) File.Delete(ledgerPath); else WriteSweepLedger(ledgerPath, runId, created, remaining); if (failures.Count != 0) throw new AzureCloudException("Azure sweep left owned resources in the ledger"); }
+            if (apply) { remaining = ownedNames.Where(item => failures.Contains(item.Name, StringComparer.Ordinal)).ToList(); if (remaining.Count == 0) File.Delete(ledgerPath); else WriteSweepLedger(ledgerPath, runId, created, remaining, cost); if (failures.Count != 0) throw new AzureCloudException("Azure sweep left owned resources in the ledger"); }
+            else WriteSweepLedger(ledgerPath, runId, created, remaining, cost);
             return new ResourceTable(rows);
         } catch (AzureCloudException) { throw; } catch (Exception ex) { throw new AzureCloudException("Azure sweep failed", ex); }
+        finally { cost?.ReportDefault(); }
     }
     internal bool IsMock => _mock;
     internal string Region => _region;
@@ -115,14 +122,14 @@ public sealed class AzureSession : IDisposable
         var endpoint = string.IsNullOrEmpty(_blobEndpoint) ? ValidateStorageEndpoint("LMAZURE_STORAGE_BLOB_URL", "blob.core.windows.net") : _blobEndpoint;
         if (string.IsNullOrEmpty(endpoint)) throw new AzureCloudException("Azure blob endpoint is not configured");
         var options = new BlobClientOptions(); options.Retry.MaxRetries = 0; options.Retry.NetworkTimeout = TimeSpan.FromSeconds(15); if (_transport is not null) options.Transport = _transport;
-        return new BlobContainerClient(new Uri(endpoint.TrimEnd('/') + "/" + name), _mock ? new MockTokenCredential() : new DefaultAzureCredential(), options);
+        return new BlobContainerClient(new Uri(endpoint.TrimEnd('/') + "/" + name), _mock ? new MockTokenCredential() : new DefaultAzureCredential(new DefaultAzureCredentialOptions { ExcludeWorkloadIdentityCredential = true }), options);
     }
     internal QueueClient Queue(string name)
     {
         var endpoint = string.IsNullOrEmpty(_queueEndpoint) ? ValidateStorageEndpoint("LMAZURE_STORAGE_QUEUE_URL", "queue.core.windows.net") : _queueEndpoint;
         if (string.IsNullOrEmpty(endpoint)) throw new AzureCloudException("Azure queue endpoint is not configured");
         var options = new QueueClientOptions(); options.Retry.MaxRetries = 0; options.Retry.NetworkTimeout = TimeSpan.FromSeconds(15); if (_transport is not null) options.Transport = _transport;
-        return new QueueClient(new Uri(endpoint.TrimEnd('/') + "/" + name), _mock ? new MockTokenCredential() : new DefaultAzureCredential(), options);
+        return new QueueClient(new Uri(endpoint.TrimEnd('/') + "/" + name), _mock ? new MockTokenCredential() : new DefaultAzureCredential(new DefaultAzureCredentialOptions { ExcludeWorkloadIdentityCredential = true }), options);
     }
     internal void EnsureWrite() { if (!_mock && !string.Equals(Environment.GetEnvironmentVariable("LMAZURE_ALLOW_WRITES"), "1", StringComparison.Ordinal)) throw new AzureCloudException("set LMAZURE_ALLOW_WRITES=1 to enable Azure writes"); }
     private async Task<ResourceTable> InventoryAsync(SubscriptionResource subscription, string kind, CancellationToken cancellationToken)
@@ -160,9 +167,9 @@ public sealed class AzureSession : IDisposable
     private static bool IsLowerHex(char value) => value is >= '0' and <= '9' or >= 'a' and <= 'f';
     private static bool SafeResourceName(string value) => value.Length is > 0 and <= 63 && value.All(c => c is >= 'a' and <= 'z' or >= '0' and <= '9' or '-');
     internal static string MaskId(string id) => id.Length <= 8 ? "masked" : id[..4] + "…" + id[^4..];
-    private void WriteSweepLedger(string path, string runId, DateTimeOffset created, IEnumerable<(string Kind, string Name)> items)
+    private void WriteSweepLedger(string path, string runId, DateTimeOffset created, IEnumerable<(string Kind, string Name)> items, CostLedger? cost = null)
     {
-        var temp = path + ".tmp-" + Guid.NewGuid().ToString("N"); using (var stream = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None)) using (var writer = new Utf8JsonWriter(stream)) { writer.WriteStartObject(); writer.WriteString("run_id", runId); writer.WriteString("subscription", _subscription); writer.WriteString("blob_endpoint", _blobEndpoint); writer.WriteString("queue_endpoint", _queueEndpoint); writer.WriteString("created_utc", created); writer.WriteStartArray("owned"); foreach (var item in items) { writer.WriteStartObject(); writer.WriteString("kind", item.Kind); writer.WriteString("name", item.Name); writer.WriteEndObject(); } writer.WriteEndArray(); writer.WriteEndObject(); writer.Flush(); } File.Move(temp, path, true);
+        var temp = path + ".tmp-" + Guid.NewGuid().ToString("N"); using (var stream = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None)) using (var writer = new Utf8JsonWriter(stream)) { writer.WriteStartObject(); writer.WriteString("run_id", runId); writer.WriteString("subscription", _subscription); writer.WriteString("blob_endpoint", _blobEndpoint); writer.WriteString("queue_endpoint", _queueEndpoint); writer.WriteString("created_utc", created); if (cost is not null) { writer.WritePropertyName("cost"); cost.Write(writer); } writer.WriteStartArray("owned"); foreach (var item in items) { writer.WriteStartObject(); writer.WriteString("kind", item.Kind); writer.WriteString("name", item.Name); writer.WriteEndObject(); } writer.WriteEndArray(); writer.WriteEndObject(); writer.Flush(); } File.Move(temp, path, true);
     }
     private static string Required(string name) => Environment.GetEnvironmentVariable(name) is { Length: > 0 } value ? value : throw new AzureCloudException($"missing {name}");
     private static string OptionalStorageEndpoint(string name, string suffix) => Environment.GetEnvironmentVariable(name) is { Length: > 0 } ? ValidateStorageEndpoint(name, suffix) : "";

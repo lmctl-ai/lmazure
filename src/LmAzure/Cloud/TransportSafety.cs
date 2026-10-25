@@ -16,6 +16,7 @@ internal static class TransportSafety
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (_validateDestination && !Allowed(request.RequestUri)) throw new HttpRequestException("Azure request destination rejected");
+            CostLedger.RecordRequest(request.Method.Method);
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.Content is null) return response;
             await using var source = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);

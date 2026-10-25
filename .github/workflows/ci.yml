@@ -7,6 +7,7 @@ on:
   pull_request:
   workflow_dispatch:
 permissions:
+  # No Azure OIDC, login action, or Azure credentials are permitted in CI.
   contents: read
 concurrency:
   group: ci-${{ github.ref }}
@@ -111,4 +112,4 @@ jobs:
           cd dist
           test "$(find . -maxdepth 1 -type f -name 'lmazure-*' | wc -l)" -eq 5
           sha256sum lmazure-* > SHA256SUMS
-          timeout 240 gh release create "$GITHUB_REF_NAME" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME — READY TO TEST" --notes 'Five NativeAOT executables, fake-transport validated only. No real Azure subscription has been accessed. Live operations require explicit user opt-in; see docs/LIVE_TESTING.md. Linux requires glibc 2.35 or newer.'
+          timeout 240 gh release create "$GITHUB_REF_NAME" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME — READY TO TEST" --notes 'Per-example cost ledgers, $0.05 default estimate cap and $0.25 process ceiling. All 27 examples print estimates. Five NativeAOT executables, fake-transport validated only; no Azure credentials or OIDC in CI. No real Azure subscription has been accessed. Live operations require explicit user opt-in; see docs/LIVE_TESTING.md. Linux requires glibc 2.35 or newer.'

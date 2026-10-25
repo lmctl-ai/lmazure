@@ -34,3 +34,4 @@ savedsl(p, "build/queue_pipeline_draw.dslb");
 r = system ${dsl_cli(p)} --dsl build/queue_pipeline_draw.dslb;
 assert(r.code == 0);
 println("wrote images/queue_pipeline.png");
+println("estimated cost: $0.00");

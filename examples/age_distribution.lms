@@ -37,3 +37,4 @@ savedsl(p, "build/age_distribution_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/age_distribution_plot.dslb;
 assert(r.code == 0);
 println("wrote images/age_distribution.png");
+println("estimated cost: $0.00");

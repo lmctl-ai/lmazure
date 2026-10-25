@@ -34,3 +34,4 @@ savedsl(p, "build/security_review_draw.dslb");
 r = system ${dsl_cli(p)} --dsl build/security_review_draw.dslb;
 assert(r.code == 0);
 println("wrote images/security_review.png");
+println("estimated cost: $0.00");

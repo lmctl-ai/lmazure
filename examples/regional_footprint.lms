@@ -32,3 +32,4 @@ savedsl(p, "build/regional_footprint_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/regional_footprint_plot.dslb;
 assert(r.code == 0);
 println("wrote images/regional_footprint.png");
+println("estimated cost: $0.00");

@@ -29,3 +29,4 @@ savedsl(p, "build/resource_status_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/resource_status_plot.dslb;
 assert(r.code == 0);
 println("wrote images/resource_status.png");
+println("estimated cost: $0.00");

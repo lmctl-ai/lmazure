@@ -34,3 +34,4 @@ savedsl(p, "build/network_topology_draw.dslb");
 r = system ${dsl_cli(p)} --dsl build/network_topology_draw.dslb;
 assert(r.code == 0);
 println("wrote images/network_topology.png");
+println("estimated cost: $0.00");

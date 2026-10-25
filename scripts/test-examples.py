@@ -17,6 +17,12 @@ for example in examples:
         raise SystemExit(f"README missing example: {example.name}")
     if "live()" in example.read_text(encoding="utf-8"):
         raise SystemExit(f"default gallery may not call live(): {example.name}")
+    lines = [line.strip() for line in example.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if example.stem not in {"owned_container_cycle", "owned_queue_cycle"}:
+        if not re.fullmatch(r'println\("estimated cost: \$0\.00"\);', lines[-1]):
+            raise SystemExit(f"read-only example must end with estimated cost: $0.00: {example.name}")
+    elif lines[-1] != 'println(getstr(cost_report, "estimated_cost_text"));':
+        raise SystemExit(f"owned example must print its ledger cost: {example.name}")
 
 images = sorted((ROOT / "docs/images").glob("*.png"))
 if not images:
@@ -54,8 +60,29 @@ if compiler:
             local_examples[example] = local
         for example in examples:
             with tempfile.TemporaryDirectory(prefix="lmazure-gallery-") as scratch:
-                subprocess.run([compiler_path, str(local_examples[example])], cwd=scratch, env=env,
-                               check=True, timeout=int(os.environ.get("LMAZURE_EXAMPLE_TIMEOUT", "120")))
+                result = subprocess.run([compiler_path, str(local_examples[example])], cwd=scratch, env=env,
+                                        check=True, capture_output=True, text=True,
+                                        timeout=int(os.environ.get("LMAZURE_EXAMPLE_TIMEOUT", "120")))
+                output_lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+                expected_cost = "estimated cost: $0.0005" if example.stem.startswith("owned_") else "estimated cost: $0.00"
+                if not output_lines or output_lines[-1] != expected_cost:
+                    raise SystemExit(f"wrong final cost line for {example.name}: {output_lines[-3:]}")
+                image = Path(scratch) / "images" / (example.stem + ".png")
+                if not image.is_file():
+                    raise SystemExit(f"example did not write its PNG: {example.name}")
+                if example.stem in {"owned_container_cycle", "owned_queue_cycle"}:
+                    evidence = Path(scratch) / "data" / (example.stem + "_cost_evidence.json")
+                    if not evidence.is_file():
+                        raise SystemExit(f"owned example cost evidence missing: {example.name}")
+                    import json
+                    report = json.loads(evidence.read_text(encoding="utf-8"))
+                    if report.get("mode") != "fake" or report.get("estimated_cost_usd") != 0.0005:
+                        raise SystemExit(f"owned example evidence cost mismatch: {example.name}")
+                    if len(report.get("requests", [])) != 5 or report.get("reserved_cost_usd") != 0:
+                        raise SystemExit(f"owned example evidence request/reservation mismatch: {example.name}")
+                    resources = report.get("resources", [])
+                    if len(resources) != 1 or resources[0].get("owned") is not False:
+                        raise SystemExit(f"owned example evidence ownership mismatch: {example.name}")
     print(f"executed {len(examples)} examples in an empty directory")
 else:
     print("example execution SKIP: set LMAZURE_LMSCRIPT with the pinned compiler")

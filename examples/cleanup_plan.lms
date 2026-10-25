@@ -34,3 +34,4 @@ savedsl(p, "build/cleanup_plan_draw.dslb");
 r = system ${dsl_cli(p)} --dsl build/cleanup_plan_draw.dslb;
 assert(r.code == 0);
 println("wrote images/cleanup_plan.png");
+println("estimated cost: $0.00");

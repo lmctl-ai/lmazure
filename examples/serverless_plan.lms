@@ -34,3 +34,4 @@ savedsl(p, "build/serverless_plan_draw.dslb");
 r = system ${dsl_cli(p)} --dsl build/serverless_plan_draw.dslb;
 assert(r.code == 0);
 println("wrote images/serverless_plan.png");
+println("estimated cost: $0.00");

@@ -12,3 +12,6 @@ data/
 !docs/images/
 !docs/images/*.png
 *.ledger.json
+
+# Generated fake cost evidence; curated gallery evidence is committed explicitly.
+evidence/fake-cost-*.json

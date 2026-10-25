@@ -30,3 +30,4 @@ savedsl(p, "build/tagging_compliance_plot.dslb");
 r = system ${dsl_cli(p)} --dsl build/tagging_compliance_plot.dslb;
 assert(r.code == 0);
 println("wrote images/tagging_compliance.png");
+println("estimated cost: $0.00");
