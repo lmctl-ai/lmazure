@@ -5,7 +5,7 @@
 | Resource inventory | Network topology plan | Security review |
 | --- | --- | --- |
 | <img src="docs/images/resource_inventory.png" width="290" alt="Mock Azure resource inventory chart"> | <img src="docs/images/network_topology.png" width="290" alt="Azure network topology plan"> | <img src="docs/images/security_review.png" width="290" alt="Azure security review workflow"> |
-| Mock resources grouped by item count<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_inventory.lms` | Inventory → policy → dry-run action<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/network_topology.lms` | A read-only audit path with an explicit action ledger<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/security_review.lms` |
+| Mock resources grouped by observed age horizon<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_inventory.lms` | Inventory → policy → dry-run action<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/network_topology.lms` | A read-only audit path with an explicit action ledger<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/security_review.lms` |
 
 | Storage encryption | Queue pipeline | Cleanup plan |
 | --- | --- | --- |
@@ -61,7 +61,7 @@ Every example is mock-only, self-executing, and has a copy-paste autorun command
 | `tagging_compliance.lms` | Tag coverage | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/tagging_compliance.lms` |
 | `stale_resources.lms` | Stale resources | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/stale_resources.lms` |
 | `regional_footprint.lms` | Regions | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/regional_footprint.lms` |
-| `resource_status.lms` | Compute status | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_status.lms` |
+| `resource_status.lms` | Observed metadata status (not VM health) | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_status.lms` |
 | `age_distribution.lms` | Resource age | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/age_distribution.lms` |
 | `service_counts.lms` | Service overview | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/service_counts.lms` |
 | `network_topology.lms` | Network plan | `lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/network_topology.lms` |

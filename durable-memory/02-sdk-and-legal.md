@@ -23,7 +23,8 @@ heap inside a 4 GiB reserved address space, with the default application
 allocation budget documented as 4096 MiB. Linux permits dynamic system glibc;
 other native dependencies are handled by the selected .NET toolchain. GCC
 static runtime components are covered by the GCC Runtime Library Exception.
-The product does not add GPL or AGPL code as a linked dependency.
+Its exception and underlying license text are embedded. No GPL/AGPL application
+library is added; the compiler runtime has the explicit linking exception.
 
 The complete embedded .NET, cryptography, zlib, Azure SDK, Arrow, and SDK
 notices are in `THIRD_PARTY_NOTICES` and `src/LmAzure/Resources/licenses`.

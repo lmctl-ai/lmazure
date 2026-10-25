@@ -1,8 +1,8 @@
-# Mock-only Azure compute status review.
+# Mock-only Azure observed inventory status review; this is metadata observation, not VM power or health.
 mkdir("images"); mkdir("data"); mkdir("build");
 azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
 let s = mock();
-let t = s.inventory("compute");
+let t = s.inventory("resources");
 t.csv("data/resource_status.csv");
 end _dsl_
 savedsl(azure, "build/resource_status.dslb");
@@ -10,10 +10,19 @@ r = system ${dsl_cli(azure)} --dsl build/resource_status.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/resource_status.csv"), false);
 assert(rows[0].len() == 10);
-assert(rows.len() == 2);
+assert(rows.len() == 13);
+let observed = 0;
+let other = 0;
+for (i in range(1, rows.len())) {
+  if (rows[i][3] == "observed") { observed = observed + 1; }
+  else { other = other + 1; }
+}
+assert(observed == 12);
+assert(other == 0);
+write_file("data/resource_status_derived.csv", "observation status,count\nobserved," + str(observed) + "\nother," + str(other) + "\n");
 p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
 plot.png("images/resource_status.png", 900, 560);
-plot.cmd("set title 'MOCK Compute age horizon'; set xlabel 'Resource'; set ylabel 'Age hours'; set xtics rotate by -90 right font ',8'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/resource_status.csv' every ::1 using 6:xtic(1) title 'mock age horizon'");
+plot.cmd("set title 'MOCK inventory observation status'; set xlabel 'Metadata status'; set ylabel 'Resources'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/resource_status_derived.csv' every ::1 using 2:xtic(1) title 'observed metadata'");
 plot.close();
 end _dsl_
 savedsl(p, "build/resource_status_plot.dslb");

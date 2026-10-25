@@ -15,9 +15,10 @@ notices maintained by the dotnet/runtime project. Linux dynamically links to
 the system glibc (LGPL-2.1); glibc is the only permitted dynamic dependency.
 OpenSSL is statically linked on Linux (Apache-2.0/OpenSSL license by version).
 zlib is under the zlib license. Windows/macOS use system cryptographic APIs.
-The GCC static runtime components, when selected by the Linux NativeAOT
-toolchain, are covered by the GCC Runtime Library Exception; no GCC source
-library is linked as a separate application dependency.
+The Linux compiler runtime components are GPL-3.0-or-later WITH
+GCC-exception-3.1. The GCC Runtime Library Exception permits distributing
+the compiled combination under the independent program's own license.
+The exception and underlying license texts are embedded with these notices.
 
 Upstream sources: github.com/Azure/azure-sdk-for-net, github.com/dotnet/runtime,
 github.com/lmctl-ai/lmcode-csharp, openssl.org, zlib.net, gnu.org/software/libc.
