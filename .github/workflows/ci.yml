@@ -56,7 +56,7 @@ jobs:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/packages.lock.json') }}
       - name: Pinned lmscript compiler
-        run: timeout 180 npm install -g @lmctl-ai/lmctl@0.2.369
+        run: timeout 180 npm install -g @lmctl-ai/lmctl@0.2.420
       - name: Pinned source and managed fake tests
         timeout-minutes: 10
         run: bash test.sh

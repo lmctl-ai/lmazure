@@ -15,7 +15,7 @@ LMAZURE_LMSCRIPT=lmscript python3 scripts/test-dsl.py artifacts/native/lmazure
 PATH="$PWD/artifacts/native:$PATH" LMAZURE_LMSCRIPT=lmscript python3 scripts/test-examples.py
 ```
 
-Use compiler `@lmctl-ai/lmctl@0.2.369` for the CI compatibility checks. All provider
+Use compiler `@lmctl-ai/lmctl@0.2.420` for the CI compatibility checks. All provider
 operations in these commands use fake transports. `test.sh` reports an explicit
 gallery execution skip when `LMAZURE_LMSCRIPT` is absent; the native CI stage sets
 it and executes every example in its own empty directory.
