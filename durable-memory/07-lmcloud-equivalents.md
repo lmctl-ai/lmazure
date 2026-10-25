@@ -89,3 +89,7 @@ used, and the lmcloud repository was not edited.
 
 Machine-readable per-example checks, release hashes and timing/cost observations
 are in [v0.1.3-verification.json](v0.1.3-verification.json).
+
+The current-asset provenance follow-up also passed all five platforms:
+[main follow-up CI](https://github.com/lmctl-ai/lmazure/actions/runs/40204299497).
+The subsequent commits contain documentation and durable verification records only.

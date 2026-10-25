@@ -2433,5 +2433,7 @@
   ],
   "live_azure_access": false,
   "lmcloud_repository_edited": false,
-  "limits": "Azure SDK fakes versus executed builtin-provider OpenTofu fixtures; no AzureRM provider plan or live equivalence claimed."
+  "limits": "Azure SDK fakes versus executed builtin-provider OpenTofu fixtures; no AzureRM provider plan or live equivalence claimed.",
+  "provenance_followup_ci": "https://github.com/lmctl-ai/lmazure/actions/runs/40204299497",
+  "provenance_followup_platform_jobs": "all five passed"
 }
