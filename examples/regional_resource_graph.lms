@@ -1,0 +1,48 @@
+# Mock-only Azure metadata analysis; no cloud writes or credentials.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/regional_resource_graph_inventory.csv");
+s.readonly_cost_report("data/regional_resource_graph_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/regional_resource_graph.dslb");
+r = system ${dsl_cli(azure)} --dsl build/regional_resource_graph.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/regional_resource_graph_inventory.csv"), false);
+assert(rows.len() == 25);
+let ledger = json_parse(read_file("data/regional_resource_graph_cost_evidence.json"));
+assert(getstr(ledger, "mode") == "fake");
+assert(getnum(ledger, "estimated_cost_usd") == 0);
+assert(getnum(ledger, "metadata_inventory.list_requests") == 1);
+assert(getlist(ledger, "owned").len() == 0);
+let counts = [0,0,0]; let tagged = [0,0,0];
+for(i in range(1,rows.len())) { let region=0; if(rows[i][2]=="westus2") {region=1;} else if(rows[i][2]=="westeurope") {region=2;} counts[region]=counts[region]+1; if(rows[i][8]==true) {tagged[region]=tagged[region]+1;} }
+assert(counts[0]==8 && counts[1]==8 && counts[2]==8 && tagged[0]==8 && tagged[1]==8 && tagged[2]==0);
+write_file("data/regional_resource_graph_derived.csv","region,total,tagged\neastus,"+str(counts[0])+","+str(tagged[0])+"\nwestus2,"+str(counts[1])+","+str(tagged[1])+"\nwesteurope,"+str(counts[2])+","+str(tagged[2])+"\n");
+p = _dsl_ cli="lmdraw" install="github:lmctl-ai/lmdraw@latest";
+scene.canvas(900,560,"#0f1720");
+scene.text(30.0,45.0,27.0,"Regional ownership graph","#f4f7fb");
+scene.text(30.0,76.0,14.0,"Derived from mock ARM inventory; no cloud mutation","#a9bdcd");
+scene.arrow(450.0,190.0,165.0,280.0,"#6fb6dc",2.0);
+scene.arrow(450.0,190.0,450.0,280.0,"#6fb6dc",2.0);
+scene.arrow(450.0,190.0,735.0,280.0,"#6fb6dc",2.0);
+scene.rect(330.0,110.0,240.0,80.0,"#244b63");
+scene.text(350.0,155.0,16.0,"Observed resources: 24","#f4f7fb");
+scene.rect(40.0,280.0,250.0,120.0,"#17324d");
+scene.text(56.0,322.0,18.0,"East US: ${counts[0]}","#f4f7fb");
+scene.text(56.0,362.0,15.0,"Tagged: ${tagged[0]}","#bcd6e8");
+scene.rect(325.0,280.0,250.0,120.0,"#17324d");
+scene.text(341.0,322.0,18.0,"West US 2: ${counts[1]}","#f4f7fb");
+scene.text(341.0,362.0,15.0,"Tagged: ${tagged[1]}","#bcd6e8");
+scene.rect(610.0,280.0,250.0,120.0,"#17324d");
+scene.text(626.0,322.0,18.0,"West Europe: ${counts[2]}","#f4f7fb");
+scene.text(626.0,362.0,15.0,"Tagged: ${tagged[2]}","#bcd6e8");
+scene.text(30.0,480.0,14.0,"Tag presence is metadata evidence; graph edges indicate regional grouping only.","#a9bdcd");
+scene.render_png("images/regional_resource_graph.png",900,560,1);
+end _dsl_
+savedsl(p,"build/regional_resource_graph_draw.dslb");
+r = system ${dsl_cli(p)} --dsl build/regional_resource_graph_draw.dslb;
+assert(r.code == 0);
+println("wrote images/regional_resource_graph.png");
+println("estimated cost: $0.00");

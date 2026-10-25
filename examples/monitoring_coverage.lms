@@ -1,0 +1,36 @@
+# Mock-only Azure metadata analysis; no cloud writes or credentials.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/monitoring_coverage_inventory.csv");
+s.readonly_cost_report("data/monitoring_coverage_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/monitoring_coverage.dslb");
+r = system ${dsl_cli(azure)} --dsl build/monitoring_coverage.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/monitoring_coverage_inventory.csv"), false);
+assert(rows.len() == 25);
+let ledger = json_parse(read_file("data/monitoring_coverage_cost_evidence.json"));
+assert(getstr(ledger, "mode") == "fake");
+assert(getnum(ledger, "estimated_cost_usd") == 0);
+assert(getnum(ledger, "metadata_inventory.list_requests") == 1);
+assert(getlist(ledger, "owned").len() == 0);
+let apps=0;let alerts=0;let logs=0;
+for(i in range(1,rows.len())) { if(rows[i][1]=="Microsoft.Insights/components") {apps=apps+1;} else if(rows[i][1]=="Microsoft.Insights/metricAlerts") {alerts=alerts+1;} else if(rows[i][1]=="Microsoft.OperationalInsights/workspaces") {logs=logs+1;} }
+assert(apps==1 && alerts==1 && logs==1);
+let labels = ["App Insights", "Metric alerts", "Log workspaces"];
+let values = [apps,alerts,logs];
+let data = "category,count\n";
+for (j in range(0, labels.len())) { data = data + labels[j] + "," + str(values[j]) + "\n"; }
+write_file("data/monitoring_coverage_derived.csv", data);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/monitoring_coverage.png", 900, 560);
+plot.cmd("set title 'MOCK monitoring metadata (no log queries)'; set xlabel ''; set ylabel 'Resources'; set key off; set yrange [0:*]; set datafile separator ','; set style data histograms; set style fill solid 0.85; set boxwidth 0.65; set xtics norotate; set bmargin 5; plot 'data/monitoring_coverage_derived.csv' every ::1 using 2:xtic(1) lc rgb '#0ea5e9'");
+plot.close();
+end _dsl_
+savedsl(p, "build/monitoring_coverage_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/monitoring_coverage_plot.dslb;
+assert(r.code == 0);
+println("wrote images/monitoring_coverage.png");
+println("estimated cost: $0.00");

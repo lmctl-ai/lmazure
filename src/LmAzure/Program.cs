@@ -8,7 +8,7 @@ namespace LmAzure;
 
 public static class EntryPoint
 {
-    public const string Version = "0.1.1";
+    public const string Version = "0.1.2";
     public static int Main(string[] args)
     {
         Console.OutputEncoding = new UTF8Encoding(false);
@@ -37,6 +37,7 @@ public static class EntryPoint
                 try { checks+=SafetySelfTests.Run(); } catch { Console.Error.WriteLine("fake transport safety suite failed"); throw; }
                 try { checks+=CostSelfTests.Run(); } catch { Console.Error.WriteLine("fake transport cost suite failed"); throw; }
                 try { checks+=CostRecoverySelfTests.Run(); } catch { Console.Error.WriteLine("fake transport cost recovery suite failed"); throw; }
+                try { checks+=ReadonlyLedgerSelfTests.Run(); } catch { Console.Error.WriteLine("fake transport readonly ledger suite failed"); throw; }
                 Console.WriteLine($"lmazure fake-transport checks: {checks} passed"); return 0;
             }
             if (args is ["--dsl", var path]) return Run(path,false);

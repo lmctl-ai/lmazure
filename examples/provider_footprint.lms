@@ -1,0 +1,38 @@
+# Mock-only Azure metadata analysis; no cloud writes or credentials.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/provider_footprint_inventory.csv");
+s.readonly_cost_report("data/provider_footprint_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/provider_footprint.dslb");
+r = system ${dsl_cli(azure)} --dsl build/provider_footprint.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/provider_footprint_inventory.csv"), false);
+assert(rows.len() == 25);
+let ledger = json_parse(read_file("data/provider_footprint_cost_evidence.json"));
+assert(getstr(ledger, "mode") == "fake");
+assert(getnum(ledger, "estimated_cost_usd") == 0);
+assert(getnum(ledger, "metadata_inventory.list_requests") == 1);
+assert(getlist(ledger, "owned").len() == 0);
+let providers = ["Microsoft.Compute/", "Microsoft.Storage/", "Microsoft.Network/", "Microsoft.ManagedIdentity/", "Microsoft.Sql/", "Microsoft.Web/", "Microsoft.Insights/", "Microsoft.KeyVault/", "Microsoft.ContainerService/", "Microsoft.ServiceBus/", "Microsoft.OperationalInsights/", "Microsoft.DBforPostgreSQL/", "Microsoft.ContainerRegistry/", "Microsoft.RecoveryServices/", "Microsoft.DocumentDB/"];
+let counts = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+for (i in range(1, rows.len())) { for (j in range(0, providers.len())) { if (starts_with(rows[i][1], providers[j])) { counts[j] = counts[j] + 1; } } }
+let expected_counts = [1,3,5,2,1,2,2,1,1,1,1,1,1,1,1];
+for (j in range(0,15)) { assert(counts[j] == expected_counts[j]); }
+let labels = ["Compute", "Storage", "Network", "Identity", "SQL", "Web", "Insights", "KeyVault", "AKS", "ServiceBus", "Logs", "PostgreSQL", "Registry", "Backup", "Cosmos"];
+let values = counts;
+let data = "category,count\n";
+for (j in range(0, labels.len())) { data = data + labels[j] + "," + str(values[j]) + "\n"; }
+write_file("data/provider_footprint_derived.csv", data);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/provider_footprint.png", 900, 560);
+plot.cmd("set title 'MOCK provider resource footprint'; set xlabel 'Listed resources'; set ylabel ''; set key off; set datafile separator ','; set style fill solid 0.85; set xrange [0:6]; set yrange [14.5:-0.5]; set lmargin 15; set ytics font ',11'; plot 'data/provider_footprint_derived.csv' every ::1 using ($2/2):0:($2/2):(0.35):ytic(1) with boxxyerrorbars lc rgb '#0ea5e9'");
+plot.close();
+end _dsl_
+savedsl(p, "build/provider_footprint_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/provider_footprint_plot.dslb;
+assert(r.code == 0);
+println("wrote images/provider_footprint.png");
+println("estimated cost: $0.00");

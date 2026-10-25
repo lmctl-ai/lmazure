@@ -1,0 +1,722 @@
+[
+  {
+    "name": "age_distribution",
+    "title": "Age distribution",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/age_distribution_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "cleanup_plan",
+    "title": "Cleanup plan",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/cleanup_plan_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "compute_inventory",
+    "title": "Compute inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/compute_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "container_inventory",
+    "title": "Container inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/container_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "database_inventory",
+    "title": "Database inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/database_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "dns_inventory",
+    "title": "Dns inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/dns_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "encryption_audit",
+    "title": "Encryption audit",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/encryption_audit_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "identity_inventory",
+    "title": "Identity inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/identity_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "monitoring_inventory",
+    "title": "Monitoring inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/monitoring_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "network_inventory",
+    "title": "Network inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/network_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "network_topology",
+    "title": "Network topology",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/network_topology_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "owned_container_cycle",
+    "title": "Owned container cycle",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_container_cycle_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "owned_queue_cycle",
+    "title": "Owned queue cycle",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_queue_cycle_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "public_resource_audit",
+    "title": "Public resource audit",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/public_resource_audit_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "queue_inventory",
+    "title": "Queue inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/queue_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "queue_pipeline",
+    "title": "Queue pipeline",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/queue_pipeline_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "regional_footprint",
+    "title": "Regional footprint",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/regional_footprint_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "resource_inventory",
+    "title": "Resource inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/resource_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "resource_status",
+    "title": "Resource status",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/resource_status_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "security_review",
+    "title": "Security review",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/security_review_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "serverless_inventory",
+    "title": "Serverless inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/serverless_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "serverless_plan",
+    "title": "Serverless plan",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/serverless_plan_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "service_counts",
+    "title": "Service counts",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/service_counts_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "stale_resources",
+    "title": "Stale resources",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/stale_resources_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "storage_inventory",
+    "title": "Storage inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/storage_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "tagging_compliance",
+    "title": "Tagging compliance",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/tagging_compliance_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "vault_inventory",
+    "title": "Vault inventory",
+    "category": "existing-inventory-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/vault_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "functions_inventory",
+    "title": "Functions",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/functions_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "servicebus_inventory",
+    "title": "Service Bus",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/servicebus_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "nsg_inventory",
+    "title": "Network Security Groups",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/nsg_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "public_ip_inventory",
+    "title": "Public IPs",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/public_ip_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "route_inventory",
+    "title": "Route Tables",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/route_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "log_workspace_inventory",
+    "title": "Log Workspaces",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/log_workspace_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "metric_alert_inventory",
+    "title": "Metric Alerts",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/metric_alert_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "app_service_plan_inventory",
+    "title": "App Service Plans",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/app_service_plan_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "postgresql_inventory",
+    "title": "PostgreSQL",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/postgresql_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "registry_inventory",
+    "title": "Container Registries",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/registry_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "backup_vault_inventory",
+    "title": "Recovery Services Vaults",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/backup_vault_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "cosmos_inventory",
+    "title": "Cosmos DB",
+    "category": "service-inventory",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/cosmos_inventory_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "provider_footprint",
+    "title": "Provider footprint",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/provider_footprint_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "resource_age_heatmap",
+    "title": "Oldest resource age by region",
+    "category": "resource-matrix",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/resource_age_heatmap_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "region_service_matrix",
+    "title": "Service counts by region",
+    "category": "resource-matrix",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/region_service_matrix_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "regional_tag_coverage",
+    "title": "Regional ownership-tag coverage",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/regional_tag_coverage_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "public_surface_by_region",
+    "title": "Regional exposure metadata",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/public_surface_by_region_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "stale_ownership_triage",
+    "title": "Age and ownership triage",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/stale_ownership_triage_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "inventory_observation_graph",
+    "title": "Inventory observation graph",
+    "category": "resource-graph",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/inventory_observation_graph_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "provider_resource_graph",
+    "title": "Provider containment graph",
+    "category": "resource-graph",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/provider_resource_graph_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "regional_resource_graph",
+    "title": "Regional ownership graph",
+    "category": "resource-graph",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/regional_resource_graph_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "storage_security_matrix",
+    "title": "Storage flag evidence matrix",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/storage_security_matrix_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "identity_tag_coverage",
+    "title": "Identity ownership-tag metadata",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/identity_tag_coverage_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "functions_region_coverage",
+    "title": "Function-app regional metadata",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/functions_region_coverage_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "servicebus_region_coverage",
+    "title": "Service Bus regional metadata",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/servicebus_region_coverage_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "network_security_review",
+    "title": "Network review inventory",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/network_security_review_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "monitoring_coverage",
+    "title": "Monitoring metadata portfolio",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/monitoring_coverage_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "database_portfolio",
+    "title": "Database portfolio age",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/database_portfolio_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "container_registry_map",
+    "title": "Container service metadata map",
+    "category": "resource-graph",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/container_registry_map_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "inventory_unknowns_audit",
+    "title": "Inventory certainty audit",
+    "category": "metadata-audit",
+    "cost_usd": 0,
+    "requests": null,
+    "ledger_mode": "readonly",
+    "evidence_file": "data/inventory_unknowns_audit_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "owned_queue_tag_audit",
+    "title": "Owned Queue Tag Audit",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_queue_tag_audit_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "owned_container_tag_audit",
+    "title": "Owned Container Tag Audit",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_container_tag_audit_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "owned_storage_pair",
+    "title": "Owned Storage Pair",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0008,
+    "requests": 8,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_storage_pair_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0008"
+  },
+  {
+    "name": "owned_queue_batch",
+    "title": "Owned Queue Batch",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.001,
+    "requests": 10,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_queue_batch_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0010"
+  },
+  {
+    "name": "owned_container_batch",
+    "title": "Owned Container Batch",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.001,
+    "requests": 10,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_container_batch_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0010"
+  },
+  {
+    "name": "owned_delete_then_cleanup",
+    "title": "Owned Delete Then Cleanup",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_delete_then_cleanup_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "owned_sweep_preview",
+    "title": "Owned Sweep Preview",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0006,
+    "requests": 6,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_sweep_preview_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0006"
+  },
+  {
+    "name": "owned_sweep_apply",
+    "title": "Owned Sweep Apply",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_sweep_apply_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "owned_mixed_lifecycle",
+    "title": "Owned Mixed Lifecycle",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.001,
+    "requests": 10,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_mixed_lifecycle_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0010"
+  },
+  {
+    "name": "owned_ownership_evidence",
+    "title": "Owned Ownership Evidence",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/owned_ownership_evidence_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "owned_budget_admission",
+    "title": "Owned Budget Admission",
+    "category": "owned-lifecycle",
+    "cost_usd": 0,
+    "requests": 0,
+    "ledger_mode": "budget",
+    "evidence_file": "data/owned_budget_admission_cost_evidence.json",
+    "cost_output": "estimated cost: $0.00"
+  },
+  {
+    "name": "cleanup_age_guard",
+    "title": "Cleanup Age Guard",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/cleanup_age_guard_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "cleanup_candidate_graph",
+    "title": "Cleanup Candidate Graph",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0006,
+    "requests": 6,
+    "ledger_mode": "owned",
+    "evidence_file": "data/cleanup_candidate_graph_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0006"
+  },
+  {
+    "name": "cost_request_breakdown",
+    "title": "Cost Request Breakdown",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/cost_request_breakdown_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  },
+  {
+    "name": "cost_teardown_reserve",
+    "title": "Cost Teardown Reserve",
+    "category": "owned-lifecycle",
+    "cost_usd": 0.0005,
+    "requests": 5,
+    "ledger_mode": "owned",
+    "evidence_file": "data/cost_teardown_reserve_cost_evidence.json",
+    "cost_output": "estimated cost: $0.0005"
+  }
+]

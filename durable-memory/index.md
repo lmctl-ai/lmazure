@@ -27,3 +27,5 @@ all 27 fresh-cache README autoruns passed. See [05-cost-ledger.md](05-cost-ledge
 Status: **READY TO TEST**. No live Azure subscription test has been performed.
 
 The v0.1.1 cost-ledger policy and acceptance checks are recorded in [05-cost-ledger.md](05-cost-ledger.md).
+
+The 72-example v0.1.2 expansion is recorded in [06-expanded-gallery.md](06-expanded-gallery.md).

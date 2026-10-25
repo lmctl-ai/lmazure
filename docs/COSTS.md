@@ -5,12 +5,16 @@ step, GitHub OIDC permission, or cloud federation. Workload-identity federation
 is excluded from the host's live credential chain. Live testing is a user-run,
 explicitly approved local operation with an existing profile.
 
-The 25 read-only examples enumerate ARM metadata or draw plans. They print
-`estimated cost: $0.00`. The two owned lifecycle examples each make five storage
-requests: create, ownership read, metadata write, cleanup ownership read, delete.
-They print `estimated cost: $0.0005` using the table below. All examples currently
-use mock(): their actual Azure charge is zero. The displayed nonzero figures are
-**estimated from price table, not yet measured live**.
+The catalog has 55 read-only examples, 16 owned-resource lifecycle examples,
+and one budget-admission rejection. Every program writes cost evidence and ends
+with `estimated cost: $...`. Read-only ARM metadata reports print `$0.00` and
+record actual management request dispatches, including pagination. The lifecycle
+examples count real SDK requests through in-process fakes and report planning
+estimates from `$0.0005` to `$0.0010`. The admission example declares a cap below
+creation plus teardown reservation and proves rejection before any HTTP request.
+All 72 currently use mock(): their actual Azure charge is zero. Nonzero figures
+are **estimated from price table, not yet measured live**. Exact per-example
+costs, request counts and evidence paths are recorded in `examples/catalog.json`.
 
 | Planning item | USD per unit |
 | --- | ---: |
@@ -79,3 +83,8 @@ must resolve any leftover resource before treating recovery as complete.
 Committed gallery evidence is fake-only. No live evidence or billing calibration
 has been claimed. The Lead/user may perform a separate optional billing comparison
 later; the host and CI never make that measurement call.
+
+`session.readonly_cost_report(path)` exports a separate zero-cost metadata ledger.
+Its request counter observes actual ARM dispatches, so an empty listing still
+counts one request and a paginated listing counts every page. It contains no
+credentials, subscription IDs or raw resource properties.

@@ -1,0 +1,55 @@
+# Mock-only owned lifecycle: Teardown reserve; no Azure calls.
+mkdir("images"); mkdir("data"); mkdir("build");
+let azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let run = s.begin_run("build/cost_teardown_reserve.ledger.json");
+run.cost_cap(0.05);
+let created = run.queue("teardown-reserve");
+let resource_name = created.text(0, 0);
+run.tag(resource_name, "gallery", "teardown-reserve");
+created.csv("data/cost_teardown_reserve_created.csv");
+
+run.cost_report("data/cost_teardown_reserve_before.json");
+run.cleanup();
+run.cost_report("data/cost_teardown_reserve_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/cost_teardown_reserve.dslb");
+r0 = system ${dsl_cli(azure)} --dsl build/cost_teardown_reserve.dslb;
+assert(r0.code == 0);
+let cost_report = json_parse(read_file("data/cost_teardown_reserve_cost_evidence.json"));
+assert(getstr(cost_report, "mode") == "fake");
+let before_report = json_parse(read_file("data/cost_teardown_reserve_before.json"));
+assert(getnum(before_report, "reserved_cost_usd") == 0.0002);
+let cost_text = getstr(cost_report, "estimated_cost_text");
+assert(getnum(cost_report, "estimated_cost_usd") == 0.0005);
+assert(getnum(cost_report, "reserved_cost_usd") == 0.0);
+assert(getlist(cost_report, "requests").len() == 5);
+let resources = getlist(cost_report, "resources");
+let requests = getlist(cost_report, "requests");
+let remaining = 0;
+for (i in range(0,resources.len())) { if(getbool(resources[i],"owned")) { remaining=remaining+1; } }
+assert(remaining==0);
+let request_count = requests.len();
+let puts=0; let gets=0; let deletes=0;
+for(i in range(0,requests.len())) { let method=getstr(requests[i],"method"); if(method=="PUT") {puts=puts+1;} else if(method=="GET" || method=="HEAD") {gets=gets+1;} else if(method=="DELETE") {deletes=deletes+1;} }
+assert(puts+gets+deletes==request_count);
+let money = split(cost_text,"$")[1];
+let reserve = getnum(cost_report,"reserved_cost_usd");
+let outcome = "Cleanup complete";
+if(r0.code==3) { outcome="Create rejected before HTTP"; }
+let outcome_text = outcome + "; values are read from this run ledger";
+let unit = getnum(cost_report,"price_table.storage_request_usd");
+let reserved_before = getnum(before_report,"reserved_cost_usd")/unit;
+let reserved_after = reserve/unit;
+assert(reserved_before==2 && reserved_after==0);
+write_file("data/cost_teardown_reserve_derived.csv","phase,request units\nBefore teardown,"+str(reserved_before)+"\nAfter teardown,"+str(reserved_after)+"\n");
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/cost_teardown_reserve.png",900,560);
+plot.cmd("set title 'MOCK teardown reservation'; set ylabel 'Reserved request units'; set key off; set yrange [0:2.7]; set datafile separator ','; set style data histograms; set style fill solid 0.85; set boxwidth 0.65; set xtics norotate; set label 'The reserved allowance is released as cleanup requests are counted.' at graph 0.03,0.93 font ',11'; plot 'data/cost_teardown_reserve_derived.csv' every ::1 using 2:xtic(1) lc rgb '#0ea5e9'");
+plot.close();
+end _dsl_
+savedsl(p,"build/cost_teardown_reserve_visual.dslb");
+r = system ${dsl_cli(p)} --dsl build/cost_teardown_reserve_visual.dslb;
+assert(r.code==0);
+println("wrote images/cost_teardown_reserve.png");
+println(getstr(cost_report, "estimated_cost_text"));

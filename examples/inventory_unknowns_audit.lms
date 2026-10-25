@@ -1,0 +1,32 @@
+# Mock-only Azure metadata analysis; no cloud writes or credentials.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/inventory_unknowns_audit_inventory.csv");
+s.readonly_cost_report("data/inventory_unknowns_audit_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/inventory_unknowns_audit.dslb");
+r = system ${dsl_cli(azure)} --dsl build/inventory_unknowns_audit.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/inventory_unknowns_audit_inventory.csv"), false);
+assert(rows.len() == 25);
+let ledger = json_parse(read_file("data/inventory_unknowns_audit_cost_evidence.json"));
+assert(getstr(ledger, "mode") == "fake");
+assert(getnum(ledger, "estimated_cost_usd") == 0);
+assert(getnum(ledger, "metadata_inventory.list_requests") == 1);
+assert(getlist(ledger, "owned").len() == 0);
+let public_unknown=0;let encrypted_unknown=0;let age_unknown=0;
+for(i in range(1,rows.len())) {if(str(rows[i][6])=="") {public_unknown=public_unknown+1;} if(str(rows[i][7])=="") {encrypted_unknown=encrypted_unknown+1;} if(rows[i][5]<0) {age_unknown=age_unknown+1;}}
+assert(public_unknown==8 && encrypted_unknown==1 && age_unknown==0);
+write_file("data/inventory_unknowns_audit_derived.csv","field,known,unknown\npublic,"+str(24-public_unknown)+","+str(public_unknown)+"\nencryption,"+str(24-encrypted_unknown)+","+str(encrypted_unknown)+"\nage,"+str(24-age_unknown)+","+str(age_unknown)+"\n");
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/inventory_unknowns_audit.png", 900, 560);
+plot.cmd("set title 'MOCK inventory certainty; flags are synthetic'; set ylabel 'Resources'; set yrange [0:*]; set key outside top center horizontal; set datafile separator ','; set style data histograms; set style histogram rowstacked; set style fill solid 0.85; plot 'data/inventory_unknowns_audit_derived.csv' every ::1 using 2:xtic(1) title 'known metadata', '' every ::1 using 3 title 'unknown'");
+plot.close();
+end _dsl_
+savedsl(p, "build/inventory_unknowns_audit_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/inventory_unknowns_audit_plot.dslb;
+assert(r.code == 0);
+println("wrote images/inventory_unknowns_audit.png");
+println("estimated cost: $0.00");

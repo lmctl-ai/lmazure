@@ -1,0 +1,48 @@
+# Mock-only Azure metadata analysis; no cloud writes or credentials.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/region_service_matrix_inventory.csv");
+s.readonly_cost_report("data/region_service_matrix_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/region_service_matrix.dslb");
+r = system ${dsl_cli(azure)} --dsl build/region_service_matrix.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/region_service_matrix_inventory.csv"), false);
+assert(rows.len() == 25);
+let ledger = json_parse(read_file("data/region_service_matrix_cost_evidence.json"));
+assert(getstr(ledger, "mode") == "fake");
+assert(getnum(ledger, "estimated_cost_usd") == 0);
+assert(getnum(ledger, "metadata_inventory.list_requests") == 1);
+assert(getlist(ledger, "owned").len() == 0);
+let matrix = [[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]];
+for (i in range(1, rows.len())) {
+let group = 7;
+if (starts_with(rows[i][1], "Microsoft.Compute/")) { group = 0; }
+else if (starts_with(rows[i][1], "Microsoft.Storage/")) { group = 1; }
+else if (starts_with(rows[i][1], "Microsoft.Network/")) { group = 2; }
+else if (starts_with(rows[i][1], "Microsoft.ManagedIdentity/")) { group = 3; }
+else if (starts_with(rows[i][1], "Microsoft.Web/")) { group = 4; }
+else if (starts_with(rows[i][1], "Microsoft.ServiceBus/")) { group = 5; }
+else if (starts_with(rows[i][1], "Microsoft.Insights/") || starts_with(rows[i][1], "Microsoft.OperationalInsights/")) { group = 6; }
+let region = 0;
+if (rows[i][2] == "westus2") { region = 1; }
+else if (rows[i][2] == "westeurope") { region = 2; }
+matrix[group][region] = matrix[group][region] + 1;
+}
+let data = "region,service,value\n";
+let total = 0;
+for (j in range(0, 8)) { for (k in range(0, 3)) { data = data + str(k) + "," + str(j) + "," + str(matrix[j][k]) + "\n"; total = total + matrix[j][k]; } }
+write_file("data/region_service_matrix_derived.csv", data);
+assert(total == 24);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/region_service_matrix.png", 900, 560);
+plot.cmd("set title 'MOCK Service counts by region'; set datafile separator ','; set key off; set xtics ('East US' 0,'West US 2' 1,'West Europe' 2); set ytics ('Compute' 0,'Storage' 1,'Network' 2,'Identity' 3,'Apps' 4,'Messaging' 5,'Observability' 6,'Other' 7); set xrange [-0.5:2.5]; set yrange [-0.5:7.5]; set lmargin 18; set palette defined (0 '#eff6ff', 0.5 '#7dd3fc', 1 '#c4b5fd'); set cblabel 'Listed resources'; plot 'data/region_service_matrix_derived.csv' every ::1 using 1:2:3 with image, '' every ::1 using 1:2:(sprintf('%g',$3)) with labels tc rgb '#0f172a' notitle");
+plot.close();
+end _dsl_
+savedsl(p, "build/region_service_matrix_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/region_service_matrix_plot.dslb;
+assert(r.code == 0);
+println("wrote images/region_service_matrix.png");
+println("estimated cost: $0.00");

@@ -1,0 +1,45 @@
+# Mock-only Azure metadata analysis; no cloud writes or credentials.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/inventory_observation_graph_inventory.csv");
+s.readonly_cost_report("data/inventory_observation_graph_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/inventory_observation_graph.dslb");
+r = system ${dsl_cli(azure)} --dsl build/inventory_observation_graph.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/inventory_observation_graph_inventory.csv"), false);
+assert(rows.len() == 25);
+let ledger = json_parse(read_file("data/inventory_observation_graph_cost_evidence.json"));
+assert(getstr(ledger, "mode") == "fake");
+assert(getnum(ledger, "estimated_cost_usd") == 0);
+assert(getnum(ledger, "metadata_inventory.list_requests") == 1);
+assert(getlist(ledger, "owned").len() == 0);
+let unknown = 0;
+for (i in range(1, rows.len())) { if (str(rows[i][6]) == "" || str(rows[i][7]) == "") { unknown = unknown + 1; } }
+let known = rows.len() - 1 - unknown;
+assert(known == 16 && unknown == 8);
+write_file("data/inventory_observation_graph_derived.csv","state,count\nknown,"+str(known)+"\nunknown,"+str(unknown)+"\n");
+p = _dsl_ cli="lmdraw" install="github:lmctl-ai/lmdraw@latest";
+scene.canvas(900,560,"#0f1720");
+scene.text(30.0,45.0,27.0,"Inventory observation graph","#f4f7fb");
+scene.text(30.0,76.0,14.0,"Derived from mock ARM inventory; no cloud mutation","#a9bdcd");
+scene.arrow(450.0,190.0,225.0,280.0,"#6fb6dc",2.0);
+scene.arrow(450.0,190.0,675.0,280.0,"#6fb6dc",2.0);
+scene.rect(330.0,110.0,240.0,80.0,"#244b63");
+scene.text(350.0,155.0,16.0,"Observed: ${rows.len()-1}","#f4f7fb");
+scene.rect(100.0,280.0,250.0,120.0,"#17324d");
+scene.text(116.0,322.0,18.0,"Known flags: ${known}","#f4f7fb");
+scene.text(116.0,362.0,15.0,"Synthetic fixture values","#bcd6e8");
+scene.rect(550.0,280.0,250.0,120.0,"#17324d");
+scene.text(566.0,322.0,18.0,"Unknown flags: ${unknown}","#f4f7fb");
+scene.text(566.0,362.0,15.0,"More evidence required","#bcd6e8");
+scene.text(30.0,480.0,14.0,"Known metadata is not a security attestation; live access/encryption can remain unknown.","#a9bdcd");
+scene.render_png("images/inventory_observation_graph.png",900,560,1);
+end _dsl_
+savedsl(p,"build/inventory_observation_graph_draw.dslb");
+r = system ${dsl_cli(p)} --dsl build/inventory_observation_graph_draw.dslb;
+assert(r.code == 0);
+println("wrote images/inventory_observation_graph.png");
+println("estimated cost: $0.00");

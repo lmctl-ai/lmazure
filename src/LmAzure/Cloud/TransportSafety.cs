@@ -6,16 +6,17 @@ namespace LmAzure.Cloud;
 internal static class TransportSafety
 {
     internal const int MaxResponseBytes = 8 * 1024 * 1024;
-    internal static HttpMessageHandler Wrap(HttpMessageHandler inner, IEnumerable<string> hosts, bool validateDestination)
-        => new BoundedHandler(inner, new HashSet<string>(hosts, StringComparer.OrdinalIgnoreCase), validateDestination);
+    internal static HttpMessageHandler Wrap(HttpMessageHandler inner, IEnumerable<string> hosts, bool validateDestination, Action<HttpRequestMessage>? observer = null)
+        => new BoundedHandler(inner, new HashSet<string>(hosts, StringComparer.OrdinalIgnoreCase), validateDestination, observer);
 
     private sealed class BoundedHandler : DelegatingHandler
     {
-        private readonly HashSet<string> _hosts; private readonly bool _validateDestination;
-        internal BoundedHandler(HttpMessageHandler inner, HashSet<string> hosts, bool validateDestination) : base(inner) { _hosts = hosts; _validateDestination = validateDestination; }
+        private readonly HashSet<string> _hosts; private readonly bool _validateDestination; private readonly Action<HttpRequestMessage>? _observer;
+        internal BoundedHandler(HttpMessageHandler inner, HashSet<string> hosts, bool validateDestination, Action<HttpRequestMessage>? observer) : base(inner) { _hosts = hosts; _validateDestination = validateDestination; _observer = observer; }
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             if (_validateDestination && !Allowed(request.RequestUri)) throw new HttpRequestException("Azure request destination rejected");
+            _observer?.Invoke(request);
             CostLedger.RecordRequest(request.Method.Method);
             var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
             if (response.Content is null) return response;

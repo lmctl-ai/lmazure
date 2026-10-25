@@ -4,13 +4,20 @@ azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
 let s = mock();
 let t = s.inventory("resources");
 t.csv("data/age_distribution.csv");
+s.readonly_cost_report("data/age_distribution_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/age_distribution.dslb");
 r = system ${dsl_cli(azure)} --dsl build/age_distribution.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/age_distribution.csv"), false);
 assert(rows[0].len() == 10);
-assert(rows.len() == 13);
+let cost_report = json_parse(read_file("data/age_distribution_cost_evidence.json"));
+assert(getstr(cost_report, "mode") == "fake");
+assert(getnum(cost_report, "estimated_cost_usd") == 0.0);
+assert(getlist(cost_report, "resources").len() == 0);
+let metadata = get(cost_report, "metadata_inventory");
+assert(getnum(metadata, "arm_requests") == 1);
+assert(rows.len() == 25);
 let fresh = 0;
 let recent = 0;
 let aging = 0;
@@ -23,11 +30,11 @@ for (i in range(1, rows.len())) {
   else { stale = stale + 1; }
 }
 write_file("data/age_distribution_derived.csv", "age bucket,count\n< 1 day," + str(fresh) + "\n1-7 days," + str(recent) + "\n8-30 days," + str(aging) + "\n> 30 days," + str(stale) + "\n");
-assert(fresh + recent + aging + stale == 12);
-assert(fresh == 3);
-assert(recent == 3);
-assert(aging == 3);
-assert(stale == 3);
+assert(fresh + recent + aging + stale == 24);
+assert(fresh == 6);
+assert(recent == 6);
+assert(aging == 6);
+assert(stale == 6);
 p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
 plot.png("images/age_distribution.png", 900, 560);
 plot.cmd("set title 'MOCK resource age distribution'; set xlabel 'Age bucket'; set ylabel 'Resources'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/age_distribution_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");

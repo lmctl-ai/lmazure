@@ -1,0 +1,36 @@
+# Mock-only Azure metadata analysis; no cloud writes or credentials.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("functions");
+t.csv("data/functions_region_coverage_inventory.csv");
+s.readonly_cost_report("data/functions_region_coverage_cost_evidence.json");
+end _dsl_
+savedsl(azure, "build/functions_region_coverage.dslb");
+r = system ${dsl_cli(azure)} --dsl build/functions_region_coverage.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/functions_region_coverage_inventory.csv"), false);
+assert(rows.len() == 2);
+let ledger = json_parse(read_file("data/functions_region_coverage_cost_evidence.json"));
+assert(getstr(ledger, "mode") == "fake");
+assert(getnum(ledger, "estimated_cost_usd") == 0);
+assert(getnum(ledger, "metadata_inventory.list_requests") == 1);
+assert(getlist(ledger, "owned").len() == 0);
+let counts=[0,0,0];
+for(i in range(1,rows.len())) { let region=0; if(rows[i][2]=="westus2") {region=1;} else if(rows[i][2]=="westeurope") {region=2;} counts[region]=counts[region]+1; }
+assert(counts[0]==1 && counts[1]==0 && counts[2]==0);
+let labels = ["East US", "West US 2", "West Europe"];
+let values = counts;
+let data = "category,count\n";
+for (j in range(0, labels.len())) { data = data + labels[j] + "," + str(values[j]) + "\n"; }
+write_file("data/functions_region_coverage_derived.csv", data);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/functions_region_coverage.png", 900, 560);
+plot.cmd("set title 'MOCK Function-app regional metadata'; set xlabel ''; set ylabel 'Resources'; set key off; set yrange [0:*]; set datafile separator ','; set style data histograms; set style fill solid 0.85; set boxwidth 0.65; set xtics norotate; set bmargin 5; plot 'data/functions_region_coverage_derived.csv' every ::1 using 2:xtic(1) lc rgb '#0ea5e9'");
+plot.close();
+end _dsl_
+savedsl(p, "build/functions_region_coverage_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/functions_region_coverage_plot.dslb;
+assert(r.code == 0);
+println("wrote images/functions_region_coverage.png");
+println("estimated cost: $0.00");

@@ -1,6 +1,6 @@
 # User-run live Azure test
 
-No real Azure subscription has been accessed during development. All 27 gallery examples explicitly use `mock()` and remain fake regardless of environment flags. Run the following live steps yourself only after approving live testing.
+No real Azure subscription has been accessed during development. All 72 gallery examples explicitly use `mock()` and remain fake regardless of environment flags. Run the following live steps yourself only after approving live testing.
 
 Live runs stay local: CI never uses Azure credentials, Azure login or OIDC. Review [the cost model](COSTS.md) before enabling writes. Until a user performs this test, all documented figures are estimated from the price table, not yet measured live.
 
@@ -11,7 +11,7 @@ Use an empty directory. Other platforms use the matching `lmazure-macos-arm64`, 
 ```sh
 mkdir lmazure-live-check
 cd lmazure-live-check
-gh release download v0.1.1 --repo lmctl-ai/lmazure --pattern lmazure-linux-x64 --pattern SHA256SUMS
+gh release download v0.1.2 --repo lmctl-ai/lmazure --pattern lmazure-linux-x64 --pattern SHA256SUMS
 sha256sum --ignore-missing --check SHA256SUMS
 chmod +x lmazure-linux-x64
 ./lmazure-linux-x64 --version
