@@ -73,13 +73,28 @@ public sealed class AzureSession : IDisposable
         if (apply) EnsureWrite();
         if (!File.Exists(ledgerPath)) return ResourceTable.Empty();
         try {
-            var doc = JsonDocument.Parse(File.ReadAllText(ledgerPath)); var run = doc.RootElement;
+            byte[] ledgerBytes;
+            using (var ledgerStream = new FileStream(ledgerPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var ledgerLength = ledgerStream.Length;
+                if (ledgerLength > 1024 * 1024) throw new AzureCloudException("ledger exceeds 1 MiB");
+                ledgerBytes = new byte[(int)ledgerLength]; ledgerStream.ReadExactly(ledgerBytes);
+                if (ledgerStream.ReadByte() != -1) throw new AzureCloudException("ledger changed while reading");
+            }
+            using var doc = JsonDocument.Parse(ledgerBytes, new JsonDocumentOptions { MaxDepth = 16 }); var run = doc.RootElement;
             var created = run.GetProperty("created_utc").GetDateTimeOffset();
             var runId = run.GetProperty("run_id").GetString() ?? "";
-            if (runId.Length != 12 || runId.Any(c => !Uri.IsHexDigit(c)) || !run.TryGetProperty("subscription", out var subscription) || subscription.GetString() != _subscription || !run.TryGetProperty("blob_endpoint", out var blobEndpoint) || blobEndpoint.GetString() != _blobEndpoint || !run.TryGetProperty("queue_endpoint", out var queueEndpoint) || queueEndpoint.GetString() != _queueEndpoint) throw new AzureCloudException("ledger account binding failed");
+            if (runId.Length != 12 || runId.Any(c => !IsLowerHex(c)) || !run.TryGetProperty("subscription", out var subscription) || subscription.GetString() != _subscription || !run.TryGetProperty("blob_endpoint", out var blobEndpoint) || blobEndpoint.GetString() != _blobEndpoint || !run.TryGetProperty("queue_endpoint", out var queueEndpoint) || queueEndpoint.GetString() != _queueEndpoint) throw new AzureCloudException("ledger account binding failed");
+            if (!run.TryGetProperty("owned", out var owned) || owned.ValueKind != JsonValueKind.Array || owned.GetArrayLength() > 64) throw new AzureCloudException("ledger owned resource limit exceeded");
+            foreach (var item in owned.EnumerateArray())
+            {
+                if (item.ValueKind != JsonValueKind.Object || !item.TryGetProperty("name", out var rawName) || !item.TryGetProperty("kind", out var rawKind)) throw new AzureCloudException("ledger contains an unsafe resource");
+                var name = rawName.GetString() ?? ""; var kind = rawKind.GetString() ?? "";
+                if (kind is not ("blob" or "queue") || !SafeResourceName(name) || !name.StartsWith($"lmazure-{runId}-", StringComparison.Ordinal)) throw new AzureCloudException("ledger contains an unsafe resource");
+            }
             if ((DateTimeOffset.UtcNow - created).TotalHours < olderHours) return ResourceTable.Empty();
             var rows = new List<object?[]>(); var remaining = new List<(string Kind, string Name)>(); var failures = new List<string>();
-            foreach (var item in run.GetProperty("owned").EnumerateArray()) {
+            foreach (var item in owned.EnumerateArray()) {
                 var name = item.GetProperty("name").GetString() ?? ""; var kind = item.GetProperty("kind").GetString() ?? "";
                 if (kind is not ("blob" or "queue") || !name.StartsWith($"lmazure-{runId}-", StringComparison.Ordinal)) throw new AzureCloudException("ledger contains an unsafe resource");
                 if (!OwnsMetadataAsync(kind, name, runId).GetAwaiter().GetResult()) { remaining.Add((kind, name)); continue; }
@@ -142,6 +157,8 @@ public sealed class AzureSession : IDisposable
         if (value == "0" || value.Equals("false", StringComparison.OrdinalIgnoreCase)) return false;
         return null;
     }
+    private static bool IsLowerHex(char value) => value is >= '0' and <= '9' or >= 'a' and <= 'f';
+    private static bool SafeResourceName(string value) => value.Length is > 0 and <= 63 && value.All(c => c is >= 'a' and <= 'z' or >= '0' and <= '9' or '-');
     internal static string MaskId(string id) => id.Length <= 8 ? "masked" : id[..4] + "…" + id[^4..];
     private void WriteSweepLedger(string path, string runId, DateTimeOffset created, IEnumerable<(string Kind, string Name)> items)
     {

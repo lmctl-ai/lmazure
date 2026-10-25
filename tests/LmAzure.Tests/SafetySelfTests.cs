@@ -15,11 +15,13 @@ public static class SafetySelfTests
         ChecksFailedCreateIsNotClaimed(ref checks);
         ChecksProtectedMetadataAndOwnership(ref checks);
         ChecksDrySweepDoesNotDelete(ref checks);
+        ChecksApplySweepDeletesAndRemovesLedger(ref checks);
         ChecksCleanupAttemptsAllAndRetainsLedger(ref checks);
         ChecksForeignLedgersAreRejected(ref checks);
         ChecksSecretValuesNeverProject(ref checks);
         ChecksTransportSafety(ref checks);
         ChecksUnknownNumbersRemainUnknown(ref checks);
+        ChecksCapacityAndLedgerBounds(ref checks);
         return checks;
     }
 
@@ -56,6 +58,20 @@ public static class SafetySelfTests
         ExpectThrows(() => run.Tag("lmazure-foreign-resource", "x", "y")); checks++;
         handler.ForcedResponseMetadata = handler.LastMetadata;
         run.Cleanup(); File.Delete(ledger);
+    }
+
+    private static void ChecksApplySweepDeletesAndRemovesLedger(ref int checks)
+    {
+        using var handler = new SafetyHandler();
+        using var session = AzureSession.Mock(handler);
+        string ledger = TempLedger();
+        var run = session.BeginRun(ledger); run.CreateQueue("apply");
+        handler.Requests.Clear();
+        var result = session.Sweep(ledger, 0, true);
+        Require(result.Count() == 1, "apply sweep reports one deletion"); checks++;
+        Require(handler.Requests.Count(r => r.Method == HttpMethod.Delete) == 1, "apply sweep deletes exactly once"); checks++;
+        Require(!File.Exists(ledger), "successful apply sweep removes ledger"); checks++;
+        run.Cleanup();
     }
 
     private static void ChecksDrySweepDoesNotDelete(ref int checks)
@@ -129,6 +145,45 @@ public static class SafetySelfTests
         var table = new ResourceTable([ResourceTable.Row("n", "k", "eastus", "observed", 1, 0, null, null, false, "masked")]);
         ExpectThrowsAny(() => table.Number(0, 6)); checks++;
         ExpectThrowsAny(() => table.Number(0, 7)); checks++;
+    }
+
+    private static void ChecksCapacityAndLedgerBounds(ref int checks)
+    {
+        using var handler = new SafetyHandler();
+        using var session = AzureSession.Mock(handler);
+        string capacityLedger = TempLedger();
+        using var run = session.BeginRun(capacityLedger);
+        for (var i = 0; i < 16; i++) run.CreateContainer("cap" + i);
+        handler.Requests.Clear();
+        ExpectThrows(() => run.CreateContainer("seventeenth"));
+        Require(handler.Requests.Count == 0, "capacity rejection must precede the create request"); checks++;
+        using (var capacityDoc = JsonDocument.Parse(File.ReadAllText(capacityLedger)))
+            Require(capacityDoc.RootElement.GetProperty("owned").GetArrayLength() == 16, "capacity ledger retains sixteen claims");
+        checks++;
+        ExpectThrows(() => run.CreateQueue("seventeenth-queue"));
+        Require(handler.Requests.Count == 0, "queue capacity rejection must precede the create request"); checks++;
+
+        var malformed = TempLedger();
+        File.WriteAllText(malformed, LedgerJson([("lmazure-0123456789ab-good", "blob"), ("lmazure-0123456789ab/bad", "blob")]));
+        handler.Requests.Clear(); ExpectThrows(() => session.Sweep(malformed, 0, false));
+        Require(handler.Requests.Count == 0, "unsafe ledger name rejected before requests"); checks++; File.Delete(malformed);
+
+        var tooMany = TempLedger();
+        var entries = Enumerable.Range(0, 65).Select(i => ($"lmazure-0123456789ab-r{i}", "blob")).ToArray();
+        File.WriteAllText(tooMany, LedgerJson(entries)); handler.Requests.Clear(); ExpectThrows(() => session.Sweep(tooMany, 0, false));
+        Require(handler.Requests.Count == 0, "oversized owned list rejected before requests"); checks++; File.Delete(tooMany);
+
+        var oversized = TempLedger(); File.WriteAllText(oversized, "{" + new string(' ', 1024 * 1024) + "}"); handler.Requests.Clear(); ExpectThrows(() => session.Sweep(oversized, 0, false));
+        Require(handler.Requests.Count == 0, "oversized ledger rejected before requests"); checks++; File.Delete(oversized);
+    }
+
+    private static string LedgerJson(IEnumerable<(string Name, string Kind)> entries)
+    {
+        using var stream = new MemoryStream(); using (var writer = new Utf8JsonWriter(stream))
+        {
+            writer.WriteStartObject(); writer.WriteString("run_id", "0123456789ab"); writer.WriteString("subscription", "00000000-0000-0000-0000-000000000000"); writer.WriteString("blob_endpoint", "https://blob.mock"); writer.WriteString("queue_endpoint", "https://queue.mock"); writer.WriteString("created_utc", "2000-01-01T00:00:00Z"); writer.WriteStartArray("owned"); foreach (var entry in entries) { writer.WriteStartObject(); writer.WriteString("name", entry.Name); writer.WriteString("kind", entry.Kind); writer.WriteEndObject(); } writer.WriteEndArray(); writer.WriteEndObject(); writer.Flush();
+        }
+        return Encoding.UTF8.GetString(stream.ToArray());
     }
 
     private static string TempLedger() => Path.Combine(Path.GetTempPath(), "lmazure-safety-" + Guid.NewGuid().ToString("N") + ".json");

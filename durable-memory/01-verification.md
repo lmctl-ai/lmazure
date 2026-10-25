@@ -7,7 +7,7 @@ env PATH=/tmp/lmazure-dotnet:$PATH dotnet build src/LmAzure/LmAzure.csproj -c Re
 ```
 
 The build completed with zero warnings and zero errors. The fake transport
-self-test currently reports 53 checks: 27 core fixture checks and 26 safety
+self-test currently reports 62 checks: 27 core fixture checks and 35 safety
 checks. The reported breakdown is retained as the release acceptance target.
 
 The broader checked-in validation counts are 31 CLI checks, 11 DSL checks on

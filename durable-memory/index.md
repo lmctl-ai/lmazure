@@ -20,7 +20,8 @@ default and retain failed or mismatched entries.
 
 The current verification evidence is recorded in [01-verification.md](01-verification.md).
 The pinned SDK and legal inventory are recorded in [02-sdk-and-legal.md](02-sdk-and-legal.md).
+Build commands and runtime constraints are recorded in [03-build-and-runtime.md](03-build-and-runtime.md).
 
 Release and CI status remains pending until the five platform NativeAOT matrix,
-network job, and release artifact checks complete. No live Azure subscription
+gallery execution, and release artifact checks complete. No live Azure subscription
 test has been performed.
