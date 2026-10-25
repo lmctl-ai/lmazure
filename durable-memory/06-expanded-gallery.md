@@ -37,6 +37,29 @@ ledger validation. Visual review replaced overlapping rotated labels, marked
 service cards MOCK, and rendered diagram metrics from their actual evidence.
 All PNGs are 900 by 560 and below 300 KB.
 
-CI and release verification are pending. No real Azure subscription or
+The [main matrix](https://github.com/lmctl-ai/lmazure/actions/runs/40164789430)
+and [tag matrix/publication](https://github.com/lmctl-ai/lmazure/actions/runs/40165570188)
+passed all five platforms. [v0.1.2](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.2)
+is published from `8c73edde8298c0989b44ba66afeac47844f8b827`, with five executables
+and SHA256SUMS. Every downloaded asset checksum passed, as did glibc-only checks
+on both Linux assets (maximum ABI 2.34; documented baseline remains glibc 2.35).
+
+| Asset | Bytes |
+| --- | ---: |
+| lmazure-linux-arm64 | 20,503,760 |
+| lmazure-linux-x64 | 20,328,824 |
+| lmazure-macos-arm64 | 15,439,192 |
+| lmazure-macos-x64 | 15,781,136 |
+| lmazure-windows-x64.exe | 16,364,544 |
+
+Post-release verification used a fresh tool cache and LMCTL_HOME, no lmazure on
+PATH, and a separate empty directory for each README raw autorun URL. All 72
+installed/used v0.1.2, generated valid 900 by 560 PNGs under 300 KB, exported the
+catalog cost evidence and printed the exact expected final estimate. The 55
+readonly ledgers recorded actual ARM request counts with empty ownership; all
+16 lifecycle ledgers ended with zero ownership/reservations, and the admission
+case proved zero dispatched requests. The installed executable SHA-256 matched
+the verified linux-x64 release asset. These are fake-transport estimates, not
+live price or subscription measurements. No real Azure subscription or
 authentication was used. CI remains fake-only, with no OIDC, Azure login or
 Azure credentials. Publishing does not wait for later user-run live testing.

@@ -40,7 +40,7 @@ The executable needs no .NET runtime installation. macOS and Windows use system
 crypto APIs. Do not replace the nonempty publish-options array with an empty one:
 macOS system Bash 3 rejects an empty array expansion under `set -u`.
 
-The 27 examples generate CSV data and 900×560 PNG images through lmplot/lmdraw.
+The 72 examples generate CSV data and 900×560 PNG images through lmplot/lmdraw.
 `scripts/render-examples.py` refreshes `docs/images`. Golden assertions cover mock
 age, exposure, encryption and ownership-tag totals. Boolean CSV cells are typed
 booleans in lmscript, not strings. All gallery calls explicitly use `mock()`.
