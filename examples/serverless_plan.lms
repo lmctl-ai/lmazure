@@ -1,0 +1,36 @@
+# Mock-only Azure serverless release plan.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("serverless");
+t.csv("data/serverless_plan.csv");
+end _dsl_
+savedsl(azure, "build/serverless_plan.dslb");
+r = system ${dsl_cli(azure)} --dsl build/serverless_plan.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/serverless_plan.csv"), false);
+assert(rows[0].len() == 10);
+assert(rows.len() == 2);
+let resource_count = rows.len() - 1;
+p = _dsl_ cli="lmdraw" install="github:lmctl-ai/lmdraw@latest";
+scene.canvas(900, 560, "#0f1720");
+scene.text(36.0, 48.0, 28.0, "Serverless release plan", "#f4f7fb");
+scene.text(36.0, 78.0, 15.0, "Generated from a redacted mock inventory; no Azure call", "#9fb3c8");
+scene.rect(70.0, 160.0, 220.0, 120.0, "#17324d");
+scene.text(95.0, 215.0, 20.0, "function", "#f4f7fb");
+scene.text(95.0, 248.0, 15.0, "mock rows: ${resource_count}", "#d9e2ec");
+scene.rect(340.0, 160.0, 220.0, 120.0, "#17324d");
+scene.text(365.0, 215.0, 20.0, "telemetry", "#f4f7fb");
+scene.text(365.0, 248.0, 15.0, "alerts + logs", "#d9e2ec");
+scene.rect(610.0, 160.0, 220.0, 120.0, "#17324d");
+scene.text(635.0, 215.0, 20.0, "release", "#f4f7fb");
+scene.text(635.0, 248.0, 15.0, "rollback plan", "#d9e2ec");
+scene.arrow(290.0, 220.0, 340.0, 220.0, "#f2c94c", 3.0);
+scene.arrow(560.0, 220.0, 610.0, 220.0, "#f2c94c", 3.0);
+scene.text(70.0, 420.0, 16.0, "A serverless plan stays read-only until a separate opt-in run.", "#9fb3c8");
+scene.render_png("images/serverless_plan.png", 900, 560, 1);
+end _dsl_
+savedsl(p, "build/serverless_plan_draw.dslb");
+r = system ${dsl_cli(p)} --dsl build/serverless_plan_draw.dslb;
+assert(r.code == 0);
+println("wrote images/serverless_plan.png");

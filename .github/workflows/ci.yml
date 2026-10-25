@@ -1,0 +1,114 @@
+name: ci
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths-ignore: ['durable-memory/**', '**.md']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+env:
+  LMAZURE_LIVE: '0'
+  LMAZURE_ALLOW_WRITES: '0'
+  DOTNET_NOLOGO: '1'
+  DOTNET_CLI_TELEMETRY_OPTOUT: '1'
+jobs:
+  native:
+    name: ${{ matrix.name }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: ubuntu-22.04, name: linux-x64}
+          - {os: ubuntu-22.04-arm, name: linux-arm64}
+          - {os: macos-15, name: macos-arm64}
+          - {os: macos-15-intel, name: macos-x64}
+          - {os: windows-2022, name: windows-x64}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: '10.0.402'
+      - name: Linux native prerequisites
+        if: runner.os == 'Linux'
+        run: timeout 180 sudo apt-get update -qq && timeout 180 sudo apt-get install -y -qq clang cmake build-essential libssl-dev zlib1g-dev
+      - name: macOS timeout utility
+        if: runner.os == 'macOS'
+        run: brew install coreutils
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        id: packages
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/packages.lock.json') }}
+      - name: Pinned lmscript compiler
+        run: timeout 180 npm install -g @lmctl-ai/lmctl@0.2.369
+      - name: Pinned source and managed fake tests
+        timeout-minutes: 10
+        run: bash test.sh
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        if: steps.packages.outputs.cache-hit != 'true'
+        with:
+          path: ~/.nuget/packages
+          key: ${{ steps.packages.outputs.cache-primary-key }}
+      - name: NativeAOT publish with trimming warnings as errors
+        timeout-minutes: 25
+        run: bash scripts/build-native.sh
+      - name: Standalone fake transport, DSL and gallery checks
+        timeout-minutes: 10
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          suffix=''
+          if [[ "$RUNNER_OS" == Windows ]]; then suffix=.exe; fi
+          mkdir -p artifacts/standalone dist
+          cp "artifacts/native/lmazure$suffix" "artifacts/standalone/lmazure$suffix"
+          export PATH="$PWD/artifacts/standalone:$PATH"
+          python3 scripts/test-cli.py "artifacts/standalone/lmazure$suffix"
+          if [[ "$RUNNER_OS" == Linux ]]; then
+            LMAZURE_TEST_ADDRESS_SPACE_LIMIT=1 LMAZURE_TEST_DEFAULT_BUDGET=1 python3 scripts/test-dsl.py "artifacts/standalone/lmazure$suffix"
+          else
+            python3 scripts/test-dsl.py "artifacts/standalone/lmazure$suffix"
+          fi
+          LMAZURE_LMSCRIPT=lmscript python3 scripts/test-examples.py
+          if [[ "$RUNNER_OS" == Linux ]]; then python3 scripts/check-linux-linkage.py artifacts/standalone/lmazure; fi
+          cp "artifacts/standalone/lmazure$suffix" "dist/lmazure-${{ matrix.name }}$suffix"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: lmazure-${{ matrix.name }}
+          path: dist/*
+          if-no-files-found: error
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: native
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: lmazure-*
+          merge-multiple: true
+          path: dist
+      - name: Publish fake-validated preview for user live testing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist
+          test "$(find . -maxdepth 1 -type f -name 'lmazure-*' | wc -l)" -eq 5
+          sha256sum lmazure-* > SHA256SUMS
+          timeout 240 gh release create "$GITHUB_REF_NAME" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME — READY TO TEST" --notes 'Five NativeAOT executables, fake-transport validated only. No real Azure subscription has been accessed. Live operations require explicit user opt-in; see docs/LIVE_TESTING.md. Linux requires glibc 2.35 or newer.'

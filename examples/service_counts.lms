@@ -1,0 +1,35 @@
+# Mock-only Azure service inventory overview.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/service_counts.csv");
+end _dsl_
+savedsl(azure, "build/service_counts.dslb");
+r = system ${dsl_cli(azure)} --dsl build/service_counts.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/service_counts.csv"), false);
+assert(rows[0].len() == 10);
+assert(rows.len() == 13);
+let compute = 0;
+let storage = 0;
+let network = 0;
+let other = 0;
+for (i in range(1, rows.len())) {
+  let kind = rows[i][1];
+  if (kind == "Microsoft.Compute/virtualMachines") { compute = compute + 1; }
+  else if (kind == "Microsoft.Storage/storageAccounts") { storage = storage + 1; }
+  else if (kind == "Microsoft.Network/virtualNetworks") { network = network + 1; }
+  else { other = other + 1; }
+}
+write_file("data/service_counts_derived.csv", "service kind,count\ncompute," + str(compute) + "\nstorage," + str(storage) + "\nnetwork," + str(network) + "\nother," + str(other) + "\n");
+assert(compute + storage + network + other == 12);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/service_counts.png", 900, 560);
+plot.cmd("set title 'MOCK service inventory overview'; set xlabel 'Service kind'; set ylabel 'Resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/service_counts_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.close();
+end _dsl_
+savedsl(p, "build/service_counts_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/service_counts_plot.dslb;
+assert(r.code == 0);
+println("wrote images/service_counts.png");

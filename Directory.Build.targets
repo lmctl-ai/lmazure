@@ -1,0 +1,11 @@
+<Project>
+  <Target Name="LmazureStaticLinuxRuntime" AfterTargets="SetupOSSpecificProps" Condition="$([System.String]::Copy('$(RuntimeIdentifier)').StartsWith('linux-'))">
+    <Error Condition="'$(LMAZURE_STATIC_ZLIB)' == ''" Text="Use scripts/build-native.sh to configure static zlib linkage." />
+    <ItemGroup>
+      <LinkerArg Remove="-lz" />
+      <LinkerArg Include="$(LMAZURE_STATIC_ZLIB)" />
+      <LinkerArg Include="-static-libgcc" />
+      <LinkerArg Include="-static-libstdc++" />
+    </ItemGroup>
+  </Target>
+</Project>

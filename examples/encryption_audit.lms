@@ -1,0 +1,33 @@
+# Mock-only Azure storage encryption audit.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("storage");
+t.csv("data/encryption_audit.csv");
+end _dsl_
+savedsl(azure, "build/encryption_audit.dslb");
+r = system ${dsl_cli(azure)} --dsl build/encryption_audit.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/encryption_audit.csv"), false);
+assert(rows[0].len() == 10);
+assert(rows.len() == 4);
+let encrypted = 0;
+let unencrypted = 0;
+let unknown = 0;
+for (i in range(1, rows.len())) {
+  let value = rows[i][7];
+  if (value == "true") { encrypted = encrypted + 1; }
+  else if (value == "false") { unencrypted = unencrypted + 1; }
+  else { unknown = unknown + 1; }
+}
+write_file("data/encryption_audit_derived.csv", "encryption,count\nencrypted," + str(encrypted) + "\nunencrypted," + str(unencrypted) + "\nunknown," + str(unknown) + "\n");
+assert(encrypted + unencrypted + unknown == 3);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/encryption_audit.png", 900, 560);
+plot.cmd("set title 'MOCK storage encryption audit'; set xlabel 'Encryption'; set ylabel 'Storage resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/encryption_audit_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.close();
+end _dsl_
+savedsl(p, "build/encryption_audit_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/encryption_audit_plot.dslb;
+assert(r.code == 0);
+println("wrote images/encryption_audit.png");

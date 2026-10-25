@@ -1,0 +1,22 @@
+# Mock-only Azure network inventory by item count.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("network");
+t.csv("data/network_inventory.csv");
+end _dsl_
+savedsl(azure, "build/network_inventory.dslb");
+r = system ${dsl_cli(azure)} --dsl build/network_inventory.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/network_inventory.csv"), false);
+assert(rows[0].len() == 10);
+assert(rows.len() == 3);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/network_inventory.png", 900, 560);
+plot.cmd("set title 'MOCK Network age horizon'; set xlabel 'Resource'; set ylabel 'Age hours'; set xtics rotate by -90 right font ',8'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/network_inventory.csv' every ::1 using 6:xtic(1) title 'mock age horizon'");
+plot.close();
+end _dsl_
+savedsl(p, "build/network_inventory_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/network_inventory_plot.dslb;
+assert(r.code == 0);
+println("wrote images/network_inventory.png");

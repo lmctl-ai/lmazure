@@ -1,0 +1,30 @@
+# Mock-only Azure stale resource review.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/stale_resources.csv");
+end _dsl_
+savedsl(azure, "build/stale_resources.dslb");
+r = system ${dsl_cli(azure)} --dsl build/stale_resources.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/stale_resources.csv"), false);
+assert(rows[0].len() == 10);
+assert(rows.len() == 13);
+let fresh = 0;
+let stale = 0;
+for (i in range(1, rows.len())) {
+  if (num(rows[i][5]) >= 720.0) { stale = stale + 1; }
+  else { fresh = fresh + 1; }
+}
+write_file("data/stale_resources_derived.csv", "age status,count\nfresh (< 30 days)," + str(fresh) + "\nstale (>= 30 days)," + str(stale) + "\n");
+assert(fresh + stale == 12);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/stale_resources.png", 900, 560);
+plot.cmd("set title 'MOCK stale resource review'; set xlabel 'Age status'; set ylabel 'Resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/stale_resources_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.close();
+end _dsl_
+savedsl(p, "build/stale_resources_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/stale_resources_plot.dslb;
+assert(r.code == 0);
+println("wrote images/stale_resources.png");

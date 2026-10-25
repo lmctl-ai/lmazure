@@ -1,0 +1,30 @@
+# Mock-only Azure regional resource footprint.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/regional_footprint.csv");
+end _dsl_
+savedsl(azure, "build/regional_footprint.dslb");
+r = system ${dsl_cli(azure)} --dsl build/regional_footprint.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/regional_footprint.csv"), false);
+assert(rows[0].len() == 10);
+assert(rows.len() == 13);
+let eastus = 0;
+let other = 0;
+for (i in range(1, rows.len())) {
+  if (rows[i][2] == "eastus") { eastus = eastus + 1; }
+  else { other = other + 1; }
+}
+write_file("data/regional_footprint_derived.csv", "region,count\neastus," + str(eastus) + "\nother," + str(other) + "\n");
+assert(eastus + other == 12);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/regional_footprint.png", 900, 560);
+plot.cmd("set title 'MOCK regional resource footprint'; set xlabel 'Region'; set ylabel 'Resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/regional_footprint_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.close();
+end _dsl_
+savedsl(p, "build/regional_footprint_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/regional_footprint_plot.dslb;
+assert(r.code == 0);
+println("wrote images/regional_footprint.png");

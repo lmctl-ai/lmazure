@@ -1,0 +1,16 @@
+lmazure 0.1.0 — third-party notices
+
+lmazure and the pinned lmcode-csharp SDK are MIT licensed.
+Azure.Core 1.63.0, Azure.Identity 1.21.0, Azure.ResourceManager 1.14.0,
+Azure.Storage.Blobs 12.30.1 and Azure.Storage.Queues 12.28.1 are Microsoft
+Azure SDK for .NET packages, MIT licensed. Exact transitive package versions
+and content hashes are recorded in packages.lock.json.
+
+The .NET runtime and NativeAOT toolchain are MIT licensed, with third-party
+notices maintained by the dotnet/runtime project. Linux dynamically links to
+the system glibc (LGPL-2.1); glibc is the only permitted dynamic dependency.
+OpenSSL is statically linked on Linux (Apache-2.0/OpenSSL license by version).
+zlib is under the zlib license. Windows/macOS use system cryptographic APIs.
+
+Upstream sources: github.com/Azure/azure-sdk-for-net, github.com/dotnet/runtime,
+github.com/lmctl-ai/lmcode-csharp, openssl.org, zlib.net, gnu.org/software/libc.

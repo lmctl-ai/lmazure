@@ -1,0 +1,22 @@
+# Mock-only Azure resource inventory by item count.
+mkdir("images"); mkdir("data"); mkdir("build");
+azure = _dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest";
+let s = mock();
+let t = s.inventory("resources");
+t.csv("data/resource_inventory.csv");
+end _dsl_
+savedsl(azure, "build/resource_inventory.dslb");
+r = system ${dsl_cli(azure)} --dsl build/resource_inventory.dslb;
+assert(r.code == 0);
+let rows = csv_parse(read_file("data/resource_inventory.csv"), false);
+assert(rows[0].len() == 10);
+assert(rows.len() == 13);
+p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
+plot.png("images/resource_inventory.png", 900, 560);
+plot.cmd("set title 'MOCK Resource age horizon'; set xlabel 'Resource'; set ylabel 'Age hours'; set xtics rotate by -90 right font ',8'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/resource_inventory.csv' every ::1 using 6:xtic(1) title 'mock age horizon'");
+plot.close();
+end _dsl_
+savedsl(p, "build/resource_inventory_plot.dslb");
+r = system ${dsl_cli(p)} --dsl build/resource_inventory_plot.dslb;
+assert(r.code == 0);
+println("wrote images/resource_inventory.png");
