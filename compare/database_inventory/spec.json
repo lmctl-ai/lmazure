@@ -1,0 +1,20 @@
+{
+  "name": "database_inventory",
+  "ledger_mode": "readonly",
+  "inventory_kind": "database",
+  "resource_types": [
+    "Microsoft.Sql/servers"
+  ],
+  "expected_resources": [],
+  "intended_resources": [],
+  "semantic_differences": [
+    "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+    "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+    "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+  ],
+  "native_expected_cost_usd": 0,
+  "tofu_estimated_cost_usd": 0,
+  "admission_cost_usd": 0,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "0a8c64a303437e82a1fb123143a477496c4cf581e7a9a6bf723d186aad95994f"
+}

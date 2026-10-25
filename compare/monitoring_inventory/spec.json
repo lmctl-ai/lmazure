@@ -1,0 +1,21 @@
+{
+  "name": "monitoring_inventory",
+  "ledger_mode": "readonly",
+  "inventory_kind": "monitoring",
+  "resource_types": [
+    "Microsoft.Insights/components",
+    "Microsoft.Insights/metricAlerts"
+  ],
+  "expected_resources": [],
+  "intended_resources": [],
+  "semantic_differences": [
+    "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+    "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+    "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+  ],
+  "native_expected_cost_usd": 0,
+  "tofu_estimated_cost_usd": 0,
+  "admission_cost_usd": 0,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "6e33b853e20274bc4e213d3ecad8be14123bd0bd3a8a9c2ca2132778f3dd6f7f"
+}

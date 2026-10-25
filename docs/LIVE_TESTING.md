@@ -11,7 +11,7 @@ Use an empty directory. Other platforms use the matching `lmazure-macos-arm64`, 
 ```sh
 mkdir lmazure-live-check
 cd lmazure-live-check
-gh release download v0.1.2 --repo lmctl-ai/lmazure --pattern lmazure-linux-x64 --pattern SHA256SUMS
+gh release download v0.1.3 --repo lmctl-ai/lmazure --pattern lmazure-linux-x64 --pattern SHA256SUMS
 sha256sum --ignore-missing --check SHA256SUMS
 chmod +x lmazure-linux-x64
 ./lmazure-linux-x64 --version

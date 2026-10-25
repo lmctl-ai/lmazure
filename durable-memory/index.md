@@ -30,3 +30,5 @@ Status: **READY TO TEST**. No live Azure subscription test has been performed.
 The v0.1.1 cost-ledger policy and acceptance checks are recorded in [05-cost-ledger.md](05-cost-ledger.md).
 
 The 72-example v0.1.2 expansion is recorded in [06-expanded-gallery.md](06-expanded-gallery.md).
+
+The v0.1.3 equivalence suite and limits are recorded in [07-lmcloud-equivalents.md](07-lmcloud-equivalents.md).

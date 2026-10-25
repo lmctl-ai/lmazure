@@ -22,6 +22,10 @@ lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/r
 
 The program writes a CSV beside its image. The mock fixture is deterministic, redacted, and varied enough to exercise inventory, security, tagging, age, regional, queue, serverless, and cleanup reports. No credentials or subscription identifiers are printed.
 
+## Native SDK versus lmcloud
+
+All 72 examples also have self-contained [lmcloud/OpenTofu equivalents](compare/README.md), a small AzureRM configuration, and a [comparison results table](compare/RESULTS.md). Run `compare/run.sh <example>` for the offline comparison. It checks exact created resource names/types, ownership metadata and fingerprints, common outputs, wall time, estimated cost and zero cleanup leftovers. Offline fixture agreement is explicitly separated from AzureRM behavior; every live comparison remains pending user test. The lmcloud repository is not modified.
+
 ## Host API
 
 Bind lmazure from lmscript with `_dsl_ cli="lmazure" install="github:lmctl-ai/lmazure@latest"`. The default path is `mock()`:

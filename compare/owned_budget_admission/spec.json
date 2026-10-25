@@ -1,0 +1,27 @@
+{
+  "name": "owned_budget_admission",
+  "ledger_mode": "budget",
+  "inventory_kind": null,
+  "resource_types": [],
+  "expected_resources": [],
+  "intended_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "budget-admission",
+      "metadata": {
+        "lmazure_test": "$run_id"
+      }
+    }
+  ],
+  "semantic_differences": [
+    "Native SDK performs imperative create/tag/delete/sweep phases; AzureRM converges to desired metadata and destroys state-owned resources.",
+    "Native estimates count SDK transport attempts; AzureRM estimate reserves 64 provider requests per intended resource and is not a bill."
+  ],
+  "native_expected_cost_usd": 0,
+  "tofu_estimated_cost_usd": 0,
+  "admission_cost_usd": 0.0003,
+  "cost_cap_usd": 0.0002,
+  "source_sha256": "538a92e0b8fcf56b4226c2edf692fec112d8b25bf6f0c721140ae79c9803adc6"
+}

@@ -1,0 +1,39 @@
+{
+  "name": "cost_request_breakdown",
+  "ledger_mode": "owned",
+  "inventory_kind": null,
+  "resource_types": [],
+  "expected_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "request-breakdown",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "request-breakdown"
+      }
+    }
+  ],
+  "intended_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "request-breakdown",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "request-breakdown"
+      }
+    }
+  ],
+  "semantic_differences": [
+    "Native SDK performs imperative create/tag/delete/sweep phases; AzureRM converges to desired metadata and destroys state-owned resources.",
+    "Native estimates count SDK transport attempts; AzureRM estimate reserves 64 provider requests per intended resource and is not a bill."
+  ],
+  "native_expected_cost_usd": 0.0005,
+  "tofu_estimated_cost_usd": 0.0064,
+  "admission_cost_usd": 0.0064,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "62520f07600c1686cc234391bf1f1097443ac6e6cb9a949f3082e83970fd212d"
+}

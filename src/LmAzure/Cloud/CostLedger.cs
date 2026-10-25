@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Security.Cryptography;
 
 namespace LmAzure.Cloud;
 
@@ -25,6 +26,8 @@ public sealed class CostLedger
         public bool Owned;
         public DateTimeOffset? Created, Deleted;
         public decimal CleanupReserved;
+        public string? MetadataSha256;
+        public bool MetadataOwnerVerified;
     }
     private sealed record RequestCost(string Resource, string Operation, string Method, DateTimeOffset At);
     public CostLedger(string runId, string example, string region, bool mock)
@@ -70,6 +73,23 @@ public sealed class CostLedger
     }
     // Called by the actual SDK transport immediately before dispatch. Failed attempts count.
     internal static void RecordRequest(string method) { Active.Value?.Record(method); }
+    internal static void ObserveMetadata(IDictionary<string, string> metadata)
+    {
+        var operation = Active.Value;
+        if (operation is null) return;
+        lock (Gate)
+        {
+            using var buffer = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(buffer))
+            {
+                writer.WriteStartObject();
+                foreach (var pair in metadata.OrderBy(x => x.Key, StringComparer.Ordinal)) writer.WriteString(pair.Key, pair.Value);
+                writer.WriteEndObject();
+            }
+            operation.Resource.MetadataSha256 = Convert.ToHexStringLower(SHA256.HashData(buffer.ToArray()));
+            operation.Resource.MetadataOwnerVerified = metadata.TryGetValue("lmazure_test", out var owner) && owner == operation.Ledger._runId;
+        }
+    }
     public sealed class Operation : IDisposable
     {
         private readonly CostLedger _ledger;
@@ -79,6 +99,8 @@ public sealed class CostLedger
         private readonly Operation? _prior;
         private decimal _remaining;
         private bool _created, _disposed;
+        internal ResourceCost Resource => _resource;
+        internal CostLedger Ledger => _ledger;
         internal Operation(CostLedger ledger, ResourceCost resource, string operation, decimal remaining, bool create, bool cleanup)
         { _ledger = ledger; _resource = resource; _operation = operation; _remaining = remaining; _create = create; _cleanup = cleanup; _prior = Active.Value; Active.Value = this; }
         public void MarkCreated() { lock (Gate) { _created = true; _resource.Owned = true; _resource.Created = DateTimeOffset.UtcNow; _resource.Deleted = null; } }
@@ -123,6 +145,9 @@ public sealed class CostLedger
             foreach (var resource in _resources.Values)
             {
                 writer.WriteStartObject(); writer.WriteString("resource", resource.Name); writer.WriteString("kind", resource.Kind); writer.WriteBoolean("owned", resource.Owned);
+                writer.WriteStartObject("tags"); if (resource.MetadataOwnerVerified) writer.WriteString("lmazure_test", _runId); writer.WriteEndObject();
+                writer.WriteBoolean("metadata_owner_verified", resource.MetadataOwnerVerified);
+                if (resource.MetadataSha256 is not null) writer.WriteString("metadata_sha256", resource.MetadataSha256); else writer.WriteNull("metadata_sha256");
                 if (resource.Created.HasValue) writer.WriteString("created_utc", resource.Created.Value); else writer.WriteNull("created_utc");
                 if (resource.Deleted.HasValue) writer.WriteString("deleted_utc", resource.Deleted.Value); else writer.WriteNull("deleted_utc");
                 var minutes = resource.Created.HasValue ? Math.Max(0, ((resource.Deleted ?? DateTimeOffset.UtcNow) - resource.Created.Value).TotalMinutes) : 0;
@@ -177,6 +202,8 @@ public sealed class CostLedger
                     var name = resource.GetProperty("resource").GetString() ?? "";
                     if (!ledger._resources.TryGetValue(name, out var entry)) continue;
                     entry.Kind = resource.GetProperty("kind").GetString() ?? "historical";
+                    if (resource.TryGetProperty("metadata_sha256", out var digest) && digest.ValueKind == JsonValueKind.String) entry.MetadataSha256 = digest.GetString();
+                    if (resource.TryGetProperty("metadata_owner_verified", out var verified)) entry.MetadataOwnerVerified = verified.GetBoolean();
                     if (resource.TryGetProperty("created_utc", out var start)) entry.Created = start.ValueKind == JsonValueKind.Null ? null : start.GetDateTimeOffset();
                     if (resource.TryGetProperty("deleted_utc", out var end)) entry.Deleted = end.ValueKind == JsonValueKind.Null ? null : end.GetDateTimeOffset();
                 }

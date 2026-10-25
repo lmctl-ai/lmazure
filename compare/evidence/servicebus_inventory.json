@@ -1,0 +1,92 @@
+{
+  "example": "servicebus_inventory",
+  "mode": "offline",
+  "comparison": {
+    "ok": true,
+    "offline": {
+      "resources": {
+        "status": "same",
+        "why": "normalized type, exact name, ownership metadata, and observed metadata fingerprints match",
+        "lmazure": [],
+        "lmcloud": [],
+        "lmazure_errors": [],
+        "lmcloud_errors": []
+      },
+      "outputs": {
+        "status": "same",
+        "why": "normalized output objects match",
+        "lmazure": {
+          "inventory": [
+            {
+              "location": "eastus",
+              "name": "lmazure-13",
+              "tagged": true,
+              "type": "Microsoft.ServiceBus/namespaces"
+            }
+          ]
+        },
+        "lmcloud": {
+          "inventory": [
+            {
+              "location": "eastus",
+              "name": "lmazure-13",
+              "tagged": true,
+              "type": "Microsoft.ServiceBus/namespaces"
+            }
+          ]
+        }
+      },
+      "time": {
+        "status": "differs",
+        "why": "wall-time differences are informational",
+        "lmazure": 0.16461669000000256,
+        "lmcloud": 0.21506693700030155
+      },
+      "cost": {
+        "status": "same",
+        "why": "cost differences reflect SDK versus conservative provider allowances",
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cleanup": {
+        "lmazure": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        },
+        "lmcloud": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        }
+      },
+      "account": {
+        "status": "same",
+        "why": "valid account fingerprints match"
+      },
+      "provenance": {
+        "status": "same offline fixture intents",
+        "why": "native SDK fakes and an executed builtin-provider fixture plan were compared; this is not live AzureRM equivalence",
+        "requested_provider": [
+          "azurerm",
+          "azurerm"
+        ],
+        "executed_provider": [
+          "azure_sdk_fake",
+          "builtin_fixture"
+        ]
+      }
+    },
+    "live": {
+      "status": "pending",
+      "why": "pending user-approved live records; offline fixtures cannot pass live comparison"
+    },
+    "semantic_differences": [
+      "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+      "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+      "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+    ]
+  }
+}

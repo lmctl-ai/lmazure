@@ -88,3 +88,8 @@ later; the host and CI never make that measurement call.
 Its request counter observes actual ARM dispatches, so an empty listing still
 counts one request and a paginated listing counts every page. It contains no
 credentials, subscription IDs or raw resource properties.
+
+Comparison equivalents use the same price-table unit but a conservative AzureRM
+provider allowance of 64 requests per intended resource, rather than claiming
+provider HTTP counts were observed. Their cost column can therefore differ.
+See compare/RESULTS.md and compare/README.md; no billing API or live test was used.

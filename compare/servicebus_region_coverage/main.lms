@@ -1,0 +1,77 @@
+# AzureRM equivalent plus an explicit builtin-provider offline fixture; never authenticates by default.
+mkdir("build"); mkdir("build/lmcloud_servicebus_region_coverage"); mkdir("build/lmcloud_servicebus_region_coverage/azure"); mkdir("build/lmcloud_servicebus_region_coverage/offline");
+let mode = getenv("LMAZURE_COMPARE_MODE", "offline");
+assert(mode == "offline" || mode == "live");
+let run_id = getenv("LMAZURE_COMPARE_RUN_ID", "0123456789ab");
+let dir = "build/lmcloud_servicebus_region_coverage/offline";
+let cap = 0.05;
+let admitted = true;
+if (mode == "live") {
+  assert(getenv("CI", "") != "true", "live comparison is forbidden in CI");
+  assert(getenv("LMAZURE_COMPARE_LIVE_APPROVED", "") == "1" && getenv("LMAZURE_LIVE", "") == "1", "user-approved local live testing is required");
+  let auth = json_parse(read_file(getenv("LMAZURE_COMPARE_AUTH_FILE", "missing-authorization.json")));
+  assert(getstr(auth,"example") == "servicebus_region_coverage" && getstr(auth,"run_id") == run_id && getbool(auth,"preflight_complete"), "use compare/run.sh for ownership preflight");
+  
+  dir = "build/lmcloud_servicebus_region_coverage/azure";
+}
+write_file("build/lmcloud_servicebus_region_coverage/azure/main.tf", "terraform {\n  required_providers {\n    azurerm = { source = \"hashicorp/azurerm\", version = \"=5.10.0\" }\n  }\n}\nprovider \"azurerm\" {\n  features {}\n  subscription_id                 = var.subscription_id\n  resource_provider_registrations = \"none\"\n  use_oidc                        = false\n  use_cli                         = true\n  use_msi                         = false\n  storage_use_azuread             = true\n}\nvariable \"subscription_id\" {\n  type      = string\n  sensitive = true\n}\nvariable \"storage_account_id\" {\n  type      = string\n  default   = \"\"\n  sensitive = true\n}\nvariable \"run_id\" {\n  type    = string\n  default = \"0123456789ab\"\n  validation {\n    condition     = can(regex(\"^[0-9a-f]{12}$\", var.run_id))\n    error_message = \"run_id must be twelve lowercase hexadecimal characters\"\n  }\n}\nvariable \"cost_cap_usd\" {\n  type    = number\n  default = 0.05\n  validation {\n    condition     = var.cost_cap_usd >= 0 && var.cost_cap_usd <= 0.25\n    error_message = \"example cap must be between zero and the 0.25 USD hard ceiling\"\n  }\n}\nresource \"terraform_data\" \"admission\" {\n  input = 0\n  lifecycle {\n    precondition {\n      condition     = var.cost_cap_usd >= 0\n      error_message = \"estimated provider allowance exceeds the example cap\"\n    }\n  }\n}\nvariable \"resource_types\" {\n  type    = set(string)\n  default = [\"Microsoft.ServiceBus/namespaces\"]\n}\ndata \"azurerm_resources\" \"inventory\" {\n  for_each = var.resource_types\n  type     = each.value\n}\noutput \"comparison\" {\n  value = jsonencode({ resources_created = [], outputs = { inventory = flatten([for collection in data.azurerm_resources.inventory : [for r in collection.resources : { name = r.name, type = r.type, location = r.location, tagged = contains(keys(r.tags), \"lmazure_test\") }]]) } })\n}\n");
+write_file("build/lmcloud_servicebus_region_coverage/offline/main.tf", "variable \"run_id\" {\n  type = string\n  default = \"0123456789ab\"\n}\nresource \"terraform_data\" \"intent\" {\n  input = {\n    resources_created = []\n    outputs = {inventory = [{\"name\": \"lmazure-13\", \"location\": \"eastus\", \"tagged\": true, \"type\": \"Microsoft.ServiceBus/namespaces\"}]}\n  }\n}\noutput \"comparison\" {\n  value = jsonencode(terraform_data.intent.output)\n}\n");
+let variables = {run_id: run_id};
+if(mode == "live") {
+ variables = {run_id:run_id, subscription_id:getenv("LMAZURE_SUBSCRIPTION_ID",""), storage_account_id:getenv("LMAZURE_COMPARE_STORAGE_ACCOUNT_ID", "")};
+}
+write_file(path_join(dir,"comparison.auto.tfvars.json"),json_stringify(variables));
+if (!admitted) {
+ write_file("build/lmcloud_servicebus_region_coverage/result.json", json_stringify({mode:mode,requested_provider:"azurerm",executed_provider:"none",admitted:false,init_ok:true,apply_ok:true,destroy_ok:true,leftovers:0,outputs:{resources_created:[],outputs:{inventory:[]}}},2));
+ println("comparison admission rejected before any provider request");
+} else {
+p = _lmcode_ cli="lmcloud" install="github:lmctl-ai/lmcloud@v0.1.9";
+let dir = ${dir};
+let initialized = tofu.init(dir);
+file_write("build/lmcloud_servicebus_region_coverage/init.ok",str(initialized));
+if(initialized) {
+ let formatted = tofu.fmt(dir);
+ let valid = tofu.validate(dir);
+ file_write("build/lmcloud_servicebus_region_coverage/validate.ok",str(valid));
+ if(valid) {
+  let planned = tofu.plan(dir);
+  file_write("build/lmcloud_servicebus_region_coverage/plan.json",planned.json());
+  let saved = planned.save("build/lmcloud_servicebus_region_coverage/plan.tfplan");
+  let err = tofu.last_error();
+  if(err == "") {
+   let applied = tofu.apply(dir);
+   file_write("build/lmcloud_servicebus_region_coverage/apply.ok",str(applied));
+   if(applied) {
+    let output = tofu.output(dir,"comparison");
+    file_write("build/lmcloud_servicebus_region_coverage/outputs.json",output);
+    let state = tofu.show_state(dir);
+    file_write("build/lmcloud_servicebus_region_coverage/private-state.json",state);
+   }
+  }
+ }
+}
+end _lmcode_
+savedsl(p,"build/lmcloud_servicebus_region_coverage/apply.dslb");
+let applied = system(concat(dsl_cli(p),["--dsl","build/lmcloud_servicebus_region_coverage/apply.dslb"]),180000);
+# Cleanup is launched even when the create VM returned an error or apply returned false.
+c = _lmcode_ cli="lmcloud" install="github:lmctl-ai/lmcloud@v0.1.9";
+let dir = ${dir};
+let destroyed = tofu.destroy(dir);
+file_write("build/lmcloud_servicebus_region_coverage/destroy.ok",str(destroyed));
+let remaining = tofu.state_list(dir);
+file_write("build/lmcloud_servicebus_region_coverage/after-destroy.txt",remaining);
+let after = tofu.show_state(dir);
+file_write("build/lmcloud_servicebus_region_coverage/private-after-state.json",after);
+end _lmcode_
+savedsl(c,"build/lmcloud_servicebus_region_coverage/cleanup.dslb");
+let cleaned = system(concat(dsl_cli(c),["--dsl","build/lmcloud_servicebus_region_coverage/cleanup.dslb"]),180000);
+let init_ok = file_exists("build/lmcloud_servicebus_region_coverage/init.ok") && trim(read_file("build/lmcloud_servicebus_region_coverage/init.ok")) == "true";
+let apply_ok = file_exists("build/lmcloud_servicebus_region_coverage/apply.ok") && trim(read_file("build/lmcloud_servicebus_region_coverage/apply.ok")) == "true";
+let destroy_ok = file_exists("build/lmcloud_servicebus_region_coverage/destroy.ok") && trim(read_file("build/lmcloud_servicebus_region_coverage/destroy.ok")) == "true";
+let state_text = file_exists("build/lmcloud_servicebus_region_coverage/after-destroy.txt") ? trim(read_file("build/lmcloud_servicebus_region_coverage/after-destroy.txt")) : "unknown";
+let output = file_exists("build/lmcloud_servicebus_region_coverage/outputs.json") ? json_parse(read_file("build/lmcloud_servicebus_region_coverage/outputs.json")) : null;
+write_file("build/lmcloud_servicebus_region_coverage/result.json",json_stringify({mode:mode,requested_provider:"azurerm",executed_provider:mode=="offline"?"builtin_fixture":"azurerm",admitted:true,init_ok:init_ok,apply_ok:apply_ok,destroy_ok:destroy_ok,state_addresses:state_text,outputs:output},2));
+assert(applied.code==0 && cleaned.code==0 && init_ok && apply_ok && destroy_ok && state_text=="", "comparison lifecycle failed; private workspace retained");
+println("lmcloud comparison complete: servicebus_region_coverage; mode="+mode);
+}
+println("estimated cost: $0.00");

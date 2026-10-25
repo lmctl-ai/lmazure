@@ -1,0 +1,20 @@
+{
+  "name": "queue_pipeline",
+  "ledger_mode": "readonly",
+  "inventory_kind": "queues",
+  "resource_types": [
+    "Microsoft.Storage/storageAccounts/queueServices"
+  ],
+  "expected_resources": [],
+  "intended_resources": [],
+  "semantic_differences": [
+    "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+    "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+    "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+  ],
+  "native_expected_cost_usd": 0,
+  "tofu_estimated_cost_usd": 0,
+  "admission_cost_usd": 0,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "bad23147c11e7ed0b21bc8d1a6afcbe27c11707b19ce239301a2df821545e858"
+}

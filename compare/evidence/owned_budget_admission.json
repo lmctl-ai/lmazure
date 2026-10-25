@@ -1,0 +1,77 @@
+{
+  "example": "owned_budget_admission",
+  "mode": "offline",
+  "comparison": {
+    "ok": true,
+    "offline": {
+      "resources": {
+        "status": "same",
+        "why": "normalized type, exact name, ownership metadata, and observed metadata fingerprints match",
+        "lmazure": [],
+        "lmcloud": [],
+        "lmazure_errors": [],
+        "lmcloud_errors": []
+      },
+      "outputs": {
+        "status": "same",
+        "why": "normalized output objects match",
+        "lmazure": {
+          "inventory": []
+        },
+        "lmcloud": {
+          "inventory": []
+        }
+      },
+      "time": {
+        "status": "differs",
+        "why": "wall-time differences are informational",
+        "lmazure": 0.17607695600054285,
+        "lmcloud": 0.11548927700005152
+      },
+      "cost": {
+        "status": "same",
+        "why": "cost differences reflect SDK versus conservative provider allowances",
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cleanup": {
+        "lmazure": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        },
+        "lmcloud": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        }
+      },
+      "account": {
+        "status": "same",
+        "why": "valid account fingerprints match"
+      },
+      "provenance": {
+        "status": "differs",
+        "why": "requested or executed providers differ",
+        "requested_provider": [
+          "azurerm",
+          "azurerm"
+        ],
+        "executed_provider": [
+          "azure_sdk_fake",
+          "none"
+        ]
+      }
+    },
+    "live": {
+      "status": "pending",
+      "why": "pending user-approved live records; offline fixtures cannot pass live comparison"
+    },
+    "semantic_differences": [
+      "Native SDK performs imperative create/tag/delete/sweep phases; AzureRM converges to desired metadata and destroys state-owned resources.",
+      "Native estimates count SDK transport attempts; AzureRM estimate reserves 64 provider requests per intended resource and is not a bill."
+    ]
+  }
+}

@@ -1,0 +1,368 @@
+{
+  "example": "public_resource_audit",
+  "mode": "offline",
+  "comparison": {
+    "ok": true,
+    "offline": {
+      "resources": {
+        "status": "same",
+        "why": "normalized type, exact name, ownership metadata, and observed metadata fingerprints match",
+        "lmazure": [],
+        "lmcloud": [],
+        "lmazure_errors": [],
+        "lmcloud_errors": []
+      },
+      "outputs": {
+        "status": "same",
+        "why": "normalized output objects match",
+        "lmazure": {
+          "inventory": [
+            {
+              "location": "eastus",
+              "name": "lmazure-1",
+              "tagged": true,
+              "type": "Microsoft.Compute/virtualMachines"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-10",
+              "tagged": true,
+              "type": "Microsoft.KeyVault/vaults"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-13",
+              "tagged": true,
+              "type": "Microsoft.ServiceBus/namespaces"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-16",
+              "tagged": true,
+              "type": "Microsoft.Network/routeTables"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-19",
+              "tagged": true,
+              "type": "Microsoft.Web/serverfarms"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-22",
+              "tagged": true,
+              "type": "Microsoft.ContainerRegistry/registries"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-4",
+              "tagged": true,
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-7",
+              "tagged": true,
+              "type": "Microsoft.Web/sites"
+            },
+            {
+              "location": "westeurope",
+              "name": "default",
+              "tagged": false,
+              "type": "Microsoft.Storage/storageAccounts/queueServices"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-12",
+              "tagged": false,
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-15",
+              "tagged": false,
+              "type": "Microsoft.Network/publicIPAddresses"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-18",
+              "tagged": false,
+              "type": "Microsoft.Insights/metricAlerts"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-21",
+              "tagged": false,
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-24",
+              "tagged": false,
+              "type": "Microsoft.DocumentDB/databaseAccounts"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-3",
+              "tagged": false,
+              "type": "Microsoft.Network/virtualNetworks"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-9",
+              "tagged": false,
+              "type": "Microsoft.Network/dnsZones"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-11",
+              "tagged": true,
+              "type": "Microsoft.ContainerService/managedClusters"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-14",
+              "tagged": true,
+              "type": "Microsoft.Network/networkSecurityGroups"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-17",
+              "tagged": true,
+              "type": "Microsoft.OperationalInsights/workspaces"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-2",
+              "tagged": true,
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-20",
+              "tagged": true,
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-23",
+              "tagged": true,
+              "type": "Microsoft.RecoveryServices/vaults"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-5",
+              "tagged": true,
+              "type": "Microsoft.Sql/servers"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-8",
+              "tagged": true,
+              "type": "Microsoft.Insights/components"
+            }
+          ]
+        },
+        "lmcloud": {
+          "inventory": [
+            {
+              "location": "eastus",
+              "name": "lmazure-1",
+              "tagged": true,
+              "type": "Microsoft.Compute/virtualMachines"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-10",
+              "tagged": true,
+              "type": "Microsoft.KeyVault/vaults"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-13",
+              "tagged": true,
+              "type": "Microsoft.ServiceBus/namespaces"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-16",
+              "tagged": true,
+              "type": "Microsoft.Network/routeTables"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-19",
+              "tagged": true,
+              "type": "Microsoft.Web/serverfarms"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-22",
+              "tagged": true,
+              "type": "Microsoft.ContainerRegistry/registries"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-4",
+              "tagged": true,
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+            },
+            {
+              "location": "eastus",
+              "name": "lmazure-7",
+              "tagged": true,
+              "type": "Microsoft.Web/sites"
+            },
+            {
+              "location": "westeurope",
+              "name": "default",
+              "tagged": false,
+              "type": "Microsoft.Storage/storageAccounts/queueServices"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-12",
+              "tagged": false,
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-15",
+              "tagged": false,
+              "type": "Microsoft.Network/publicIPAddresses"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-18",
+              "tagged": false,
+              "type": "Microsoft.Insights/metricAlerts"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-21",
+              "tagged": false,
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-24",
+              "tagged": false,
+              "type": "Microsoft.DocumentDB/databaseAccounts"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-3",
+              "tagged": false,
+              "type": "Microsoft.Network/virtualNetworks"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-9",
+              "tagged": false,
+              "type": "Microsoft.Network/dnsZones"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-11",
+              "tagged": true,
+              "type": "Microsoft.ContainerService/managedClusters"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-14",
+              "tagged": true,
+              "type": "Microsoft.Network/networkSecurityGroups"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-17",
+              "tagged": true,
+              "type": "Microsoft.OperationalInsights/workspaces"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-2",
+              "tagged": true,
+              "type": "Microsoft.Storage/storageAccounts"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-20",
+              "tagged": true,
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-23",
+              "tagged": true,
+              "type": "Microsoft.RecoveryServices/vaults"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-5",
+              "tagged": true,
+              "type": "Microsoft.Sql/servers"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-8",
+              "tagged": true,
+              "type": "Microsoft.Insights/components"
+            }
+          ]
+        }
+      },
+      "time": {
+        "status": "differs",
+        "why": "wall-time differences are informational",
+        "lmazure": 0.16473213300014322,
+        "lmcloud": 0.2183028439994814
+      },
+      "cost": {
+        "status": "same",
+        "why": "cost differences reflect SDK versus conservative provider allowances",
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cleanup": {
+        "lmazure": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        },
+        "lmcloud": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        }
+      },
+      "account": {
+        "status": "same",
+        "why": "valid account fingerprints match"
+      },
+      "provenance": {
+        "status": "same offline fixture intents",
+        "why": "native SDK fakes and an executed builtin-provider fixture plan were compared; this is not live AzureRM equivalence",
+        "requested_provider": [
+          "azurerm",
+          "azurerm"
+        ],
+        "executed_provider": [
+          "azure_sdk_fake",
+          "builtin_fixture"
+        ]
+      }
+    },
+    "live": {
+      "status": "pending",
+      "why": "pending user-approved live records; offline fixtures cannot pass live comparison"
+    },
+    "semantic_differences": [
+      "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+      "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+      "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+    ]
+  }
+}

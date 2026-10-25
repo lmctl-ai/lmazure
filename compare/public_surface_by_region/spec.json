@@ -1,0 +1,41 @@
+{
+  "name": "public_surface_by_region",
+  "ledger_mode": "readonly",
+  "inventory_kind": "resources",
+  "resource_types": [
+    "Microsoft.Compute/virtualMachines",
+    "Microsoft.Storage/storageAccounts",
+    "Microsoft.Network/virtualNetworks",
+    "Microsoft.ManagedIdentity/userAssignedIdentities",
+    "Microsoft.Sql/servers",
+    "Microsoft.Storage/storageAccounts/queueServices",
+    "Microsoft.Web/sites",
+    "Microsoft.Insights/components",
+    "Microsoft.Network/dnsZones",
+    "Microsoft.KeyVault/vaults",
+    "Microsoft.ContainerService/managedClusters",
+    "Microsoft.ServiceBus/namespaces",
+    "Microsoft.Network/networkSecurityGroups",
+    "Microsoft.Network/publicIPAddresses",
+    "Microsoft.Network/routeTables",
+    "Microsoft.OperationalInsights/workspaces",
+    "Microsoft.Insights/metricAlerts",
+    "Microsoft.Web/serverfarms",
+    "Microsoft.DBforPostgreSQL/flexibleServers",
+    "Microsoft.ContainerRegistry/registries",
+    "Microsoft.RecoveryServices/vaults",
+    "Microsoft.DocumentDB/databaseAccounts"
+  ],
+  "expected_resources": [],
+  "intended_resources": [],
+  "semantic_differences": [
+    "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+    "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+    "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+  ],
+  "native_expected_cost_usd": 0,
+  "tofu_estimated_cost_usd": 0,
+  "admission_cost_usd": 0,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "efae163c3b44a9f2496f3dbbdc4dd07c5e9299bda75cb8f61179198096f8c40b"
+}

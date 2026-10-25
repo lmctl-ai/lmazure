@@ -1,0 +1,140 @@
+{
+  "example": "network_topology",
+  "mode": "offline",
+  "comparison": {
+    "ok": true,
+    "offline": {
+      "resources": {
+        "status": "same",
+        "why": "normalized type, exact name, ownership metadata, and observed metadata fingerprints match",
+        "lmazure": [],
+        "lmcloud": [],
+        "lmazure_errors": [],
+        "lmcloud_errors": []
+      },
+      "outputs": {
+        "status": "same",
+        "why": "normalized output objects match",
+        "lmazure": {
+          "inventory": [
+            {
+              "location": "eastus",
+              "name": "lmazure-16",
+              "tagged": true,
+              "type": "Microsoft.Network/routeTables"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-15",
+              "tagged": false,
+              "type": "Microsoft.Network/publicIPAddresses"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-3",
+              "tagged": false,
+              "type": "Microsoft.Network/virtualNetworks"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-9",
+              "tagged": false,
+              "type": "Microsoft.Network/dnsZones"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-14",
+              "tagged": true,
+              "type": "Microsoft.Network/networkSecurityGroups"
+            }
+          ]
+        },
+        "lmcloud": {
+          "inventory": [
+            {
+              "location": "eastus",
+              "name": "lmazure-16",
+              "tagged": true,
+              "type": "Microsoft.Network/routeTables"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-15",
+              "tagged": false,
+              "type": "Microsoft.Network/publicIPAddresses"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-3",
+              "tagged": false,
+              "type": "Microsoft.Network/virtualNetworks"
+            },
+            {
+              "location": "westeurope",
+              "name": "lmazure-9",
+              "tagged": false,
+              "type": "Microsoft.Network/dnsZones"
+            },
+            {
+              "location": "westus2",
+              "name": "lmazure-14",
+              "tagged": true,
+              "type": "Microsoft.Network/networkSecurityGroups"
+            }
+          ]
+        }
+      },
+      "time": {
+        "status": "differs",
+        "why": "wall-time differences are informational",
+        "lmazure": 0.17528535699966596,
+        "lmcloud": 0.21507521500006987
+      },
+      "cost": {
+        "status": "same",
+        "why": "cost differences reflect SDK versus conservative provider allowances",
+        "lmazure": 0,
+        "lmcloud": 0
+      },
+      "cleanup": {
+        "lmazure": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        },
+        "lmcloud": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        }
+      },
+      "account": {
+        "status": "same",
+        "why": "valid account fingerprints match"
+      },
+      "provenance": {
+        "status": "same offline fixture intents",
+        "why": "native SDK fakes and an executed builtin-provider fixture plan were compared; this is not live AzureRM equivalence",
+        "requested_provider": [
+          "azurerm",
+          "azurerm"
+        ],
+        "executed_provider": [
+          "azure_sdk_fake",
+          "builtin_fixture"
+        ]
+      }
+    },
+    "live": {
+      "status": "pending",
+      "why": "pending user-approved live records; offline fixtures cannot pass live comparison"
+    },
+    "semantic_differences": [
+      "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+      "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+      "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+    ]
+  }
+}

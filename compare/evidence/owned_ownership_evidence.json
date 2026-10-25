@@ -1,0 +1,91 @@
+{
+  "example": "owned_ownership_evidence",
+  "mode": "offline",
+  "comparison": {
+    "ok": true,
+    "offline": {
+      "resources": {
+        "status": "same",
+        "why": "normalized type, exact name, ownership metadata, and observed metadata fingerprints match",
+        "lmazure": [
+          {
+            "type": "azurerm_storage_queue",
+            "name": "lmazure-0ed438429b0b-ownership-evidence",
+            "owner": "0ed438429b0b",
+            "metadata_sha256": "e0d1a4580d4f8d9b0c787f5c7daa9a8d42fa13cb76da324c55bd056b1d621305"
+          }
+        ],
+        "lmcloud": [
+          {
+            "type": "azurerm_storage_queue",
+            "name": "lmazure-0ed438429b0b-ownership-evidence",
+            "owner": "0ed438429b0b",
+            "metadata_sha256": "e0d1a4580d4f8d9b0c787f5c7daa9a8d42fa13cb76da324c55bd056b1d621305"
+          }
+        ],
+        "lmazure_errors": [],
+        "lmcloud_errors": []
+      },
+      "outputs": {
+        "status": "same",
+        "why": "normalized output objects match",
+        "lmazure": {
+          "inventory": []
+        },
+        "lmcloud": {
+          "inventory": []
+        }
+      },
+      "time": {
+        "status": "differs",
+        "why": "wall-time differences are informational",
+        "lmazure": 0.1649108370002068,
+        "lmcloud": 0.2177554730005795
+      },
+      "cost": {
+        "status": "differs",
+        "why": "cost differences reflect SDK versus conservative provider allowances",
+        "lmazure": 0.0005,
+        "lmcloud": 0.0064
+      },
+      "cleanup": {
+        "lmazure": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        },
+        "lmcloud": {
+          "status": "same",
+          "why": "cleanup reported zero leftovers",
+          "count": 0,
+          "ok": true
+        }
+      },
+      "account": {
+        "status": "same",
+        "why": "valid account fingerprints match"
+      },
+      "provenance": {
+        "status": "same offline fixture intents",
+        "why": "native SDK fakes and an executed builtin-provider fixture plan were compared; this is not live AzureRM equivalence",
+        "requested_provider": [
+          "azurerm",
+          "azurerm"
+        ],
+        "executed_provider": [
+          "azure_sdk_fake",
+          "builtin_fixture"
+        ]
+      }
+    },
+    "live": {
+      "status": "pending",
+      "why": "pending user-approved live records; offline fixtures cannot pass live comparison"
+    },
+    "semantic_differences": [
+      "Native SDK performs imperative create/tag/delete/sweep phases; AzureRM converges to desired metadata and destroys state-owned resources.",
+      "Native estimates count SDK transport attempts; AzureRM estimate reserves 64 provider requests per intended resource and is not a bill."
+    ]
+  }
+}

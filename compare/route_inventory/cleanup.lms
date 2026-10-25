@@ -1,0 +1,26 @@
+# AzureRM equivalent plus an explicit builtin-provider offline fixture; never authenticates by default.
+mkdir("build"); mkdir("build/lmcloud_route_inventory"); mkdir("build/lmcloud_route_inventory/azure"); mkdir("build/lmcloud_route_inventory/offline");
+let mode = getenv("LMAZURE_COMPARE_MODE", "offline");
+assert(mode == "offline" || mode == "live");
+let run_id = getenv("LMAZURE_COMPARE_RUN_ID", "0123456789ab");
+let dir = "build/lmcloud_route_inventory/offline";
+let cap = 0.05;
+let admitted = true;
+if (mode == "live") {
+  assert(getenv("CI", "") != "true", "live comparison is forbidden in CI");
+  assert(getenv("LMAZURE_COMPARE_LIVE_APPROVED", "") == "1" && getenv("LMAZURE_LIVE", "") == "1", "user-approved local live testing is required");
+  let auth = json_parse(read_file(getenv("LMAZURE_COMPARE_AUTH_FILE", "missing-authorization.json")));
+  assert(getstr(auth,"example") == "route_inventory" && getstr(auth,"run_id") == run_id && getbool(auth,"preflight_complete"), "use compare/run.sh for ownership preflight");
+  
+  dir = "build/lmcloud_route_inventory/azure";
+}
+dir = mode == "live" ? "build/lmcloud_route_inventory/azure" : "build/lmcloud_route_inventory/offline";
+c = _lmcode_ cli="lmcloud" install="github:lmctl-ai/lmcloud@v0.1.9";
+let dir = ${dir};
+let destroyed = tofu.destroy(dir);
+file_write("build/lmcloud_route_inventory/destroy.ok",str(destroyed));
+file_write("build/lmcloud_route_inventory/after-destroy.txt",tofu.state_list(dir));
+end _lmcode_
+savedsl(c,"build/lmcloud_route_inventory/recovery.dslb");
+r = system(concat(dsl_cli(c),["--dsl","build/lmcloud_route_inventory/recovery.dslb"]),180000);
+assert(r.code==0);

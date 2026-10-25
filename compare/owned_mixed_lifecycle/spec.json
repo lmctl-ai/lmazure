@@ -1,0 +1,59 @@
+{
+  "name": "owned_mixed_lifecycle",
+  "ledger_mode": "owned",
+  "inventory_kind": null,
+  "resource_types": [],
+  "expected_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_container",
+      "native_kind": "blob",
+      "suffix": "mixed-life-blob",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "mixed-life"
+      }
+    },
+    {
+      "logical_name": "owned_1",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "mixed-life-queue",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "mixed-life"
+      }
+    }
+  ],
+  "intended_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_container",
+      "native_kind": "blob",
+      "suffix": "mixed-life-blob",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "mixed-life"
+      }
+    },
+    {
+      "logical_name": "owned_1",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "mixed-life-queue",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "mixed-life"
+      }
+    }
+  ],
+  "semantic_differences": [
+    "Native SDK performs imperative create/tag/delete/sweep phases; AzureRM converges to desired metadata and destroys state-owned resources.",
+    "Native estimates count SDK transport attempts; AzureRM estimate reserves 64 provider requests per intended resource and is not a bill."
+  ],
+  "native_expected_cost_usd": 0.001,
+  "tofu_estimated_cost_usd": 0.0128,
+  "admission_cost_usd": 0.0128,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "c50afdebdbb0d2af39ac0b6c17fb9ca1193a54f27f0fa50da8b2955840f83d3a"
+}

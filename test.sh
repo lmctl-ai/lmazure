@@ -10,3 +10,7 @@ timeout 300 dotnet restore src/LmAzure/LmAzure.csproj --locked-mode
 timeout 180 dotnet build src/LmAzure/LmAzure.csproj -c Release -p:PublishAot=false --no-restore -warnaserror
 timeout 180 python3 scripts/test-cli.py
 timeout 30 python3 scripts/test-examples.py
+
+timeout 30 python3 scripts/test-compare-configs.py
+timeout 30 python3 scripts/test-compare-results.py
+timeout 30 python3 scripts/test-comparison-harness.py

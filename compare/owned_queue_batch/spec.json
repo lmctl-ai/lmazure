@@ -1,0 +1,59 @@
+{
+  "name": "owned_queue_batch",
+  "ledger_mode": "owned",
+  "inventory_kind": null,
+  "resource_types": [],
+  "expected_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "batch-a",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "batch"
+      }
+    },
+    {
+      "logical_name": "owned_1",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "batch-b",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "batch"
+      }
+    }
+  ],
+  "intended_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "batch-a",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "batch"
+      }
+    },
+    {
+      "logical_name": "owned_1",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "batch-b",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "batch"
+      }
+    }
+  ],
+  "semantic_differences": [
+    "Native SDK performs imperative create/tag/delete/sweep phases; AzureRM converges to desired metadata and destroys state-owned resources.",
+    "Native estimates count SDK transport attempts; AzureRM estimate reserves 64 provider requests per intended resource and is not a bill."
+  ],
+  "native_expected_cost_usd": 0.001,
+  "tofu_estimated_cost_usd": 0.0128,
+  "admission_cost_usd": 0.0128,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "132f280e5efd1e2bfa8d6f021d88ea3b3f6f9b2a7ac8f9fa4a5193e83aacff44"
+}

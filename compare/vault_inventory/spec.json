@@ -1,0 +1,20 @@
+{
+  "name": "vault_inventory",
+  "ledger_mode": "readonly",
+  "inventory_kind": "vaults",
+  "resource_types": [
+    "Microsoft.KeyVault/vaults"
+  ],
+  "expected_resources": [],
+  "intended_resources": [],
+  "semantic_differences": [
+    "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+    "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+    "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+  ],
+  "native_expected_cost_usd": 0,
+  "tofu_estimated_cost_usd": 0,
+  "admission_cost_usd": 0,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "db570cf1befe12d008187614d303593a099aeca14a882bfedbbf4168d8bda8b7"
+}

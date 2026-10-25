@@ -31,7 +31,7 @@ assert 'LMAZURE_MAX_MEMORY_MB' in run('--help').stdout
 assert 'Azure.Core' in run('--notices').stdout
 summary=run('--self-test').stdout
 match=re.search(r'fake-transport checks: (\d+) passed',summary)
-assert match and int(match[1])>=116,summary
+assert match and int(match[1])>=120,summary
 for kind in ['resources','compute','storage','network','identity','database','queues','serverless','monitoring','dns','vaults','containers','functions','servicebus','nsg','public_ips','routes','logs','alerts','app_plans','postgresql','registries','backup','cosmos']:
     rows=list(csv.reader(io.StringIO(run('--inventory',kind).stdout)))
     assert len(rows)>1 and rows[0][:2]==['name','kind'],kind

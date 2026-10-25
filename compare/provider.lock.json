@@ -1,0 +1,7 @@
+{
+  "provider": "hashicorp/azurerm",
+  "version": "5.10.0",
+  "source": "https://registry.terraform.io/providers/hashicorp/azurerm/5.10.0",
+  "verified": "official Terraform Registry, 2026-10-25",
+  "live_tested": false
+}

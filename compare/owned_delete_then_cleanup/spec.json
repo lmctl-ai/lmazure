@@ -1,0 +1,39 @@
+{
+  "name": "owned_delete_then_cleanup",
+  "ledger_mode": "owned",
+  "inventory_kind": null,
+  "resource_types": [],
+  "expected_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "delete-then-cleanup",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "delete-then-cleanup"
+      }
+    }
+  ],
+  "intended_resources": [
+    {
+      "logical_name": "owned_0",
+      "tofu_type": "azurerm_storage_queue",
+      "native_kind": "queue",
+      "suffix": "delete-then-cleanup",
+      "metadata": {
+        "lmazure_test": "$run_id",
+        "gallery": "delete-then-cleanup"
+      }
+    }
+  ],
+  "semantic_differences": [
+    "Native SDK performs imperative create/tag/delete/sweep phases; AzureRM converges to desired metadata and destroys state-owned resources.",
+    "Native estimates count SDK transport attempts; AzureRM estimate reserves 64 provider requests per intended resource and is not a bill."
+  ],
+  "native_expected_cost_usd": 0.0005,
+  "tofu_estimated_cost_usd": 0.0064,
+  "admission_cost_usd": 0.0064,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "59c0cf25e58a1d42309f8016051fdcbcd78e3cefa7b84e473caf2052d2f38b43"
+}

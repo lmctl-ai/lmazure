@@ -159,8 +159,8 @@ public sealed class AzureSession : IDisposable
         if (!name.StartsWith("lmazure-", StringComparison.Ordinal)) return false;
         try {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
-            if (kind == "blob") { var p = await BlobContainer(name).GetPropertiesAsync(cancellationToken: timeout.Token); return p.Value.Metadata.TryGetValue("lmazure_test", out var value) && value == runId; }
-            var q = await Queue(name).GetPropertiesAsync(cancellationToken: timeout.Token); return q.Value.Metadata.TryGetValue("lmazure_test", out var queueValue) && queueValue == runId;
+            if (kind == "blob") { var p = await BlobContainer(name).GetPropertiesAsync(cancellationToken: timeout.Token); CostLedger.ObserveMetadata(p.Value.Metadata); return p.Value.Metadata.TryGetValue("lmazure_test", out var value) && value == runId; }
+            var q = await Queue(name).GetPropertiesAsync(cancellationToken: timeout.Token); CostLedger.ObserveMetadata(q.Value.Metadata); return q.Value.Metadata.TryGetValue("lmazure_test", out var queueValue) && queueValue == runId;
         } catch (RequestFailedException) { return false; }
     }
     private async Task DeleteOwnedAsync(string kind, string name, string runId)
@@ -193,7 +193,7 @@ public sealed class AzureSession : IDisposable
     private sealed class RequestCounter { public int ManagementRequests; public void Record(HttpRequestMessage request) { if (request.RequestUri?.Host.Equals("management.azure.com", StringComparison.OrdinalIgnoreCase) == true) Interlocked.Increment(ref ManagementRequests); } }
     private sealed class FakeAzureHandler : HttpMessageHandler
     {
-        private readonly Dictionary<string, string> _metadata = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Dictionary<string, string>> _metadata = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _created = new(StringComparer.OrdinalIgnoreCase);
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
@@ -212,20 +212,20 @@ public sealed class AzureSession : IDisposable
             var resourceName = path.Trim('/').Split('/').LastOrDefault() ?? "";
             if (request.Method == HttpMethod.Put)
             {
-                IEnumerable<string>? metadata = null;
-                if (request.Headers.TryGetValues("x-ms-meta-lmazure_test", out var headerMetadata)) metadata = headerMetadata;
-                else if (request.Content?.Headers.TryGetValues("x-ms-meta-lmazure_test", out var contentMetadata) == true) metadata = contentMetadata;
+                var metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var header in request.Headers.Concat(request.Content?.Headers.AsEnumerable() ?? []))
+                    if (header.Key.StartsWith("x-ms-meta-", StringComparison.OrdinalIgnoreCase)) metadata[header.Key[10..].ToLowerInvariant()] = header.Value.Single();
                 var metadataUpdate = request.RequestUri?.Query.Contains("comp=metadata", StringComparison.OrdinalIgnoreCase) ?? false;
-                if (metadataUpdate) { if (!_created.Contains(resourceName)) return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound)); if (metadata != null) _metadata[resourceName] = metadata.Single(); }
+                if (metadataUpdate) { if (!_created.Contains(resourceName)) return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound)); _metadata[resourceName] = metadata; }
                 else if (!_created.Add(resourceName)) return Task.FromResult(new HttpResponseMessage(request.RequestUri!.Host == "queue.mock" ? HttpStatusCode.NoContent : HttpStatusCode.Conflict));
-                if (metadata != null) _metadata[resourceName] = metadata.Single();
+                _metadata[resourceName] = metadata;
             }
             if (request.Method == HttpMethod.Delete) { if (!_created.Remove(resourceName)) return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound)); _metadata.Remove(resourceName); }
             if ((request.Method == HttpMethod.Get || request.Method == HttpMethod.Head) && !_created.Contains(resourceName)) return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
             var status = (request.Method == HttpMethod.Get || request.Method == HttpMethod.Head) ? HttpStatusCode.OK : request.Method == HttpMethod.Delete ? (request.RequestUri!.Host == "blob.mock" ? HttpStatusCode.Accepted : HttpStatusCode.NoContent) : request.Method == HttpMethod.Put && (request.RequestUri?.Query.Contains("comp=metadata", StringComparison.OrdinalIgnoreCase) ?? false) ? (request.RequestUri!.Host == "queue.mock" ? HttpStatusCode.NoContent : HttpStatusCode.OK) : HttpStatusCode.Created;
             var response = new HttpResponseMessage(status) { Content = new StringContent("{}", Encoding.UTF8, "application/json") };
             if (request.Method == HttpMethod.Head) { response.Headers.ETag = new EntityTagHeaderValue("\"mock\""); response.Headers.TryAddWithoutValidation("x-ms-blob-type", "BlockBlob"); response.Headers.TryAddWithoutValidation("x-ms-server-encrypted", "true"); response.Headers.TryAddWithoutValidation("x-ms-request-id", "mock"); response.Headers.TryAddWithoutValidation("x-ms-version", "2023-11-03"); response.Headers.TryAddWithoutValidation("Last-Modified", DateTimeOffset.UtcNow.ToString("R")); response.Content.Headers.ContentLength = 0; }
-            if ((request.Method == HttpMethod.Get || request.Method == HttpMethod.Head) && _metadata.TryGetValue(resourceName, out var owned)) response.Headers.TryAddWithoutValidation("x-ms-meta-lmazure_test", owned);
+            if ((request.Method == HttpMethod.Get || request.Method == HttpMethod.Head) && _metadata.TryGetValue(resourceName, out var owned)) foreach (var pair in owned) response.Headers.TryAddWithoutValidation("x-ms-meta-" + pair.Key, pair.Value);
             return Task.FromResult(response);
         }
     }

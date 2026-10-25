@@ -87,6 +87,28 @@ jobs:
           LMAZURE_LMSCRIPT=lmscript python3 scripts/test-examples.py
           if [[ "$RUNNER_OS" == Linux ]]; then python3 scripts/check-linux-linkage.py artifacts/standalone/lmazure; fi
           cp "artifacts/standalone/lmazure$suffix" "dist/lmazure-${{ matrix.name }}$suffix"
+      - name: Offline native versus lmcloud comparisons (no Azure provider)
+        timeout-minutes: 20
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          timeout 180 npm install -g @lmctl-ai/lmctl@0.2.420
+          suffix=''
+          if [[ "$RUNNER_OS" == Windows ]]; then suffix=.exe; fi
+          mkdir -p build/lmcloud-tool
+          timeout 240 gh release download v0.1.9 --repo lmctl-ai/lmcloud --pattern "lmcloud-${{ matrix.name }}$suffix" --pattern SHA256SUMS --dir build/lmcloud-tool
+          python3 - <<'PYCI'
+          from pathlib import Path
+          import hashlib
+          root=Path('build/lmcloud-tool')
+          for file in root.glob('lmcloud-*'):
+              checks={line.split()[1]:line.split()[0] for line in (root/'SHA256SUMS').read_text().splitlines()}
+              assert hashlib.sha256(file.read_bytes()).hexdigest()==checks[file.name]
+              file.chmod(0o755)
+          PYCI
+          export PATH="$PWD/artifacts/standalone:$PATH"
+          timeout 900 python3 compare/run.py all --offline --native-binary "$PWD/artifacts/standalone/lmazure$suffix" --lmcloud-binary "$PWD/build/lmcloud-tool/lmcloud-${{ matrix.name }}$suffix" --output "$RUNNER_TEMP/lmazure-compare"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: lmazure-${{ matrix.name }}
@@ -112,4 +134,4 @@ jobs:
           cd dist
           test "$(find . -maxdepth 1 -type f -name 'lmazure-*' | wc -l)" -eq 5
           sha256sum lmazure-* > SHA256SUMS
-          timeout 240 gh release create "$GITHUB_REF_NAME" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME — READY TO TEST" --notes 'Per-example cost ledgers, $0.05 default estimate cap and $0.25 process ceiling. All 72 illustrated examples print estimates and write cost evidence; expanded service metadata and cleanup coverage. Five NativeAOT executables, fake-transport validated only; no Azure credentials or OIDC in CI. No real Azure subscription has been accessed. Live operations require explicit user opt-in; see docs/LIVE_TESTING.md. Linux requires glibc 2.35 or newer.'
+          timeout 240 gh release create "$GITHUB_REF_NAME" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME — READY TO TEST" --notes 'Per-example cost ledgers, $0.05 default estimate cap and $0.25 process ceiling. All 72 native examples have lmcloud equivalents and offline comparison evidence; live Azure comparisons are pending user testing. Five NativeAOT executables, fake-transport validated only; no Azure credentials or OIDC in CI. No real Azure subscription has been accessed. Live operations require explicit user opt-in; see docs/LIVE_TESTING.md. Linux requires glibc 2.35 or newer.'

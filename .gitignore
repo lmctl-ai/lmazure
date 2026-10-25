@@ -15,3 +15,10 @@ data/
 
 # Generated fake cost evidence; curated gallery evidence is committed explicitly.
 evidence/fake-cost-*.json
+
+# Private comparison state/logs may contain subscription IDs; never commit them.
+/compare/runs/
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan

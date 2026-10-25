@@ -1,0 +1,20 @@
+{
+  "name": "dns_inventory",
+  "ledger_mode": "readonly",
+  "inventory_kind": "dns",
+  "resource_types": [
+    "Microsoft.Network/dnsZones"
+  ],
+  "expected_resources": [],
+  "intended_resources": [],
+  "semantic_differences": [
+    "Offline runs use a builtin-provider fixture plan, not an AzureRM plan.",
+    "AzureRM exposes common metadata but not SDK-created age, synthetic access/encryption flags, or function Kind.",
+    "Live AzureRM queries the explicitly curated type set; native all-resource inventory can include additional provider types."
+  ],
+  "native_expected_cost_usd": 0,
+  "tofu_estimated_cost_usd": 0,
+  "admission_cost_usd": 0,
+  "cost_cap_usd": 0.05,
+  "source_sha256": "998312245811eaf0adc6921140915e23ca4bf8c41c74133a45a1776ec39e7180"
+}
