@@ -1,9 +1,10 @@
 {
   "lmcloud": "0.1.9",
-  "binary_sha256": "dc9ce53de1a18a9958bcf1bc2e1445be4d33e7e671b5be129582e55447ebd739",
+  "binary_sha256": "b1d7b99f1c53a27d145cb021cb8c8bdd8b8dbe6d4a689b94bd4870927b831c9d",
   "fixture_provider": "builtin terraform_data",
   "network": "offline",
   "release_tag": "v0.1.9",
   "reported_version": "lmcloud 0.1.9 (opentofu 1.13.2)",
-  "source": "https://github.com/lmctl-ai/lmcloud/releases/tag/v0.1.9"
+  "source": "https://github.com/lmctl-ai/lmcloud/releases/tag/v0.1.9",
+  "verified_utc": "2026-10-25"
 }
