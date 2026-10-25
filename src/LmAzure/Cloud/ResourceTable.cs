@@ -12,7 +12,7 @@ public sealed class ResourceTable
     public int Count() => _rows.Count;
     public int Columns() => StableColumns.Length;
     public string Column(int index) => StableColumns[index];
-    public string Text(int row, int column) => Convert.ToString(_rows[row][column], CultureInfo.InvariantCulture) ?? "";
+    public string Text(int row, int column) => _rows[row][column] switch { null => "", bool b => b ? "true" : "false", _ => Convert.ToString(_rows[row][column], CultureInfo.InvariantCulture) ?? "" };
     public double Number(int row, int column) => _rows[row][column] is null ? throw new InvalidOperationException("resource value is unknown") : Convert.ToDouble(_rows[row][column], CultureInfo.InvariantCulture);
     public void Csv(string path) => File.WriteAllText(path, CsvString(), new UTF8Encoding(false));
     public void Json(string path) => File.WriteAllText(path, JsonString(), new UTF8Encoding(false));

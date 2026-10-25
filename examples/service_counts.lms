@@ -26,7 +26,7 @@ write_file("data/service_counts_derived.csv", "service kind,count\ncompute," + s
 assert(compute + storage + network + other == 12);
 p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
 plot.png("images/service_counts.png", 900, 560);
-plot.cmd("set title 'MOCK service inventory overview'; set xlabel 'Service kind'; set ylabel 'Resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/service_counts_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.cmd("set title 'MOCK service inventory overview'; set xlabel 'Service kind'; set ylabel 'Resources'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/service_counts_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
 plot.close();
 end _dsl_
 savedsl(p, "build/service_counts_plot.dslb");

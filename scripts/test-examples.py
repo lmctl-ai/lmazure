@@ -3,6 +3,7 @@
 from pathlib import Path
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 
@@ -37,6 +38,7 @@ for image in images:
 
 compiler = os.environ.get("LMAZURE_LMSCRIPT")
 if compiler:
+    compiler_path = shutil.which(compiler) or compiler
     env = os.environ.copy()
     env["LMAZURE_LIVE"] = "0"
     with tempfile.TemporaryDirectory(prefix="lmazure-local-examples-") as source_dir:
@@ -52,7 +54,7 @@ if compiler:
             local_examples[example] = local
         for example in examples:
             with tempfile.TemporaryDirectory(prefix="lmazure-gallery-") as scratch:
-                subprocess.run([compiler, str(local_examples[example])], cwd=scratch, env=env,
+                subprocess.run([compiler_path, str(local_examples[example])], cwd=scratch, env=env,
                                check=True, timeout=int(os.environ.get("LMAZURE_EXAMPLE_TIMEOUT", "120")))
     print(f"executed {len(examples)} examples in an empty directory")
 else:

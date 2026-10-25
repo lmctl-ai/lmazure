@@ -24,9 +24,13 @@ for (i in range(1, rows.len())) {
 }
 write_file("data/age_distribution_derived.csv", "age bucket,count\n< 1 day," + str(fresh) + "\n1-7 days," + str(recent) + "\n8-30 days," + str(aging) + "\n> 30 days," + str(stale) + "\n");
 assert(fresh + recent + aging + stale == 12);
+assert(fresh == 3);
+assert(recent == 3);
+assert(aging == 3);
+assert(stale == 3);
 p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
 plot.png("images/age_distribution.png", 900, 560);
-plot.cmd("set title 'MOCK resource age distribution'; set xlabel 'Age bucket'; set ylabel 'Resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/age_distribution_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.cmd("set title 'MOCK resource age distribution'; set xlabel 'Age bucket'; set ylabel 'Resources'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/age_distribution_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
 plot.close();
 end _dsl_
 savedsl(p, "build/age_distribution_plot.dslb");

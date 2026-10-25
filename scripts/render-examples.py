@@ -9,6 +9,7 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 compiler = os.environ.get("LMAZURE_LMSCRIPT", "lmscript")
 timeout = int(os.environ.get("LMAZURE_EXAMPLE_TIMEOUT", "120"))
+compiler_path = shutil.which(compiler) or compiler
 if os.environ.get("LMAZURE_LIVE") == "1":
     raise SystemExit("refusing to render gallery with LMAZURE_LIVE=1")
 
@@ -22,10 +23,10 @@ if os.environ.get("LMAZURE_LOCAL") == "1":
                 text = text.replace(f' install="github:lmctl-ai/{host}@latest"', "")
             local = source / example.name
             local.write_text(text, encoding="utf-8")
-            subprocess.run([compiler, str(local)], cwd=ROOT, check=True, timeout=timeout)
+            subprocess.run([compiler_path, str(local)], cwd=ROOT, check=True, timeout=timeout)
 else:
     for example in examples:
-        subprocess.run([compiler, str(example)], cwd=ROOT, check=True, timeout=timeout)
+        subprocess.run([compiler_path, str(example)], cwd=ROOT, check=True, timeout=timeout)
 
 (ROOT / "docs/images").mkdir(parents=True, exist_ok=True)
 for image in sorted((ROOT / "images").glob("*.png")):

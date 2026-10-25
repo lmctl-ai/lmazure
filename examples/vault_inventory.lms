@@ -13,7 +13,7 @@ assert(rows[0].len() == 10);
 assert(rows.len() == 2);
 p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
 plot.png("images/vault_inventory.png", 900, 560);
-plot.cmd("set title 'MOCK Vault age horizon'; set xlabel 'Resource'; set ylabel 'Age hours'; set xtics rotate by -90 right font ',8'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/vault_inventory.csv' every ::1 using 6:xtic(1) title 'mock age horizon'");
+plot.cmd("set title 'MOCK Vault age horizon'; set xlabel 'Resource'; set ylabel 'Age hours'; set xtics rotate by -90 right font ',8'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/vault_inventory.csv' every ::1 using 6:xtic(1) title 'mock age horizon'");
 plot.close();
 end _dsl_
 savedsl(p, "build/vault_inventory_plot.dslb");

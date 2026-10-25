@@ -14,14 +14,16 @@ assert(rows.len() == 13);
 let tagged = 0;
 let untagged = 0;
 for (i in range(1, rows.len())) {
-  if (rows[i][8] == "true") { tagged = tagged + 1; }
+  if (rows[i][8] == true) { tagged = tagged + 1; }
   else { untagged = untagged + 1; }
 }
 write_file("data/tagging_compliance_derived.csv", "tag coverage,count\ntagged," + str(tagged) + "\nuntagged," + str(untagged) + "\n");
 assert(tagged + untagged == 12);
+assert(tagged == 8);
+assert(untagged == 4);
 p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
 plot.png("images/tagging_compliance.png", 900, 560);
-plot.cmd("set title 'MOCK tagging compliance review'; set xlabel 'Tag coverage'; set ylabel 'Resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/tagging_compliance_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.cmd("set title 'MOCK tagging compliance review'; set xlabel 'Tag coverage'; set ylabel 'Resources'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/tagging_compliance_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
 plot.close();
 end _dsl_
 savedsl(p, "build/tagging_compliance_plot.dslb");

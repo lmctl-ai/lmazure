@@ -1,0 +1,2 @@
+# Preserve upstream legal notices verbatim, including their original line endings.
+src/LmAzure/Resources/licenses/** -whitespace

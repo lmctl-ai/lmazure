@@ -16,6 +16,11 @@ public static class CoreSelfTests
         Require(session.Inventory("queues").Count() == 1, "queue inventory filtering"); checks++;
         Require(session.Inventory("dns").Count() == 1, "DNS inventory filtering"); checks++;
         Require(session.Inventory("storage").Count() == 3, "storage inventory filtering"); checks++;
+        var golden = session.Inventory("all"); var publicTrue = 0; var publicFalse = 0; var publicUnknown = 0; var tagged = 0; var ageSum = 0d;
+        for (var i = 0; i < golden.Count(); i++) { var value = golden.Text(i, 6); if (value == "true") publicTrue++; else if (value == "false") publicFalse++; else publicUnknown++; if (golden.Text(i, 8) == "true") tagged++; ageSum += golden.Number(i, 5); }
+        Require(publicTrue == 4 && publicFalse == 4 && publicUnknown == 4, "golden public flags"); checks++;
+        Require(tagged == 8 && Math.Abs(ageSum - 3762d) < 0.001, "golden ages and tags"); checks++;
+        var storage = session.Inventory("storage"); var encryptedTrue = 0; var encryptedFalse = 0; var encryptedUnknown = 0; for (var i = 0; i < storage.Count(); i++) { var value = storage.Text(i, 7); if (value == "true") encryptedTrue++; else if (value == "false") encryptedFalse++; else encryptedUnknown++; } Require(encryptedTrue == 1 && encryptedFalse == 1 && encryptedUnknown == 1, "golden storage encryption flags"); checks++;
         var ledger = Path.Combine(Path.GetTempPath(), "lmazure-selftest-" + Guid.NewGuid().ToString("N") + ".json");
         using (var run = session.BeginRun(ledger))
         {

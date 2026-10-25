@@ -6,11 +6,18 @@ Azure.Storage.Blobs 12.30.1 and Azure.Storage.Queues 12.28.1 are Microsoft
 Azure SDK for .NET packages, MIT licensed. Exact transitive package versions
 and content hashes are recorded in packages.lock.json.
 
+Apache.Arrow 22.1.0 is Apache-2.0 licensed. Its upstream NOTICE is embedded
+at src/LmAzure/Resources/licenses/arrow-NOTICE.txt and was taken from
+apache/arrow-dotnet commit fcc16d879fe3618b2a6806851922c51beb1a3fd2.
+
 The .NET runtime and NativeAOT toolchain are MIT licensed, with third-party
 notices maintained by the dotnet/runtime project. Linux dynamically links to
 the system glibc (LGPL-2.1); glibc is the only permitted dynamic dependency.
 OpenSSL is statically linked on Linux (Apache-2.0/OpenSSL license by version).
 zlib is under the zlib license. Windows/macOS use system cryptographic APIs.
+The GCC static runtime components, when selected by the Linux NativeAOT
+toolchain, are covered by the GCC Runtime Library Exception; no GCC source
+library is linked as a separate application dependency.
 
 Upstream sources: github.com/Azure/azure-sdk-for-net, github.com/dotnet/runtime,
 github.com/lmctl-ai/lmcode-csharp, openssl.org, zlib.net, gnu.org/software/libc.

@@ -11,7 +11,7 @@ case "$(uname -s):$(uname -m)" in
   *) echo 'unsupported native build target' >&2; exit 2 ;;
 esac
 mkdir -p artifacts/native
-options=()
+options=(-p:IlcTreatWarningsAsErrors=true)
 if [[ "$rid" == linux-* ]]; then
   # Prefer the baseline CMake installed with the Linux build prerequisites.
   mkdir -p build/native-tools
@@ -22,4 +22,4 @@ if [[ "$rid" == linux-* ]]; then
   LMAZURE_STATIC_ZLIB="$(gcc -print-file-name=libz.a)"
   [[ -f "$LMAZURE_STATIC_ZLIB" ]] || { echo 'static zlib development archive required' >&2; exit 2; }
 fi
-timeout 1200 dotnet publish src/LmAzure/LmAzure.csproj -r "$rid" -c Release -p:PublishAot=true -p:IlcTreatWarningsAsErrors=true "${options[@]}" -o artifacts/native
+timeout 1200 dotnet publish src/LmAzure/LmAzure.csproj -r "$rid" -c Release -p:PublishAot=true "${options[@]}" -o artifacts/native

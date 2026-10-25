@@ -21,7 +21,7 @@ write_file("data/regional_footprint_derived.csv", "region,count\neastus," + str(
 assert(eastus + other == 12);
 p = _dsl_ cli="lmplot" install="github:lmctl-ai/lmplot@latest";
 plot.png("images/regional_footprint.png", 900, 560);
-plot.cmd("set title 'MOCK regional resource footprint'; set xlabel 'Region'; set ylabel 'Resources'; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/regional_footprint_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
+plot.cmd("set title 'MOCK regional resource footprint'; set xlabel 'Region'; set ylabel 'Resources'; set key outside top center horizontal; set yrange [0:*]; set style data histograms; set style fill solid 0.8; set datafile separator ','; plot 'data/regional_footprint_derived.csv' every ::1 using 2:xtic(1) title 'mock resources'");
 plot.close();
 end _dsl_
 savedsl(p, "build/regional_footprint_plot.dslb");
