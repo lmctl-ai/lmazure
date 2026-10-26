@@ -1,6 +1,6 @@
 # Architecture, build and runtime
 
-`Program.cs` handles CLI/schema/bytecode execution. `Host.cs` binds 24 signatures
+`Program.cs` handles CLI/schema/bytecode execution. `Host.cs` binds 25 signatures
 (schema 2) to `AzureSession`, `AzureRun` and `ResourceTable`. lmcode validates the
 schema hash before execution; preserve registry/schema signature agreement.
 `AzureSession.Mock()` uses real Azure SDK pipelines with in-process HTTP fakes;

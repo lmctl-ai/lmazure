@@ -25,7 +25,7 @@ assert run('--version').stdout.strip()=='lmazure '+(root/'VERSION').read_text().
 schema=json.loads(run('--dsl-schema').stdout)
 assert schema['name']=='lmazure' and schema['dsl.schema']==2
 signatures=run('--dsl-signatures').stdout.splitlines()
-assert len(signatures)==24 and len(set(signatures))==24
+assert len(signatures)==25 and len(set(signatures))==25
 assert 'DefaultAzureCredential' in run('--help').stdout
 assert 'LMAZURE_MAX_MEMORY_MB' in run('--help').stdout
 assert 'Azure.Core' in run('--notices').stdout

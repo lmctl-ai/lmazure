@@ -1,6 +1,6 @@
 # Curated services and API
 
-`src/LmAzure/Host.cs` defines **24 signatures, schema version 2**. Inspect the
+`src/LmAzure/Host.cs` defines **25 signatures, schema version 2**. Inspect the
 actual interface with `lmazure --dsl-schema` and `--dsl-signatures`.
 
 - Functions: `mock()`, `live()` → Session.
