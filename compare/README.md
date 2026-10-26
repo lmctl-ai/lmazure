@@ -109,3 +109,11 @@ review local live evidence before sharing it.
 The harness never calls a billing/Cost Explorer API. Real billing calibration,
 IAM limitations and live provider/RBAC behavior remain user work. See
 [LMCLOUD_ISSUES.md](LMCLOUD_ISSUES.md) for documented lmcloud API/version findings.
+
+
+Live report contract: `user_approved_actual` is the canonical boolean approval
+field. The local approval flags must pass before the runner sets it. Live `same`
+requires both actual-provider reports plus matching resources, metadata, outputs,
+account fingerprints and zero leftovers; approval never overrides a difference.
+Offline fixtures always remain live-pending. See docs/LIVE_TESTING.md; fake
+regression artifacts are unit-test inputs, not live Azure evidence.

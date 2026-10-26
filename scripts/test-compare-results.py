@@ -71,3 +71,28 @@ with tempfile.TemporaryDirectory() as directory:
     expect("pending" in path.read_text(encoding="utf-8"), "RESULTS must state live pending")
 
 print("compare-results checks: 11 passed")
+
+# Simulated live records are unit fixtures only, never actual Azure evidence.
+actual = {**report(a_mode='live', b_mode='live'), 'user_approved_actual': True}
+actual['lmazure'].update(requested_provider='azurerm', executed_provider='azure_sdk_live')
+actual['lmcloud'].update(requested_provider='azurerm', executed_provider='azurerm')
+expect(compare(actual)['live']['status']=='same', 'matching approved live records')
+for approval in (None, False, 'true', 1):
+    unapproved={**actual,'user_approved_actual':approval}
+    expect(compare(unapproved)['live']['status']=='pending' and not compare(unapproved)['ok'], 'approval must be boolean true')
+legacy={**actual,'user_approved_actual':False,'user_approved':True}
+expect(compare(legacy)['live']['status']=='pending' and not compare(legacy)['ok'], 'legacy field cannot grant approval')
+mixed={**actual,'lmcloud':{**actual['lmcloud'],'mode':'offline'}}
+expect(compare(mixed)['live']['status']=='pending' and not compare(mixed)['ok'], 'mixed modes cannot pass live')
+fixture_live={**actual,'lmcloud':{**actual['lmcloud'],'executed_provider':'builtin_fixture'}}
+expect(compare(fixture_live)['live']['status']=='pending' and not compare(fixture_live)['ok'], 'fixture provenance cannot pass as actual live')
+for change in ({'leftovers':1},{'outputs':{'rows':[]}}, {'account_fingerprint':'other'}):
+    bad={**actual,'lmcloud':{**actual['lmcloud'],**change}}
+    expect(compare(bad)['live']['status']=='differs' and not compare(bad)['ok'], 'approved mismatches cannot claim live sameness')
+with tempfile.TemporaryDirectory() as directory:
+    path=Path(directory)/'RESULTS.md'
+    write_results([{'name':'sample'}],{'sample':compare(actual)},path)
+    text=path.read_text()
+    expect('Every live row remains pending user test' not in text,'summary must reflect supplied live result')
+    expect('No live Azure subscription was used' not in text,'summary cannot deny supplied live records')
+print('comparison live approval/provenance/failure regressions: passed (synthetic records only)')

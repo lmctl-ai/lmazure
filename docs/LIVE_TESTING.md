@@ -80,3 +80,24 @@ After success, the ledger should be removed. A failed cleanup retains an account
 Call `azure.sweep("path/to/retained.ledger.json", 1.0)` from an explicit `live()` DSL block and export its table to review candidates at least one hour old. The default sweep is read-only. After reviewing the exact ledger and account endpoints, replace that call with `sweep_apply` only with `LMAZURE_ALLOW_WRITES=1`. Only ledger entries with the matching run prefix, ownership metadata, account endpoints and age qualify. Failed entries stay in the ledger. There is no subscription-wide prefix deletion.
 
 Unset `LMAZURE_ALLOW_WRITES` and `LMAZURE_LIVE` when finished. Never put credentials, access tokens, secret values or private keys into scripts, command arguments, CSV output, images or logs.
+
+
+## 5. Optional native/lmcloud comparison
+
+After the same explicit local approval, follow [compare/README.md](../compare/README.md)
+for the existing account inputs and exact-name preflight. Set
+`LMAZURE_COMPARE_LIVE_APPROVED=1` in addition to `LMAZURE_LIVE=1`; owned cases
+also require `LMAZURE_ALLOW_WRITES=1`. Then use `compare/run.sh <example> --live`.
+CI is refused. Do not enable any of these flags for development/fake tests.
+
+The private `report.json` has one approval field: `user_approved_actual` (boolean).
+The runner sets it true only on the live branch after validating the local flags;
+completed results must also identify `azure_sdk_live` and `azurerm` execution.
+Approval alone does not mean success: resources, ownership metadata, outputs,
+account fingerprints and zero leftovers must match before live status is `same`.
+Mismatch/incomplete results are `differs`; missing approval, fake providers or
+mixed live/offline records stay `pending` and cannot pass. Offline runs always
+write false and cannot become live evidence. Fake regression tests exercise this
+handoff using local artifacts and synthetic reports, without contacting Azure.
+Keep private reports/state/logs local; do not copy credentials or raw state into
+public results. All actual Azure comparisons remain pending the user's first test.

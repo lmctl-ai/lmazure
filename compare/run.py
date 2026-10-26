@@ -157,13 +157,13 @@ def run_one(name,args):
    if planned!=cloud_created:raise ComparisonFailure('plan resource intent differs from actual fixture outputs')
   if result.get('state_addresses','unknown')!='':raise ComparisonFailure('lmcloud state leftovers remain')
  cloud_leftovers=0 if result.get('destroy_ok') else None
- report={'example':name,'mode':'live' if args.live else 'offline','user_approved':bool(args.live),'semantic_differences':spec['semantic_differences'],'lmazure':{'mode':'live' if args.live else 'fake','executed_provider':'azure_sdk_live' if args.live else 'azure_sdk_fake','requested_provider':'azurerm','account_fingerprint':fingerprint,'resources_created':resources,'outputs':outputs,'wall_seconds':native_time,'estimated_cost_usd':cost['estimated_cost_usd'],'leftovers':leftovers},'lmcloud':{'mode':'live' if args.live else 'offline','executed_provider':result['executed_provider'],'requested_provider':'azurerm','account_fingerprint':fingerprint,'resources_created':cloud_created,'outputs':cloud_result['outputs'],'wall_seconds':cloud_time,'estimated_cost_usd':spec['tofu_estimated_cost_usd'],'leftovers':cloud_leftovers}}
+ report={'example':name,'mode':'live' if args.live else 'offline','user_approved_actual':bool(args.live),'semantic_differences':spec['semantic_differences'],'lmazure':{'mode':'live' if args.live else 'fake','executed_provider':'azure_sdk_live' if args.live else 'azure_sdk_fake','requested_provider':'azurerm','account_fingerprint':fingerprint,'resources_created':resources,'outputs':outputs,'wall_seconds':native_time,'estimated_cost_usd':cost['estimated_cost_usd'],'leftovers':leftovers},'lmcloud':{'mode':'live' if args.live else 'offline','executed_provider':result['executed_provider'],'requested_provider':'azurerm','account_fingerprint':fingerprint,'resources_created':cloud_created,'outputs':cloud_result['outputs'],'wall_seconds':cloud_time,'estimated_cost_usd':spec['tofu_estimated_cost_usd'],'leftovers':cloud_leftovers}}
  compared=compare(report);compared['semantic_differences']=spec['semantic_differences'];report['comparison']=compared
  (out/'report.json').write_text(json.dumps(report,indent=2)+'\n')
  # Public summary excludes state, IDs, logs, variable files and account credentials.
  public=ROOT/'compare/evidence'/(name+'.json');public.parent.mkdir(exist_ok=True)
  public.write_text(json.dumps({'example':name,'mode':report['mode'],'comparison':compared},indent=2)+'\n')
- print(name+': '+('same offline fixture intents' if compared['ok'] else 'differs (see report)'))
+ print(name+': '+(('same live comparison' if args.live else 'same offline fixture intents') if compared['ok'] else 'differs (see report)'))
  return compared
 
 def main():

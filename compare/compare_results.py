@@ -116,12 +116,20 @@ def compare(report):
     provenance=_st("same offline fixture intents" if requested==("azurerm","azurerm") and executed in {("azure_sdk_fake","builtin_fixture"),("builtin_fixture","builtin_fixture")} else "differs",
                    "native SDK fakes and an executed builtin-provider fixture plan were compared; this is not live AzureRM equivalence" if requested==("azurerm","azurerm") and executed in {("azure_sdk_fake","builtin_fixture"),("builtin_fixture","builtin_fixture")} else "requested or executed providers differ",
                    requested_provider=requested,executed_provider=executed)
-    live=_st("same" if a.get("mode")=="live" and b.get("mode")=="live" and report.get("user_approved_actual") is True else "pending",
-             "user-approved actual live reports supplied" if a.get("mode")=="live" and b.get("mode")=="live" and report.get("user_approved_actual") is True else "pending user-approved live records; offline fixtures cannot pass live comparison")
+    live_requested = a.get("mode")=="live" or b.get("mode")=="live"
+    live_approved = (a.get("mode")=="live" and b.get("mode")=="live"
+                     and report.get("user_approved_actual") is True
+                     and requested==("azurerm","azurerm")
+                     and executed==("azure_sdk_live","azurerm"))
     ok=resources["status"]=="same" and outputs["status"]=="same" and account["status"]=="same" and all(x.get("ok") for x in cleanup.values())
     if report.get("fixture_inputs_identical") is True:
         ok = False
         outputs = _st("pending", "fixture inputs were declared identical without an actual provider report")
+    if live_requested and not live_approved:
+        ok = False
+    live=_st(("same" if ok else "differs") if live_approved else "pending",
+             ("user-approved actual live results match" if ok else "user-approved actual live results differ or are incomplete")
+             if live_approved else "pending user-approved live records; offline fixtures cannot pass live comparison")
     return _safe({"ok":ok,"offline":{"resources":resources,"outputs":outputs,"time":time,"cost":cost,"cleanup":cleanup,"account":account,"provenance":provenance},"live":live})
 
 def write_results(catalog,reports,path):
@@ -142,5 +150,8 @@ def write_results(catalog,reports,path):
         cleanup="/".join(data["cleanup"][side]["status"] for side in ("lmazure","lmcloud"))
         live="pending user test" if result["live"]["status"]=="pending" else result["live"]["status"]
         rows.append(f"| {name} | {data['resources']['status']} | {data['outputs']['status']} | {data['time']['status']} | {data['cost']['status']} | {cleanup} | {live} | {why_text} | [native]({native}) · [lmcloud]({cloud}) |")
-    text="# lmazure / lmcloud comparison results\n\nAll offline rows compare SDK fake results with an **executed builtin-provider OpenTofu fixture plan**, not an AzureRM plan. No live Azure subscription was used. Wall times are informational (native offline timing includes image rendering); the cost model differences are explicit planning allowances. Cleanup means zero native fake ownership and zero local OpenTofu fixture state, **not a live Azure absence measurement**. Every live row remains pending user test.\n\n| Example | Resources | Common outputs | Wall time | Estimated cost | Cleanup native/tofu | Live | Why / limits | Autorun |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n"+"\n".join(rows)+"\n"
+    live_supplied=any(r.get("live",{}).get("status") in {"same","differs"} for r in reports.values())
+    live_summary=("Live statuses reflect supplied user-approved actual-provider reports; review the individual evidence. " if live_supplied
+                  else "No live Azure subscription was used. Every live row remains pending user test. ")
+    text="# lmazure / lmcloud comparison results\n\nAll offline rows compare SDK fake results with an **executed builtin-provider OpenTofu fixture plan**, not an AzureRM plan. "+live_summary+"Wall times are informational (native offline timing includes image rendering); the cost model differences are explicit planning allowances. For offline rows, cleanup means zero native fake ownership and zero local OpenTofu fixture state, **not a live Azure absence measurement**.\n\n| Example | Resources | Common outputs | Wall time | Estimated cost | Cleanup native/tofu | Live | Why / limits | Autorun |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n"+"\n".join(rows)+"\n"
     Path(path).write_text(text,encoding="utf-8")

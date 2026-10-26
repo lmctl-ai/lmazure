@@ -1,8 +1,7 @@
 # lmazure durable memory
 
 Current version: **0.1.3 — READY TO TEST**. Live Azure testing is pending the user;
-no real subscription was accessed during development. A live-report approval-field
-mismatch is documented in the open-items note. Local build/tests are the
+no real subscription was accessed during development. Local build/tests are the
 acceptance gate; CI is supplementary, not a user approval or merge gate.
 
 `lmazure` is a public MIT Azure SDK host on the pinned lmcode-csharp VM/SDK.

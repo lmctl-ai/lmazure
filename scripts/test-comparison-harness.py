@@ -20,3 +20,29 @@ for entry in h.CATALOG:
  assert 'install="github:lmctl-ai/lmazure@latest"' not in h.native_source(name)
  checks+=1
 print(f'comparison harness admission/source checks: {checks} passed; no Azure calls')
+
+# Exercise the actual report producer and consumer together, with provider execution
+# replaced by local artifacts. Approval validation still runs; no credential loads.
+from argparse import Namespace
+import contextlib,io
+with tempfile.TemporaryDirectory() as directory:
+ fake=Path(directory);name='resource_inventory'
+ (fake/'compare'/name).mkdir(parents=True)
+ (fake/'compare'/name/'spec.json').write_text(json.dumps({'ledger_mode':'readonly','semantic_differences':[],'tofu_estimated_cost_usd':0}))
+ (fake/'compare'/name/'main.lms').write_text('fake transport fixture')
+ def fake_execute(argv,cwd,env,log,limit=240):
+  if Path(argv[-1]).name=='main.lms':
+   base=Path(cwd)/'build'/('lmcloud_'+name);base.mkdir(parents=True)
+   (base/'result.json').write_text(json.dumps({'admitted':True,'destroy_ok':True,'state_addresses':'','executed_provider':'azurerm','outputs':{'resources_created':[],'outputs':{'inventory':[]}}}))
+   (base/'plan.json').write_text(json.dumps({'resource_changes':[]}))
+  return 0,1.0
+ args=Namespace(output=str(fake/'runs'),live=True,native_binary=sys.executable,lmcloud_binary=sys.executable,compiler=sys.executable,_tools_dir=str(fake/'tools'))
+ environment={'PATH':os.environ.get('PATH',os.defpath),'LMAZURE_COMPARE_LIVE_APPROVED':'1','LMAZURE_LIVE':'1','LMAZURE_SUBSCRIPTION_ID':'11111111-1111-1111-1111-111111111111'}
+ with patch.object(h,'ROOT',fake),patch.object(h,'native_source',return_value='fixture'),patch.object(h,'execute',side_effect=fake_execute),patch.object(h,'native_facts',return_value=({'estimated_cost_usd':0},[],{'inventory':[]},0)),patch.dict(os.environ,environment,clear=True),contextlib.redirect_stdout(io.StringIO()) as output:
+  result=h.run_one(name,args)
+ produced=json.loads((fake/'runs'/name/'report.json').read_text())
+ assert produced.get('user_approved_actual') is True,'runner must emit the engine approval field'
+ assert 'user_approved' not in produced,'one canonical approval field'
+ assert result['ok'] and result['live']['status']=='same','approved fake-produced actual-provider report must reach live acceptance'
+ assert 'same live comparison' in output.getvalue(),'live runs must not be called offline fixtures'
+print('comparison report integration: passed; provider execution replaced by local fake artifacts')

@@ -29,9 +29,8 @@ Open: user-run authentication/RBAC/endpoint checks; actual AzureRM validation an
 price review and optional billing calibration. Live figures remain “estimated
 from price table, not yet measured live.”
 
-Known live-report integration issue: `compare/run.py` emits `user_approved`, while
-`compare/compare_results.py` requires `user_approved_actual` before labeling a live
-record accepted. Thus a future successful live harness run would still be labeled
-pending. Reconcile these fields with the approval checks and a regression test
-before accepting live comparison evidence; do not simply relabel offline records.
-This documentation refresh does not change executable behavior.
+Live report approval is canonical: `user_approved_actual` must be boolean true,
+both reports must be live with actual SDK/AzureRM provenance, and resource/output/
+account/cleanup comparisons must pass before status is `same`. Synthetic fake
+regressions cover the runner-to-engine handoff, denial paths and mismatches.
+No actual live evidence has been supplied.
