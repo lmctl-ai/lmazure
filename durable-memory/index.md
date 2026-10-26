@@ -1,37 +1,24 @@
 # lmazure durable memory
 
-`lmazure` is a typed Azure SDK host for lmscript. The implementation uses
-Azure.ResourceManager generic resources for read-only inventory and the Azure
-Storage Blobs and Queues SDKs for tightly scoped, ledger-owned test resources.
-The public API is exposed through `AzureSession`, `AzureRun`, and
-`ResourceTable` in `src/LmAzure/Cloud`.
+Current version: **0.1.3 — READY TO TEST**. Live Azure testing is pending the user;
+no real subscription was accessed during development. A live-report approval-field
+mismatch is documented in the open-items note. Local build/tests are the
+acceptance gate; CI is supplementary, not a user approval or merge gate.
 
-The default execution path is fake-only. `AzureSession.Mock()` uses the real
-Azure SDK request pipeline with an in-process HTTP handler. It never discovers
-credentials or opens a network connection. `AzureSession.Live()` requires
-`LMAZURE_LIVE=1`, a subscription ID, and a region; writes additionally require
-`LMAZURE_ALLOW_WRITES=1`.
+`lmazure` is a public MIT Azure SDK host on the pinned lmcode-csharp VM/SDK.
+It ships one .NET 10 NativeAOT executable per platform, a typed DSL schema and
+72 illustrated, fake-only examples with 72 lmcloud equivalents.
 
-Run ledgers are created exclusively, bind the subscription and storage endpoint
-configuration, and contain only prefixed resources claimed after an HTTP 201
-creation response. Cleanup, deletion, and sweeping require the ledger entry,
-the `lmazure-` prefix, and matching `lmazure_test` metadata. Sweeps are dry by
-default and retain failed or mismatched entries.
+- [Verification and local gate](01-verification.md)
+- [SDK pins and legal inventory](02-sdk-and-legal.md)
+- [Architecture, build and memory budget](03-build-and-runtime.md)
+- [Published versions and release workflow](04-release.md)
+- [Ownership safety and cost model](05-cost-ledger.md)
+- [Examples and pictures](06-expanded-gallery.md)
+- [lmcloud equivalents and limits](07-lmcloud-equivalents.md)
+- [Curated services and typed API](08-services-and-api.md)
+- [Live procedure and open items](09-live-testing.md)
+- [Current-release machine-readable evidence](v0.1.3-verification.json)
 
-The current verification evidence is recorded in [01-verification.md](01-verification.md).
-The pinned SDK and legal inventory are recorded in [02-sdk-and-legal.md](02-sdk-and-legal.md).
-Build commands and runtime constraints are recorded in [03-build-and-runtime.md](03-build-and-runtime.md).
-Release verification for earlier versions is recorded in [04-release.md](04-release.md).
-
-Release v0.1.3, both five-platform NativeAOT matrices, all five release checksums,
-72 fresh-cache README autoruns, 72 fresh-cache lmcloud comparison URLs and the
-72-case released-binary offline matrix passed. See
-[07-lmcloud-equivalents.md](07-lmcloud-equivalents.md) and
-[v0.1.3-verification.json](v0.1.3-verification.json). Earlier notes remain historical.
-Status: **READY TO TEST**. No live Azure subscription test has been performed.
-
-The v0.1.1 cost-ledger policy and acceptance checks are recorded in [05-cost-ledger.md](05-cost-ledger.md).
-
-The 72-example v0.1.2 expansion is recorded in [06-expanded-gallery.md](06-expanded-gallery.md).
-
-The v0.1.3 equivalence suite and limits are recorded in [07-lmcloud-equivalents.md](07-lmcloud-equivalents.md).
+Prefer source, catalog and test assertions over copied counts when changing code.
+Keep these notes current and short; release detail belongs in the linked evidence.
