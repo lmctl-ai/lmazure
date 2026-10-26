@@ -20,5 +20,8 @@ These synthetic records are unit fixtures, never published live Azure evidence.
 Local verification (2026-10-26 UTC): managed `test.sh`, NativeAOT publish,
 120 fake assertions, 43 native CLI checks, 14 Linux DSL budget/contract checks,
 all 72 gallery runs, all 72 native/lmcloud offline comparisons, and glibc-only linkage (maximum ABI 2.34) passed. No actual
-Azure authentication or subscription was used. Patch publication is in progress;
-local verification, not CI approval, is the repository acceptance gate.
+Azure authentication or subscription was used. [v0.1.4](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.4) is published.
+The five-platform tag/release workflow passed, all five downloaded checksums
+matched, and the released Linux x64 version/self-tests passed.
+See [release verification](v0.1.4-verification.json). Local build/tests remain
+the repository acceptance gate; all actual Azure comparisons remain pending.

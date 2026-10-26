@@ -9,8 +9,7 @@ checks version agreement. Published versions:
 | [v0.1.1](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.1) | Cost-ledger policy |
 | [v0.1.2](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.2) | 72-example gallery |
 | [v0.1.3](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.3) | lmcloud equivalents and metadata evidence |
-
-v0.1.4 is being prepared with the live approval/report correctness fix.
+| [v0.1.4](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.4) | Live approval/report correctness fix |
 
 The retained `.github/workflows/ci.yml` builds NativeAOT on Linux x64/ARM64,
 macOS x64/ARM64 and Windows x64. Each job checks fake CLI/DSL/gallery behavior and
@@ -24,3 +23,6 @@ ABI was 2.34 (supported baseline remains 2.35). Windows is a full native executa
 Current-release hashes, sizes, workflow links and public-URL acceptance are in
 [v0.1.3-verification.json](v0.1.3-verification.json). Publishing need not wait for
 user live testing. Do not infer live Azure validation from a release or CI badge.
+
+[v0.1.4 verification](v0.1.4-verification.json): all five published asset hashes
+passed; downloaded Linux x64 reports 0.1.4 and passes 120 fake assertions.

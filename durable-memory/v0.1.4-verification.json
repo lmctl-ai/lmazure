@@ -1,0 +1,42 @@
+{
+  "version": "lmazure 0.1.4",
+  "assets": [
+    {
+      "name": "lmazure-linux-arm64",
+      "bytes": 20524584,
+      "sha256": "db7d2d34b8c25d06a9ff8c271623353290bedac1251fa6dc2b8cb5e487a01aa2"
+    },
+    {
+      "name": "lmazure-linux-x64",
+      "bytes": 20353752,
+      "sha256": "efa6793accc050a8a4e8506168f3a82294b67a07c55bbf7047a9dfc5879148b4"
+    },
+    {
+      "name": "lmazure-macos-arm64",
+      "bytes": 15472312,
+      "sha256": "8d0bbcadb6fbe768b637efe00cfe7f8c221e9710692f879e987b3e41edcd3f35"
+    },
+    {
+      "name": "lmazure-macos-x64",
+      "bytes": 15805800,
+      "sha256": "d7acd9c7734d5be1cfabd9d3bee694f461604eddcb490756187bbd033b806c9e"
+    },
+    {
+      "name": "lmazure-windows-x64.exe",
+      "bytes": 16393216,
+      "sha256": "bf49c5b59a47cb75c469934068c69fc48897ef8307ad886858c44c43e4c4de09"
+    }
+  ],
+  "verified_utc": "2026-10-26",
+  "tag_commit": "28b42ff6d66bcde91bc6a118695c92ea0baaddaf",
+  "release": "https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.4",
+  "tag_workflow": "https://github.com/lmctl-ai/lmazure/actions/runs/40264212375",
+  "native_assertions": 120,
+  "native_cli_checks": 43,
+  "linux_dsl_checks": 14,
+  "local_gallery_runs": 72,
+  "local_offline_comparisons": 72,
+  "approval_handoff_regression": "failed before fix; passed with provider execution replaced by local artifacts",
+  "live_azure_access": false,
+  "live_comparisons": "pending user test"
+}

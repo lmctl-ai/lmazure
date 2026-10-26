@@ -18,6 +18,7 @@ It ships one .NET 10 NativeAOT executable per platform, a typed DSL schema and
 - [Curated services and typed API](08-services-and-api.md)
 - [Live procedure and open items](09-live-testing.md)
 - [v0.1.4 live-report fix and acceptance](10-live-report-fix.md)
+- [v0.1.4 release verification](v0.1.4-verification.json)
 - [v0.1.3 comparison baseline evidence](v0.1.3-verification.json)
 
 Prefer source, catalog and test assertions over copied counts when changing code.
