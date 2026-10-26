@@ -1,6 +1,6 @@
 # Published versions and release workflow
 
-Current source, CLI and project version: **0.1.3**. `scripts/check-version.py`
+Current source, CLI and project version: **0.1.4**. `scripts/check-version.py`
 checks version agreement. Published versions:
 
 | Version | Scope |
@@ -9,6 +9,8 @@ checks version agreement. Published versions:
 | [v0.1.1](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.1) | Cost-ledger policy |
 | [v0.1.2](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.2) | 72-example gallery |
 | [v0.1.3](https://github.com/lmctl-ai/lmazure/releases/tag/v0.1.3) | lmcloud equivalents and metadata evidence |
+
+v0.1.4 is being prepared with the live approval/report correctness fix.
 
 The retained `.github/workflows/ci.yml` builds NativeAOT on Linux x64/ARM64,
 macOS x64/ARM64 and Windows x64. Each job checks fake CLI/DSL/gallery behavior and

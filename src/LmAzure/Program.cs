@@ -8,7 +8,7 @@ namespace LmAzure;
 
 public static class EntryPoint
 {
-    public const string Version = "0.1.3";
+    public const string Version = "0.1.4";
     public static int Main(string[] args)
     {
         Console.OutputEncoding = new UTF8Encoding(false);

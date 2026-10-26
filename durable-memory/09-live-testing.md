@@ -6,7 +6,7 @@ AzureRM provider plan, real resource lifecycle or billing calibration is claimed
 
 Follow [docs/LIVE_TESTING.md](../docs/LIVE_TESTING.md), not the mock gallery:
 
-1. Download the matching v0.1.3 executable, verify SHA256SUMS and run `--self-test`
+1. Download the matching v0.1.4 executable, verify SHA256SUMS and run `--self-test`
    (still fake; no .NET runtime needed).
 2. With explicit user approval, use an existing local Azure CLI profile/Reader
    permissions. Set `LMAZURE_LIVE=1`, `LMAZURE_SUBSCRIPTION_ID`, `LMAZURE_REGION`,

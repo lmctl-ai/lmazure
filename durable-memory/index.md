@@ -1,6 +1,6 @@
 # lmazure durable memory
 
-Current version: **0.1.3 — READY TO TEST**. Live Azure testing is pending the user;
+Current version: **0.1.4 — READY TO TEST**. Live Azure testing is pending the user;
 no real subscription was accessed during development. Local build/tests are the
 acceptance gate; CI is supplementary, not a user approval or merge gate.
 
@@ -17,7 +17,8 @@ It ships one .NET 10 NativeAOT executable per platform, a typed DSL schema and
 - [lmcloud equivalents and limits](07-lmcloud-equivalents.md)
 - [Curated services and typed API](08-services-and-api.md)
 - [Live procedure and open items](09-live-testing.md)
-- [Current-release machine-readable evidence](v0.1.3-verification.json)
+- [v0.1.4 live-report fix and acceptance](10-live-report-fix.md)
+- [v0.1.3 comparison baseline evidence](v0.1.3-verification.json)
 
 Prefer source, catalog and test assertions over copied counts when changing code.
 Keep these notes current and short; release detail belongs in the linked evidence.

@@ -5,10 +5,12 @@ before committing/merging/pushing locally verified work. Keep the existing fake-
 five-platform/release automation; its job dependencies still control publication.
 Documentation-only pushes are ignored by that workflow.
 
-Current source acceptance (2026-10-25): `test.sh` passed with .NET SDK 10.0.402,
+Current source acceptance (2026-10-26 UTC): `test.sh` passed with .NET SDK 10.0.402,
 zero build warnings/errors, 43 CLI checks (including 120 fake-transport assertions),
 17 CI safety guard checks, version agreement, 72 gallery/catalog contracts,
-72 comparison configuration contracts, 11 comparison-engine regressions and
+72 comparison configuration contracts, 11 baseline comparison-engine regressions
+plus live approval/provenance/failure regressions, fake report-producer/consumer
+integration, and
 74 harness admission/source checks. No Azure provider is initialized by these tests.
 
 `test.sh` does not execute the gallery unless `LMAZURE_LMSCRIPT` is set, and does
