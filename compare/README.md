@@ -26,7 +26,7 @@ release checksum and the known embedded-version discrepancy.
 Each equivalent is self-contained and directly autorunnable, for example:
 
 ```sh
-lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_mixed_lifecycle/main.lms
+lmctl https://raw.githubusercontent.com/lmctl-ai/lmazure/main/compare/owned_mixed_lifecycle/main.lms
 ```
 
 It writes the checked AzureRM HCL and the separate offline fixture in an isolated

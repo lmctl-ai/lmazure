@@ -71,7 +71,7 @@ let cost = json_parse(read_file("build/live-write-cost.json"));
 println(getstr(cost, "estimated_cost_text"));
 ```
 
-Execute it with `lmscript live-write.lms` or `lmctl autorun live-write.lms` only after approving writes. The script's `install=@latest` binding installs the host if it is absent from PATH. Each resource has a generated `lmazure-<run-id>-...` name and `lmazure_test=<run-id>` metadata. The host claims only HTTP 201 creations, checks prefix, metadata and ledger membership before mutation, and cleans up on normal or exceptional VM exit. Existing resources are never claimed.
+Execute it with `lmscript live-write.lms` or `lmctl live-write.lms` only after approving writes. The script's `install=@latest` binding installs the host if it is absent from PATH. Each resource has a generated `lmazure-<run-id>-...` name and `lmazure_test=<run-id>` metadata. The host claims only HTTP 201 creations, checks prefix, metadata and ledger membership before mutation, and cleans up on normal or exceptional VM exit. Existing resources are never claimed.
 
 After success, the ledger should be removed. A failed cleanup retains an account-bound ledger for recovery; never delete that file until all entries have been resolved. Abrupt process/OS termination can also leave resources requiring recovery.
 

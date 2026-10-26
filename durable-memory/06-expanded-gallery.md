@@ -8,7 +8,7 @@ one budget-admission rejection. All gallery programs explicitly call `mock()`;
 environment flags cannot turn these scripts into live Azure runs.
 
 ```sh
-lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_inventory.lms
+lmctl https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/resource_inventory.lms
 ```
 
 Each installs `github:lmctl-ai/lmazure@latest` if needed, exports CSV/cost JSON,
