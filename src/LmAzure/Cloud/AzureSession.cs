@@ -68,6 +68,19 @@ public sealed class AzureSession : IDisposable
             var result = InventoryAsync(subscription, kind, timeout.Token).GetAwaiter().GetResult(); _lastInventoryKind = kind; _lastInventoryRows = result.Count(); return result;
         } catch (AzureCloudException) { throw; } catch (Exception ex) { throw new AzureCloudException("Azure inventory failed", ex); }
     }
+
+    public ResourceTable FindPrefix(string prefix)
+    {
+        Ensure();
+        if (string.IsNullOrWhiteSpace(prefix)) return ResourceTable.Empty();
+        var rows = new List<object?[]>();
+        foreach (var kind in Kinds.Keys)
+        {
+            var table = Inventory(kind).FindPrefix(prefix);
+            for (var i = 0; i < table.Count(); i++) rows.Add([table.Text(i, 0), kind, table.Text(i, 2), table.Text(i, 3), table.Text(i, 4), table.Text(i, 5), table.Text(i, 6), table.Text(i, 7), table.Text(i, 8), table.Text(i, 9)]);
+        }
+        return new ResourceTable(rows);
+    }
     public AzureRun BeginRun(string ledgerPath) { Ensure(); var run = new AzureRun(this, ledgerPath, _mock); _runs.Add(run); return run; }
     public void ReadonlyCostReport(string path)
     {

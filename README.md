@@ -36,6 +36,7 @@ Bind lmazure from lmscript with `_dsl_ cli="lmazure" install="github:lmctl-ai/lm
 | --- | --- |
 | `mock()` | Deterministic in-process fixture; the only path used by the default gallery |
 | `session.inventory(kind)` | Read-only tables for resources, compute, storage, network, identity, database, queues, serverless, monitoring, dns, vaults, or containers |
+| `session.find_prefix(prefix)` | Fake/live read-only account inventory filtered by literal name prefix, including `lmazure_` and `lmazure-` |
 | `table.rows/columns/column/text/number/csv/json` | Inspect and export masked inventory rows |
 | `session.readonly_cost_report(path)` | Export a zero-cost metadata ledger with measured ARM request count |
 | `session.begin_run(path)` | Create a prefixed run ledger for owned resources |

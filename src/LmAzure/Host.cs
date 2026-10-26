@@ -13,7 +13,7 @@ public static class Host
     private static readonly Spec[] Specs =
     [
         new(null, "mock", [], "Session"), new(null, "live", [], "Session"),
-        new("Session", "inventory", ["string"], "Table"), new("Session", "begin_run", ["string"], "Run"),
+        new("Session", "inventory", ["string"], "Table"), new("Session", "find_prefix", ["string"], "Table"), new("Session", "begin_run", ["string"], "Run"),
         new("Session", "readonly_cost_report", ["string"], "void"),
         new("Session", "sweep", ["string", "float"], "Table"), new("Session", "sweep_apply", ["string", "float"], "Table"),
         new("Run", "container", ["string"], "Table"), new("Run", "queue", ["string"], "Table"),
@@ -38,6 +38,8 @@ public static class Host
 
         r.Method("Session", "inventory", ["string"], "Table", static (c, self, a) =>
             Safe(() => TableValue(c, c.Get<SessionHandle>(self).Session.Inventory(Text(a[0])))));
+        r.Method("Session", "find_prefix", ["string"], "Table", static (c, self, a) =>
+            Safe(() => TableValue(c, c.Get<SessionHandle>(self).Session.FindPrefix(Text(a[0])))));
         r.Method("Session", "readonly_cost_report", ["string"], "void", static (c, self, a) =>
             Safe(() => { c.Get<SessionHandle>(self).Session.ReadonlyCostReport(Text(a[0])); return Value.None; }));
         r.Method("Session", "begin_run", ["string"], "Run", static (c, self, a) =>

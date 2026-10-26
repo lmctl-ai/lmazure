@@ -43,6 +43,9 @@ public sealed class ResourceTable
         return Encoding.UTF8.GetString(stream.ToArray()) + "\n";
     }
     internal static ResourceTable Empty() => new([]);
+    public ResourceTable FindPrefix(string prefix)
+        => new(_rows.Where(row => TextValue(row[0]).StartsWith(prefix, StringComparison.Ordinal)).ToList());
+    private static string TextValue(object? value) => value switch { null => "", bool b => b ? "true" : "false", _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? "" };
     internal static object?[] Row(string name, string kind, string location, string status, int count, double age, bool? @public, bool? encrypted, bool tagged, string id)
         => [name, kind, location, status, count, age, @public, encrypted, tagged, id];
     private static void AppendCsvRow(StringBuilder b, IEnumerable<object?> values)
