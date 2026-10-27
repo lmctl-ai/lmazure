@@ -18,8 +18,8 @@ Everything in this repository runs through [lmctl](https://lmctl.com), the core 
 
 ```bash
 npm install -g @lmctl-ai/lmctl
-lmctl autorun path/to/example.lms
-lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/example.lms
+lmctl autorun examples/age_distribution.lms
+lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/age_distribution.lms
 ```
 
 ## Quick start
