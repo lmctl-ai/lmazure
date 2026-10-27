@@ -12,6 +12,16 @@
 | <img src="docs/images/functions_inventory.png" width="290" alt="Functions"> | <img src="docs/images/owned_mixed_lifecycle.png" width="290" alt="Owned Mixed Lifecycle"> | <img src="docs/images/cost_request_breakdown.png" width="290" alt="Cost Request Breakdown"> |
 | `lmctl https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/functions_inventory.lms`<br>running this example costs about $0.00 (estimated from price table, not yet measured live) | `lmctl https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/owned_mixed_lifecycle.lms`<br>running this example costs about $0.0010 (estimated from price table, not yet measured live) | `lmctl https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/cost_request_breakdown.lms`<br>running this example costs about $0.0005 (estimated from price table, not yet measured live) |
 
+## Install lmctl
+
+Everything in this repository runs through [lmctl](https://lmctl.com), the core tool of the lmctl family. Install it once, then run any `.lms` file or raw URL:
+
+```bash
+npm install -g @lmctl-ai/lmctl
+lmctl autorun path/to/example.lms
+lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmazure/main/examples/example.lms
+```
+
 ## Quick start
 
 The default examples use `mock()` and never contact Azure:
