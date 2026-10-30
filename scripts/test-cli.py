@@ -48,4 +48,14 @@ with tempfile.TemporaryDirectory(prefix='lmazure-invalid-') as d:
     assert 'private-secret' not in p.stdout+p.stderr
     assert json.loads(p.stdout)['phase']=='load'
     run('--dsl',str(Path(d)/'missing.dslb'),code=3)
+# Simulator mode is opt-in and cannot send requests outside literal IPv4 loopback.
+for endpoint in ['https://management.azure.com', 'http://example.com', 'http://127.0.0.1.evil.test',
+                 'http://127.0.0.1:4577/path', 'http://user@127.0.0.1:4577', 'http://127.0.0.1:4577/?q=1']:
+    p=run('--simulator','container-create','local-container',code=2,env={'LMAZURE_SIM_ENDPOINT':endpoint})
+    assert json.loads(p.stdout)['error']=='InvalidSimulatorEndpoint'
+run('--simulator',code=2)
+run('--simulator','invalid-operation','local-container',code=2)
+p=run('--simulator','container-create','local-container',code=2,
+      env={'LMAZURE_SIM_KEY':'redacted-test-key','LMAZURE_SIM_TOKEN':'redacted-test-token'})
+assert 'redacted-test' not in p.stdout+p.stderr
 print(f'lmazure CLI checks: {checks} passed; live access disabled')

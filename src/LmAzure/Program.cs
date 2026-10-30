@@ -8,7 +8,7 @@ namespace LmAzure;
 
 public static class EntryPoint
 {
-    public const string Version = "0.1.4";
+    public const string Version = "0.1.5";
     public static int Main(string[] args)
     {
         Console.OutputEncoding = new UTF8Encoding(false);
@@ -41,6 +41,7 @@ public static class EntryPoint
                 try { checks+=MetadataEvidenceSelfTests.Run(); } catch { Console.Error.WriteLine("fake metadata evidence suite failed"); throw; }
                 Console.WriteLine($"lmazure fake-transport checks: {checks} passed"); return 0;
             }
+            if (args.Length > 0 && args[0] == "--simulator") return SimulatorCommand.Run(args[1..]);
             if (args is ["--dsl", var path]) return Run(path,false);
             if (args is ["--dsl", "--dry-run", var dryPath]) return Run(dryPath,true);
             if (args is ["--inventory", var kind]) { using var s=AzureSession.Mock(); var table=s.Inventory(kind); RuntimeBudget.Check(); Console.Write(table.CsvString()); return 0; }
@@ -72,6 +73,9 @@ public static class EntryPoint
         lmazure --dsl [--dry-run] FILE | --dsl-schema [--json] | --dsl-signatures
         lmazure --inventory KIND | --live --inventory KIND
         lmazure --self-test | --version | --notices | --help
+        lmazure --simulator OP NAME [ARGS] (loopback storage SDK operations only)
+        Simulator: LMAZURE_SIM_ENDPOINT=http://127.0.0.1:4577; optional
+        LMAZURE_SIM_ACCOUNT, LMAZURE_SIM_KEY or LMAZURE_SIM_TOKEN. No cloud credentials.
         Live reads: LMAZURE_LIVE=1, LMAZURE_SUBSCRIPTION_ID, LMAZURE_REGION;
         DefaultAzureCredential uses your configured environment/profile/login.
         Writes also require LMAZURE_ALLOW_WRITES=1; only ledger-owned prefixed

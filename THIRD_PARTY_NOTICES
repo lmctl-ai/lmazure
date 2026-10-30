@@ -1,4 +1,4 @@
-lmazure 0.1.4 — third-party notices
+lmazure 0.1.5 — third-party notices
 
 lmazure and the pinned lmcode-csharp SDK are MIT licensed.
 Azure.Core 1.63.0, Azure.Identity 1.21.0, Azure.ResourceManager 1.14.0,
