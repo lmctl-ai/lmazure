@@ -7,7 +7,7 @@ t.csv("data/regional_resource_graph_inventory.csv");
 s.readonly_cost_report("data/regional_resource_graph_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/regional_resource_graph.dslb");
-r = system ${dsl_cli(azure)} --dsl build/regional_resource_graph.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/regional_resource_graph.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/regional_resource_graph_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -42,7 +42,7 @@ scene.text(30.0,480.0,14.0,"Tag presence is metadata evidence; graph edges indic
 scene.render_png("images/regional_resource_graph.png",900,560,1);
 end _dsl_
 savedsl(p,"build/regional_resource_graph_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/regional_resource_graph_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/regional_resource_graph_draw.dslb;
 assert(r.code == 0);
 println("wrote images/regional_resource_graph.png");
 println("estimated cost: $0.00");

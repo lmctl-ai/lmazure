@@ -7,7 +7,7 @@ t.csv("data/tagging_compliance.csv");
 s.readonly_cost_report("data/tagging_compliance_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/tagging_compliance.dslb");
-r = system ${dsl_cli(azure)} --dsl build/tagging_compliance.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/tagging_compliance.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/tagging_compliance.csv"), false);
 assert(rows[0].len() == 10);
@@ -34,7 +34,7 @@ plot.cmd("set title 'MOCK tagging compliance review'; set xlabel 'Tag coverage';
 plot.close();
 end _dsl_
 savedsl(p, "build/tagging_compliance_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/tagging_compliance_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/tagging_compliance_plot.dslb;
 assert(r.code == 0);
 println("wrote images/tagging_compliance.png");
 println("estimated cost: $0.00");

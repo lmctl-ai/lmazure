@@ -7,7 +7,7 @@ t.csv("data/encryption_audit.csv");
 s.readonly_cost_report("data/encryption_audit_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/encryption_audit.dslb");
-r = system ${dsl_cli(azure)} --dsl build/encryption_audit.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/encryption_audit.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/encryption_audit.csv"), false);
 assert(rows[0].len() == 10);
@@ -38,7 +38,7 @@ plot.cmd("set title 'MOCK storage encryption audit'; set xlabel 'Encryption'; se
 plot.close();
 end _dsl_
 savedsl(p, "build/encryption_audit_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/encryption_audit_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/encryption_audit_plot.dslb;
 assert(r.code == 0);
 println("wrote images/encryption_audit.png");
 println("estimated cost: $0.00");

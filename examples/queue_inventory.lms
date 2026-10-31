@@ -7,7 +7,7 @@ t.csv("data/queue_inventory.csv");
 s.readonly_cost_report("data/queue_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/queue_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/queue_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/queue_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/queue_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -24,7 +24,7 @@ plot.cmd("set title 'MOCK Queue age horizon'; set xlabel 'Resource'; set ylabel 
 plot.close();
 end _dsl_
 savedsl(p, "build/queue_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/queue_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/queue_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/queue_inventory.png");
 println("estimated cost: $0.00");

@@ -7,7 +7,7 @@ t.csv("data/storage_inventory.csv");
 s.readonly_cost_report("data/storage_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/storage_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/storage_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/storage_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/storage_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -24,7 +24,7 @@ plot.cmd("set title 'MOCK Storage age horizon'; set xlabel 'Resource'; set ylabe
 plot.close();
 end _dsl_
 savedsl(p, "build/storage_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/storage_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/storage_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/storage_inventory.png");
 println("estimated cost: $0.00");

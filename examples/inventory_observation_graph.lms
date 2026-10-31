@@ -7,7 +7,7 @@ t.csv("data/inventory_observation_graph_inventory.csv");
 s.readonly_cost_report("data/inventory_observation_graph_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/inventory_observation_graph.dslb");
-r = system ${dsl_cli(azure)} --dsl build/inventory_observation_graph.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/inventory_observation_graph.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/inventory_observation_graph_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -39,7 +39,7 @@ scene.text(30.0,480.0,14.0,"Known metadata is not a security attestation; live a
 scene.render_png("images/inventory_observation_graph.png",900,560,1);
 end _dsl_
 savedsl(p,"build/inventory_observation_graph_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/inventory_observation_graph_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/inventory_observation_graph_draw.dslb;
 assert(r.code == 0);
 println("wrote images/inventory_observation_graph.png");
 println("estimated cost: $0.00");

@@ -65,7 +65,7 @@ run.cleanup();
 run.cost_report("build/live-write-cost.json");
 end _dsl_
 savedsl(azurehost,"build/live-write.dslb");
-r = system ${dsl_cli(azurehost)} --dsl build/live-write.dslb;
+r = system ${dsl_cli(azurehost)} --lmcode build/live-write.dslb;
 assert(r.code == 0);
 let cost = json_parse(read_file("build/live-write-cost.json"));
 println(getstr(cost, "estimated_cost_text"));

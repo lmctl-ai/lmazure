@@ -52,7 +52,7 @@ if(initialized) {
 }
 end _lmcode_
 savedsl(p,"build/lmcloud_dns_inventory/apply.dslb");
-let applied = system(concat(dsl_cli(p),["--dsl","build/lmcloud_dns_inventory/apply.dslb"]),180000);
+let applied = system(concat(dsl_cli(p),["--lmcode","build/lmcloud_dns_inventory/apply.dslb"]),180000);
 # Cleanup is launched even when the create VM returned an error or apply returned false.
 c = _lmcode_ cli="lmcloud" install="github:lmctl-ai/lmcloud@v0.1.9";
 let dir = ${dir};
@@ -64,7 +64,7 @@ let after = tofu.show_state(dir);
 file_write("build/lmcloud_dns_inventory/private-after-state.json",after);
 end _lmcode_
 savedsl(c,"build/lmcloud_dns_inventory/cleanup.dslb");
-let cleaned = system(concat(dsl_cli(c),["--dsl","build/lmcloud_dns_inventory/cleanup.dslb"]),180000);
+let cleaned = system(concat(dsl_cli(c),["--lmcode","build/lmcloud_dns_inventory/cleanup.dslb"]),180000);
 let init_ok = file_exists("build/lmcloud_dns_inventory/init.ok") && trim(read_file("build/lmcloud_dns_inventory/init.ok")) == "true";
 let apply_ok = file_exists("build/lmcloud_dns_inventory/apply.ok") && trim(read_file("build/lmcloud_dns_inventory/apply.ok")) == "true";
 let destroy_ok = file_exists("build/lmcloud_dns_inventory/destroy.ok") && trim(read_file("build/lmcloud_dns_inventory/destroy.ok")) == "true";

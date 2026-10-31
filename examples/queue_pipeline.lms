@@ -7,7 +7,7 @@ t.csv("data/queue_pipeline.csv");
 s.readonly_cost_report("data/queue_pipeline_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/queue_pipeline.dslb");
-r = system ${dsl_cli(azure)} --dsl build/queue_pipeline.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/queue_pipeline.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/queue_pipeline.csv"), false);
 assert(rows[0].len() == 10);
@@ -38,7 +38,7 @@ scene.text(70.0, 420.0, 16.0, "Queue metadata is inspected before any message op
 scene.render_png("images/queue_pipeline.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/queue_pipeline_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/queue_pipeline_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/queue_pipeline_draw.dslb;
 assert(r.code == 0);
 println("wrote images/queue_pipeline.png");
 println("estimated cost: $0.00");

@@ -22,5 +22,5 @@ file_write("build/lmcloud_servicebus_region_coverage/destroy.ok",str(destroyed))
 file_write("build/lmcloud_servicebus_region_coverage/after-destroy.txt",tofu.state_list(dir));
 end _lmcode_
 savedsl(c,"build/lmcloud_servicebus_region_coverage/recovery.dslb");
-r = system(concat(dsl_cli(c),["--dsl","build/lmcloud_servicebus_region_coverage/recovery.dslb"]),180000);
+r = system(concat(dsl_cli(c),["--lmcode","build/lmcloud_servicebus_region_coverage/recovery.dslb"]),180000);
 assert(r.code==0);

@@ -7,7 +7,7 @@ t.csv("data/compute_inventory.csv");
 s.readonly_cost_report("data/compute_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/compute_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/compute_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/compute_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/compute_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -24,7 +24,7 @@ plot.cmd("set title 'MOCK Compute age horizon'; set xlabel 'Resource'; set ylabe
 plot.close();
 end _dsl_
 savedsl(p, "build/compute_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/compute_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/compute_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/compute_inventory.png");
 println("estimated cost: $0.00");

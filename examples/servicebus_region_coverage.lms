@@ -7,7 +7,7 @@ t.csv("data/servicebus_region_coverage_inventory.csv");
 s.readonly_cost_report("data/servicebus_region_coverage_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/servicebus_region_coverage.dslb");
-r = system ${dsl_cli(azure)} --dsl build/servicebus_region_coverage.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/servicebus_region_coverage.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/servicebus_region_coverage_inventory.csv"), false);
 assert(rows.len() == 2);
@@ -30,7 +30,7 @@ plot.cmd("set title 'MOCK Service Bus regional metadata'; set xlabel ''; set yla
 plot.close();
 end _dsl_
 savedsl(p, "build/servicebus_region_coverage_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/servicebus_region_coverage_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/servicebus_region_coverage_plot.dslb;
 assert(r.code == 0);
 println("wrote images/servicebus_region_coverage.png");
 println("estimated cost: $0.00");

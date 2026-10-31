@@ -7,7 +7,7 @@ t.csv("data/dns_inventory.csv");
 s.readonly_cost_report("data/dns_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/dns_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/dns_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/dns_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/dns_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -24,7 +24,7 @@ plot.cmd("set title 'MOCK DNS age horizon'; set xlabel 'Resource'; set ylabel 'A
 plot.close();
 end _dsl_
 savedsl(p, "build/dns_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/dns_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/dns_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/dns_inventory.png");
 println("estimated cost: $0.00");

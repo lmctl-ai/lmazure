@@ -7,7 +7,7 @@ t.csv("data/public_surface_by_region_inventory.csv");
 s.readonly_cost_report("data/public_surface_by_region_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/public_surface_by_region.dslb");
-r = system ${dsl_cli(azure)} --dsl build/public_surface_by_region.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/public_surface_by_region.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/public_surface_by_region_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -36,7 +36,7 @@ plot.cmd("set title 'MOCK Regional exposure metadata'; set ylabel 'Resources'; s
 plot.close();
 end _dsl_
 savedsl(p, "build/public_surface_by_region_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/public_surface_by_region_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/public_surface_by_region_plot.dslb;
 assert(r.code == 0);
 println("wrote images/public_surface_by_region.png");
 println("estimated cost: $0.00");

@@ -7,7 +7,7 @@ t.csv("data/age_distribution.csv");
 s.readonly_cost_report("data/age_distribution_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/age_distribution.dslb");
-r = system ${dsl_cli(azure)} --dsl build/age_distribution.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/age_distribution.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/age_distribution.csv"), false);
 assert(rows[0].len() == 10);
@@ -41,7 +41,7 @@ plot.cmd("set title 'MOCK resource age distribution'; set xlabel 'Age bucket'; s
 plot.close();
 end _dsl_
 savedsl(p, "build/age_distribution_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/age_distribution_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/age_distribution_plot.dslb;
 assert(r.code == 0);
 println("wrote images/age_distribution.png");
 println("estimated cost: $0.00");

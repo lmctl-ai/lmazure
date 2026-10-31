@@ -7,7 +7,7 @@ t.csv("data/resource_inventory.csv");
 s.readonly_cost_report("data/resource_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/resource_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/resource_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/resource_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/resource_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -24,7 +24,7 @@ plot.cmd("set title 'MOCK resource age inventory'; set xlabel 'Age hours'; set y
 plot.close();
 end _dsl_
 savedsl(p, "build/resource_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/resource_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/resource_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/resource_inventory.png");
 println("estimated cost: $0.00");

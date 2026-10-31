@@ -7,7 +7,7 @@ t.csv("data/resource_age_heatmap_inventory.csv");
 s.readonly_cost_report("data/resource_age_heatmap_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/resource_age_heatmap.dslb");
-r = system ${dsl_cli(azure)} --dsl build/resource_age_heatmap.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/resource_age_heatmap.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/resource_age_heatmap_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -42,7 +42,7 @@ plot.cmd("set title 'MOCK Oldest resource age by region'; set datafile separator
 plot.close();
 end _dsl_
 savedsl(p, "build/resource_age_heatmap_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/resource_age_heatmap_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/resource_age_heatmap_plot.dslb;
 assert(r.code == 0);
 println("wrote images/resource_age_heatmap.png");
 println("estimated cost: $0.00");

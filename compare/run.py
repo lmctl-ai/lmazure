@@ -33,7 +33,7 @@ def native_source(name,live=False):
  if not match:raise ComparisonFailure('native provider block not found')
  body=match[2].replace('mock()','live()')
  expected=3 if BY_NAME[name]['ledger_mode']=='budget' else 0
- return 'mkdir("build");mkdir("data");mkdir("evidence");\n'+match[1]+' = _dsl_ cli="lmazure";\n'+body+'end _dsl_\nsavedsl('+match[1]+',"build/native-live.dslb");\nr = system ${dsl_cli('+match[1]+')} --dsl build/native-live.dslb;\nassert(r.code == '+str(expected)+');\n'
+ return 'mkdir("build");mkdir("data");mkdir("evidence");\n'+match[1]+' = _dsl_ cli="lmazure";\n'+body+'end _dsl_\nsavedsl('+match[1]+',"build/native-live.dslb");\nr = system ${dsl_cli('+match[1]+')} --lmcode build/native-live.dslb;\nassert(r.code == '+str(expected)+');\n'
 
 def common_inventory(name,directory):
  source=(ROOT/'examples'/(name+'.lms')).read_text().split('end _dsl_',1)[0]

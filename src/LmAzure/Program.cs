@@ -28,8 +28,8 @@ public static class EntryPoint
                 { using var s=assembly.GetManifestResourceStream(name)!; using var reader=new StreamReader(s); Console.WriteLine(name); Console.WriteLine(reader.ReadToEnd()); }
                 return 0;
             }
-            if (args is ["--dsl-schema"] or ["--dsl-schema", "--json"]) { Console.OpenStandardOutput().Write(Host.Schema); return 0; }
-            if (args is ["--dsl-signatures"]) { Console.WriteLine(string.Join('\n',Host.CreateRegistry().HostSignatures())); return 0; }
+            if (args is ["--lmcode-schema"] or ["--lmcode-schema", "--json"]) { Console.OpenStandardOutput().Write(Host.Schema); return 0; }
+            if (args is ["--lmcode-signatures"]) { Console.WriteLine(string.Join('\n',Host.CreateRegistry().HostSignatures())); return 0; }
             if (args is ["--self-test"])
             {
                 int checks;
@@ -42,8 +42,8 @@ public static class EntryPoint
                 Console.WriteLine($"lmazure fake-transport checks: {checks} passed"); return 0;
             }
             if (args.Length > 0 && args[0] == "--simulator") return SimulatorCommand.Run(args[1..]);
-            if (args is ["--dsl", var path]) return Run(path,false);
-            if (args is ["--dsl", "--dry-run", var dryPath]) return Run(dryPath,true);
+            if (args is ["--lmcode", var path]) return Run(path,false);
+            if (args is ["--lmcode", "--dry-run", var dryPath]) return Run(dryPath,true);
             if (args is ["--inventory", var kind]) { using var s=AzureSession.Mock(); var table=s.Inventory(kind); RuntimeBudget.Check(); Console.Write(table.CsvString()); return 0; }
             if (args is ["--live", "--inventory", var liveKind]) { using var s=AzureSession.Live(); var table=s.Inventory(liveKind); RuntimeBudget.Check(); Console.Write(table.CsvString()); return 0; }
             Console.Error.WriteLine("invalid arguments; use --help"); return 2;
@@ -70,7 +70,7 @@ public static class EntryPoint
 
     private const string Usage="""
         lmazure — Azure SDK host; fake transport by default
-        lmazure --dsl [--dry-run] FILE | --dsl-schema [--json] | --dsl-signatures
+        lmazure --lmcode [--dry-run] FILE | --lmcode-schema [--json] | --lmcode-signatures
         lmazure --inventory KIND | --live --inventory KIND
         lmazure --self-test | --version | --notices | --help
         lmazure --simulator OP NAME [ARGS] (loopback storage SDK operations only)

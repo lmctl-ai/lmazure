@@ -7,7 +7,7 @@ t.csv("data/security_review.csv");
 s.readonly_cost_report("data/security_review_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/security_review.dslb");
-r = system ${dsl_cli(azure)} --dsl build/security_review.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/security_review.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/security_review.csv"), false);
 assert(rows[0].len() == 10);
@@ -38,7 +38,7 @@ scene.text(70.0, 420.0, 16.0, "Identity findings are recorded without printing p
 scene.render_png("images/security_review.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/security_review_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/security_review_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/security_review_draw.dslb;
 assert(r.code == 0);
 println("wrote images/security_review.png");
 println("estimated cost: $0.00");

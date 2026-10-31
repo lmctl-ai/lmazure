@@ -7,7 +7,7 @@ t.csv("data/regional_footprint.csv");
 s.readonly_cost_report("data/regional_footprint_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/regional_footprint.dslb");
-r = system ${dsl_cli(azure)} --dsl build/regional_footprint.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/regional_footprint.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/regional_footprint.csv"), false);
 assert(rows[0].len() == 10);
@@ -36,7 +36,7 @@ plot.cmd("set title 'MOCK regional resource footprint'; set xlabel 'Region'; set
 plot.close();
 end _dsl_
 savedsl(p, "build/regional_footprint_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/regional_footprint_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/regional_footprint_plot.dslb;
 assert(r.code == 0);
 println("wrote images/regional_footprint.png");
 println("estimated cost: $0.00");

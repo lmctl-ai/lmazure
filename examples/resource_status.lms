@@ -7,7 +7,7 @@ t.csv("data/resource_status.csv");
 s.readonly_cost_report("data/resource_status_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/resource_status.dslb");
-r = system ${dsl_cli(azure)} --dsl build/resource_status.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/resource_status.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/resource_status.csv"), false);
 assert(rows[0].len() == 10);
@@ -33,7 +33,7 @@ plot.cmd("set title 'MOCK inventory observation status'; set xlabel 'Metadata st
 plot.close();
 end _dsl_
 savedsl(p, "build/resource_status_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/resource_status_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/resource_status_plot.dslb;
 assert(r.code == 0);
 println("wrote images/resource_status.png");
 println("estimated cost: $0.00");

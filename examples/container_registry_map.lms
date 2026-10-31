@@ -7,7 +7,7 @@ t.csv("data/container_registry_map_inventory.csv");
 s.readonly_cost_report("data/container_registry_map_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/container_registry_map.dslb");
-r = system ${dsl_cli(azure)} --dsl build/container_registry_map.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/container_registry_map.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/container_registry_map_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -38,7 +38,7 @@ scene.text(30.0,480.0,14.0,"Grouping does not establish which registry a cluster
 scene.render_png("images/container_registry_map.png",900,560,1);
 end _dsl_
 savedsl(p,"build/container_registry_map_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/container_registry_map_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/container_registry_map_draw.dslb;
 assert(r.code == 0);
 println("wrote images/container_registry_map.png");
 println("estimated cost: $0.00");

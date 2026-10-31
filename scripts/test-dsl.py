@@ -24,7 +24,7 @@ with tempfile.TemporaryDirectory(prefix='lmazure-dsl-') as directory:
         return d/(name+'.dslb')
     def execute(path,code=0,memory=None,dry=False):
         global checks
-        args=[binary,'--dsl']+(['--dry-run'] if dry else [])+[str(path)]
+        args=[binary,'--lmcode']+(['--dry-run'] if dry else [])+[str(path)]
         if sys.platform=='linux' and os.environ.get('LMAZURE_TEST_ADDRESS_SPACE_LIMIT')=='1':
             args=['bash','-c','ulimit -v 6291456; exec "$@"','_',*args]
         p=subprocess.run(args,cwd=d,env={**env,**({'LMAZURE_MAX_MEMORY_MB':memory} if memory else {})},capture_output=True,text=True,timeout=90)

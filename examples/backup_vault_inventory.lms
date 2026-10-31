@@ -8,7 +8,7 @@ t.csv("data/backup_vault_inventory.csv");
 s.readonly_cost_report("data/backup_vault_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/backup_vault_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/backup_vault_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/backup_vault_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/backup_vault_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -47,7 +47,7 @@ scene.text(40.0, 492.0, 15.0, "Synthetic flags only; live ARM metadata does not 
 scene.render_png("images/backup_vault_inventory.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/backup_vault_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/backup_vault_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/backup_vault_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/backup_vault_inventory.png");
 println("estimated cost: $0.00");

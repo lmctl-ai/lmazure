@@ -7,7 +7,7 @@ t.csv("data/provider_resource_graph_inventory.csv");
 s.readonly_cost_report("data/provider_resource_graph_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/provider_resource_graph.dslb");
-r = system ${dsl_cli(azure)} --dsl build/provider_resource_graph.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/provider_resource_graph.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/provider_resource_graph_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -51,7 +51,7 @@ scene.text(30.0,480.0,14.0,"Edges show inventory grouping only; no network or ap
 scene.render_png("images/provider_resource_graph.png",900,560,1);
 end _dsl_
 savedsl(p,"build/provider_resource_graph_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/provider_resource_graph_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/provider_resource_graph_draw.dslb;
 assert(r.code == 0);
 println("wrote images/provider_resource_graph.png");
 println("estimated cost: $0.00");

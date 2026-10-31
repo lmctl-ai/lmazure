@@ -7,7 +7,7 @@ t.csv("data/region_service_matrix_inventory.csv");
 s.readonly_cost_report("data/region_service_matrix_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/region_service_matrix.dslb");
-r = system ${dsl_cli(azure)} --dsl build/region_service_matrix.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/region_service_matrix.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/region_service_matrix_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -42,7 +42,7 @@ plot.cmd("set title 'MOCK Service counts by region'; set datafile separator ',';
 plot.close();
 end _dsl_
 savedsl(p, "build/region_service_matrix_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/region_service_matrix_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/region_service_matrix_plot.dslb;
 assert(r.code == 0);
 println("wrote images/region_service_matrix.png");
 println("estimated cost: $0.00");

@@ -7,7 +7,7 @@ t.csv("data/serverless_plan.csv");
 s.readonly_cost_report("data/serverless_plan_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/serverless_plan.dslb");
-r = system ${dsl_cli(azure)} --dsl build/serverless_plan.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/serverless_plan.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/serverless_plan.csv"), false);
 assert(rows[0].len() == 10);
@@ -38,7 +38,7 @@ scene.text(70.0, 420.0, 16.0, "A serverless plan stays read-only until a separat
 scene.render_png("images/serverless_plan.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/serverless_plan_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/serverless_plan_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/serverless_plan_draw.dslb;
 assert(r.code == 0);
 println("wrote images/serverless_plan.png");
 println("estimated cost: $0.00");

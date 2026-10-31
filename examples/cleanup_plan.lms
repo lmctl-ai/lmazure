@@ -7,7 +7,7 @@ t.csv("data/cleanup_plan.csv");
 s.readonly_cost_report("data/cleanup_plan_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/cleanup_plan.dslb");
-r = system ${dsl_cli(azure)} --dsl build/cleanup_plan.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/cleanup_plan.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/cleanup_plan.csv"), false);
 assert(rows[0].len() == 10);
@@ -38,7 +38,7 @@ scene.text(70.0, 420.0, 16.0, "Only prefix-owned, ledger-owned stale rows may be
 scene.render_png("images/cleanup_plan.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/cleanup_plan_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/cleanup_plan_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/cleanup_plan_draw.dslb;
 assert(r.code == 0);
 println("wrote images/cleanup_plan.png");
 println("estimated cost: $0.00");

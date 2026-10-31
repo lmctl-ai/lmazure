@@ -7,7 +7,7 @@ t.csv("data/public_resource_audit.csv");
 s.readonly_cost_report("data/public_resource_audit_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/public_resource_audit.dslb");
-r = system ${dsl_cli(azure)} --dsl build/public_resource_audit.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/public_resource_audit.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/public_resource_audit.csv"), false);
 assert(rows[0].len() == 10);
@@ -38,7 +38,7 @@ plot.cmd("set title 'MOCK public exposure audit'; set xlabel 'Exposure'; set yla
 plot.close();
 end _dsl_
 savedsl(p, "build/public_resource_audit_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/public_resource_audit_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/public_resource_audit_plot.dslb;
 assert(r.code == 0);
 println("wrote images/public_resource_audit.png");
 println("estimated cost: $0.00");

@@ -15,7 +15,7 @@ run.cleanup();
 run.cost_report("data/cleanup_age_guard_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/cleanup_age_guard.dslb");
-r0 = system ${dsl_cli(azure)} --dsl build/cleanup_age_guard.dslb;
+r0 = system ${dsl_cli(azure)} --lmcode build/cleanup_age_guard.dslb;
 assert(r0.code == 0);
 let age_rows = csv_parse(read_file("data/cleanup_age_guard_age.csv"), false);
 assert(age_rows.len() == 1);
@@ -62,7 +62,7 @@ scene.text(30.0,477.0,14.0,"Fake transports only; price-table estimates have not
 scene.render_png("images/cleanup_age_guard.png",900,560,1);
 end _dsl_
 savedsl(p,"build/cleanup_age_guard_visual.dslb");
-r = system ${dsl_cli(p)} --dsl build/cleanup_age_guard_visual.dslb;
+r = system ${dsl_cli(p)} --lmcode build/cleanup_age_guard_visual.dslb;
 assert(r.code==0);
 println("wrote images/cleanup_age_guard.png");
 println(getstr(cost_report, "estimated_cost_text"));

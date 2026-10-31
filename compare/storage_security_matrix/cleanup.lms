@@ -22,5 +22,5 @@ file_write("build/lmcloud_storage_security_matrix/destroy.ok",str(destroyed));
 file_write("build/lmcloud_storage_security_matrix/after-destroy.txt",tofu.state_list(dir));
 end _lmcode_
 savedsl(c,"build/lmcloud_storage_security_matrix/recovery.dslb");
-r = system(concat(dsl_cli(c),["--dsl","build/lmcloud_storage_security_matrix/recovery.dslb"]),180000);
+r = system(concat(dsl_cli(c),["--lmcode","build/lmcloud_storage_security_matrix/recovery.dslb"]),180000);
 assert(r.code==0);

@@ -7,7 +7,7 @@ t.csv("data/network_topology.csv");
 s.readonly_cost_report("data/network_topology_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/network_topology.dslb");
-r = system ${dsl_cli(azure)} --dsl build/network_topology.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/network_topology.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/network_topology.csv"), false);
 assert(rows[0].len() == 10);
@@ -38,7 +38,7 @@ scene.text(70.0, 420.0, 16.0, "Mock network rows drive a read-only topology revi
 scene.render_png("images/network_topology.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/network_topology_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/network_topology_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/network_topology_draw.dslb;
 assert(r.code == 0);
 println("wrote images/network_topology.png");
 println("estimated cost: $0.00");

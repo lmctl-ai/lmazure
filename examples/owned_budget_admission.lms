@@ -8,7 +8,7 @@ run.cost_report("data/owned_budget_admission_cost_evidence.json");
 let blocked = run.queue("budget-admission");
 end _dsl_
 savedsl(azure, "build/owned_budget_admission.dslb");
-r0 = system ${dsl_cli(azure)} --dsl build/owned_budget_admission.dslb;
+r0 = system ${dsl_cli(azure)} --lmcode build/owned_budget_admission.dslb;
 assert(r0.code == 3);
 let cost_report = json_parse(read_file("data/owned_budget_admission_cost_evidence.json"));
 assert(getstr(cost_report, "mode") == "fake");
@@ -52,7 +52,7 @@ scene.text(30.0,477.0,14.0,"Fake transports only; price-table estimates have not
 scene.render_png("images/owned_budget_admission.png",900,560,1);
 end _dsl_
 savedsl(p,"build/owned_budget_admission_visual.dslb");
-r = system ${dsl_cli(p)} --dsl build/owned_budget_admission_visual.dslb;
+r = system ${dsl_cli(p)} --lmcode build/owned_budget_admission_visual.dslb;
 assert(r.code==0);
 println("wrote images/owned_budget_admission.png");
 println(getstr(cost_report, "estimated_cost_text"));

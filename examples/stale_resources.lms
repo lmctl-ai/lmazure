@@ -7,7 +7,7 @@ t.csv("data/stale_resources.csv");
 s.readonly_cost_report("data/stale_resources_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/stale_resources.dslb");
-r = system ${dsl_cli(azure)} --dsl build/stale_resources.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/stale_resources.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/stale_resources.csv"), false);
 assert(rows[0].len() == 10);
@@ -34,7 +34,7 @@ plot.cmd("set title 'MOCK stale resource review'; set xlabel 'Age status'; set y
 plot.close();
 end _dsl_
 savedsl(p, "build/stale_resources_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/stale_resources_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/stale_resources_plot.dslb;
 assert(r.code == 0);
 println("wrote images/stale_resources.png");
 println("estimated cost: $0.00");

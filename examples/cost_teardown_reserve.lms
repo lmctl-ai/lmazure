@@ -14,7 +14,7 @@ run.cleanup();
 run.cost_report("data/cost_teardown_reserve_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/cost_teardown_reserve.dslb");
-r0 = system ${dsl_cli(azure)} --dsl build/cost_teardown_reserve.dslb;
+r0 = system ${dsl_cli(azure)} --lmcode build/cost_teardown_reserve.dslb;
 assert(r0.code == 0);
 let cost_report = json_parse(read_file("data/cost_teardown_reserve_cost_evidence.json"));
 assert(getstr(cost_report, "mode") == "fake");
@@ -49,7 +49,7 @@ plot.cmd("set title 'MOCK teardown reservation'; set ylabel 'Reserved request un
 plot.close();
 end _dsl_
 savedsl(p,"build/cost_teardown_reserve_visual.dslb");
-r = system ${dsl_cli(p)} --dsl build/cost_teardown_reserve_visual.dslb;
+r = system ${dsl_cli(p)} --lmcode build/cost_teardown_reserve_visual.dslb;
 assert(r.code==0);
 println("wrote images/cost_teardown_reserve.png");
 println(getstr(cost_report, "estimated_cost_text"));

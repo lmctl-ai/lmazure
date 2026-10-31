@@ -22,5 +22,5 @@ file_write("build/lmcloud_queue_pipeline/destroy.ok",str(destroyed));
 file_write("build/lmcloud_queue_pipeline/after-destroy.txt",tofu.state_list(dir));
 end _lmcode_
 savedsl(c,"build/lmcloud_queue_pipeline/recovery.dslb");
-r = system(concat(dsl_cli(c),["--dsl","build/lmcloud_queue_pipeline/recovery.dslb"]),180000);
+r = system(concat(dsl_cli(c),["--lmcode","build/lmcloud_queue_pipeline/recovery.dslb"]),180000);
 assert(r.code==0);

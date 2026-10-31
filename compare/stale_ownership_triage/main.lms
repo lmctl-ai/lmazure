@@ -52,7 +52,7 @@ if(initialized) {
 }
 end _lmcode_
 savedsl(p,"build/lmcloud_stale_ownership_triage/apply.dslb");
-let applied = system(concat(dsl_cli(p),["--dsl","build/lmcloud_stale_ownership_triage/apply.dslb"]),180000);
+let applied = system(concat(dsl_cli(p),["--lmcode","build/lmcloud_stale_ownership_triage/apply.dslb"]),180000);
 # Cleanup is launched even when the create VM returned an error or apply returned false.
 c = _lmcode_ cli="lmcloud" install="github:lmctl-ai/lmcloud@v0.1.9";
 let dir = ${dir};
@@ -64,7 +64,7 @@ let after = tofu.show_state(dir);
 file_write("build/lmcloud_stale_ownership_triage/private-after-state.json",after);
 end _lmcode_
 savedsl(c,"build/lmcloud_stale_ownership_triage/cleanup.dslb");
-let cleaned = system(concat(dsl_cli(c),["--dsl","build/lmcloud_stale_ownership_triage/cleanup.dslb"]),180000);
+let cleaned = system(concat(dsl_cli(c),["--lmcode","build/lmcloud_stale_ownership_triage/cleanup.dslb"]),180000);
 let init_ok = file_exists("build/lmcloud_stale_ownership_triage/init.ok") && trim(read_file("build/lmcloud_stale_ownership_triage/init.ok")) == "true";
 let apply_ok = file_exists("build/lmcloud_stale_ownership_triage/apply.ok") && trim(read_file("build/lmcloud_stale_ownership_triage/apply.ok")) == "true";
 let destroy_ok = file_exists("build/lmcloud_stale_ownership_triage/destroy.ok") && trim(read_file("build/lmcloud_stale_ownership_triage/destroy.ok")) == "true";

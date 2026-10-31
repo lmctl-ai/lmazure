@@ -8,7 +8,7 @@ t.csv("data/registry_inventory.csv");
 s.readonly_cost_report("data/registry_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/registry_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/registry_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/registry_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/registry_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -47,7 +47,7 @@ scene.text(40.0, 492.0, 15.0, "Synthetic flags only; live ARM metadata does not 
 scene.render_png("images/registry_inventory.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/registry_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/registry_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/registry_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/registry_inventory.png");
 println("estimated cost: $0.00");

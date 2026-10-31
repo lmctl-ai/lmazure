@@ -7,7 +7,7 @@ t.csv("data/monitoring_coverage_inventory.csv");
 s.readonly_cost_report("data/monitoring_coverage_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/monitoring_coverage.dslb");
-r = system ${dsl_cli(azure)} --dsl build/monitoring_coverage.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/monitoring_coverage.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/monitoring_coverage_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -30,7 +30,7 @@ plot.cmd("set title 'MOCK monitoring metadata (no log queries)'; set xlabel ''; 
 plot.close();
 end _dsl_
 savedsl(p, "build/monitoring_coverage_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/monitoring_coverage_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/monitoring_coverage_plot.dslb;
 assert(r.code == 0);
 println("wrote images/monitoring_coverage.png");
 println("estimated cost: $0.00");

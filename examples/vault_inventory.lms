@@ -7,7 +7,7 @@ t.csv("data/vault_inventory.csv");
 s.readonly_cost_report("data/vault_inventory_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/vault_inventory.dslb");
-r = system ${dsl_cli(azure)} --dsl build/vault_inventory.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/vault_inventory.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/vault_inventory.csv"), false);
 assert(rows[0].len() == 10);
@@ -24,7 +24,7 @@ plot.cmd("set title 'MOCK Vault age horizon'; set xlabel 'Resource'; set ylabel 
 plot.close();
 end _dsl_
 savedsl(p, "build/vault_inventory_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/vault_inventory_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/vault_inventory_plot.dslb;
 assert(r.code == 0);
 println("wrote images/vault_inventory.png");
 println("estimated cost: $0.00");

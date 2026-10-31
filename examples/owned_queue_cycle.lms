@@ -14,7 +14,7 @@ let remaining = s.sweep("build/owned_queue_cycle.ledger.json", 0.0);
 remaining.csv("data/owned_queue_cycle_remaining.csv");
 end _dsl_
 savedsl(azure, "build/owned_queue_cycle.dslb");
-r = system ${dsl_cli(azure)} --dsl build/owned_queue_cycle.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/owned_queue_cycle.dslb;
 assert(r.code == 0);
 let created_rows = csv_parse(read_file("data/owned_queue_cycle_created.csv"), false);
 let remaining_rows = csv_parse(read_file("data/owned_queue_cycle_remaining.csv"), false);
@@ -45,7 +45,7 @@ scene.text(70.0, 420.0, 16.0, "The post-cleanup sweep is empty and the ledger is
 scene.render_png("images/owned_queue_cycle.png", 900, 560, 1);
 end _dsl_
 savedsl(p, "build/owned_queue_cycle_draw.dslb");
-r = system ${dsl_cli(p)} --dsl build/owned_queue_cycle_draw.dslb;
+r = system ${dsl_cli(p)} --lmcode build/owned_queue_cycle_draw.dslb;
 assert(r.code == 0);
 println("wrote images/owned_queue_cycle.png");
 println(getstr(cost_report, "estimated_cost_text"));

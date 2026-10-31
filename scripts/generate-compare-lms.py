@@ -71,7 +71,7 @@ if(initialized) {{
 }}
 end _lmcode_
 savedsl(p,"{base}/apply.dslb");
-let applied = system(concat(dsl_cli(p),["--dsl","{base}/apply.dslb"]),180000);
+let applied = system(concat(dsl_cli(p),["--lmcode","{base}/apply.dslb"]),180000);
 # Cleanup is launched even when the create VM returned an error or apply returned false.
 c = _lmcode_ cli="lmcloud" install="github:lmctl-ai/lmcloud@v0.1.9";
 let dir = ${{dir}};
@@ -83,7 +83,7 @@ let after = tofu.show_state(dir);
 file_write("{base}/private-after-state.json",after);
 end _lmcode_
 savedsl(c,"{base}/cleanup.dslb");
-let cleaned = system(concat(dsl_cli(c),["--dsl","{base}/cleanup.dslb"]),180000);
+let cleaned = system(concat(dsl_cli(c),["--lmcode","{base}/cleanup.dslb"]),180000);
 let init_ok = file_exists("{base}/init.ok") && trim(read_file("{base}/init.ok")) == "true";
 let apply_ok = file_exists("{base}/apply.ok") && trim(read_file("{base}/apply.ok")) == "true";
 let destroy_ok = file_exists("{base}/destroy.ok") && trim(read_file("{base}/destroy.ok")) == "true";
@@ -106,7 +106,7 @@ file_write("{base}/destroy.ok",str(destroyed));
 file_write("{base}/after-destroy.txt",tofu.state_list(dir));
 end _lmcode_
 savedsl(c,"{base}/recovery.dslb");
-r = system(concat(dsl_cli(c),["--dsl","{base}/recovery.dslb"]),180000);
+r = system(concat(dsl_cli(c),["--lmcode","{base}/recovery.dslb"]),180000);
 assert(r.code==0);
 '''
  (sp.parent/'cleanup.lms').write_text('\n'.join(line.rstrip() for line in cleanup.splitlines())+'\n')

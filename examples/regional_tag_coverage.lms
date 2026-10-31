@@ -7,7 +7,7 @@ t.csv("data/regional_tag_coverage_inventory.csv");
 s.readonly_cost_report("data/regional_tag_coverage_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/regional_tag_coverage.dslb");
-r = system ${dsl_cli(azure)} --dsl build/regional_tag_coverage.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/regional_tag_coverage.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/regional_tag_coverage_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -36,7 +36,7 @@ plot.cmd("set title 'MOCK Regional ownership-tag coverage'; set ylabel 'Resource
 plot.close();
 end _dsl_
 savedsl(p, "build/regional_tag_coverage_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/regional_tag_coverage_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/regional_tag_coverage_plot.dslb;
 assert(r.code == 0);
 println("wrote images/regional_tag_coverage.png");
 println("estimated cost: $0.00");

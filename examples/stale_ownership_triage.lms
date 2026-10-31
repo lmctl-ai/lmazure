@@ -7,7 +7,7 @@ t.csv("data/stale_ownership_triage_inventory.csv");
 s.readonly_cost_report("data/stale_ownership_triage_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/stale_ownership_triage.dslb");
-r = system ${dsl_cli(azure)} --dsl build/stale_ownership_triage.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/stale_ownership_triage.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/stale_ownership_triage_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -29,7 +29,7 @@ plot.cmd("set title 'MOCK age and ownership triage'; set ylabel 'Resources'; set
 plot.close();
 end _dsl_
 savedsl(p, "build/stale_ownership_triage_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/stale_ownership_triage_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/stale_ownership_triage_plot.dslb;
 assert(r.code == 0);
 println("wrote images/stale_ownership_triage.png");
 println("estimated cost: $0.00");

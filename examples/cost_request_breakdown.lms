@@ -13,7 +13,7 @@ run.cleanup();
 run.cost_report("data/cost_request_breakdown_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/cost_request_breakdown.dslb");
-r0 = system ${dsl_cli(azure)} --dsl build/cost_request_breakdown.dslb;
+r0 = system ${dsl_cli(azure)} --lmcode build/cost_request_breakdown.dslb;
 assert(r0.code == 0);
 let cost_report = json_parse(read_file("data/cost_request_breakdown_cost_evidence.json"));
 assert(getstr(cost_report, "mode") == "fake");
@@ -48,7 +48,7 @@ plot.cmd("set title 'MOCK actual storage request attempts'; set ylabel 'Request 
 plot.close();
 end _dsl_
 savedsl(p,"build/cost_request_breakdown_visual.dslb");
-r = system ${dsl_cli(p)} --dsl build/cost_request_breakdown_visual.dslb;
+r = system ${dsl_cli(p)} --lmcode build/cost_request_breakdown_visual.dslb;
 assert(r.code==0);
 println("wrote images/cost_request_breakdown.png");
 println(getstr(cost_report, "estimated_cost_text"));

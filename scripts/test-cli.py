@@ -22,9 +22,9 @@ def run(*args,code=0,env=None):
     return p
 
 assert run('--version').stdout.strip()=='lmazure '+(root/'VERSION').read_text().strip()
-schema=json.loads(run('--dsl-schema').stdout)
+schema=json.loads(run('--lmcode-schema').stdout)
 assert schema['name']=='lmazure' and schema['dsl.schema']==2
-signatures=run('--dsl-signatures').stdout.splitlines()
+signatures=run('--lmcode-signatures').stdout.splitlines()
 assert len(signatures)==25 and len(set(signatures))==25
 assert 'DefaultAzureCredential' in run('--help').stdout
 assert 'LMAZURE_MAX_MEMORY_MB' in run('--help').stdout
@@ -44,10 +44,10 @@ for value in ['0','-1','1.5','lots','99999999999999999999999','']:
 assert 'LMAZURE_MAX_MEMORY_MB' in run('--version',code=3,env={'LMAZURE_MAX_MEMORY_MB':'1'}).stderr
 with tempfile.TemporaryDirectory(prefix='lmazure-invalid-') as d:
     path=Path(d)/'corrupt.dslb';path.write_bytes(b'not-bytecode-with-private-secret')
-    p=run('--dsl',str(path),code=3)
+    p=run('--lmcode',str(path),code=3)
     assert 'private-secret' not in p.stdout+p.stderr
     assert json.loads(p.stdout)['phase']=='load'
-    run('--dsl',str(Path(d)/'missing.dslb'),code=3)
+    run('--lmcode',str(Path(d)/'missing.dslb'),code=3)
 # Simulator mode is opt-in and cannot send requests outside literal IPv4 loopback.
 for endpoint in ['https://management.azure.com', 'http://example.com', 'http://127.0.0.1.evil.test',
                  'http://127.0.0.1:4577/path', 'http://user@127.0.0.1:4577', 'http://127.0.0.1:4577/?q=1']:

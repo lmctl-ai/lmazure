@@ -7,7 +7,7 @@ t.csv("data/service_counts.csv");
 s.readonly_cost_report("data/service_counts_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/service_counts.dslb");
-r = system ${dsl_cli(azure)} --dsl build/service_counts.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/service_counts.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/service_counts.csv"), false);
 assert(rows[0].len() == 10);
@@ -37,7 +37,7 @@ plot.cmd("set title 'MOCK service inventory overview'; set xlabel 'Service kind'
 plot.close();
 end _dsl_
 savedsl(p, "build/service_counts_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/service_counts_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/service_counts_plot.dslb;
 assert(r.code == 0);
 println("wrote images/service_counts.png");
 println("estimated cost: $0.00");

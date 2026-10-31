@@ -7,7 +7,7 @@ t.csv("data/inventory_unknowns_audit_inventory.csv");
 s.readonly_cost_report("data/inventory_unknowns_audit_cost_evidence.json");
 end _dsl_
 savedsl(azure, "build/inventory_unknowns_audit.dslb");
-r = system ${dsl_cli(azure)} --dsl build/inventory_unknowns_audit.dslb;
+r = system ${dsl_cli(azure)} --lmcode build/inventory_unknowns_audit.dslb;
 assert(r.code == 0);
 let rows = csv_parse(read_file("data/inventory_unknowns_audit_inventory.csv"), false);
 assert(rows.len() == 25);
@@ -26,7 +26,7 @@ plot.cmd("set title 'MOCK inventory certainty; flags are synthetic'; set ylabel 
 plot.close();
 end _dsl_
 savedsl(p, "build/inventory_unknowns_audit_plot.dslb");
-r = system ${dsl_cli(p)} --dsl build/inventory_unknowns_audit_plot.dslb;
+r = system ${dsl_cli(p)} --lmcode build/inventory_unknowns_audit_plot.dslb;
 assert(r.code == 0);
 println("wrote images/inventory_unknowns_audit.png");
 println("estimated cost: $0.00");
