@@ -21,5 +21,9 @@ for name,entry in CATALOG.items():
  assert 'LMAZURE_COMPARE_MODE' in lms and 'LMAZURE_COMPARE_LIVE_APPROVED' in lms and 'LMAZURE_COMPARE_AUTH_FILE' in lms
  assert 'tofu.destroy(' in lms and 'destroy.ok' in lms and 'apply.ok' in lms
  assert '_lmcode_' in lms and 'github:lmctl-ai/lmcloud@v0.1.9' in lms
+ cleanup=(d/'cleanup.lms').read_text()
+ assert 'r = run_lmcode(c);' in cleanup and 'assert(r.ok,' in cleanup
+ assert 'savedsl(' not in cleanup and 'dsl_cli(' not in cleanup
+ assert 'LMAZURE_COMPARE_LIVE_APPROVED' in cleanup and 'LMAZURE_COMPARE_AUTH_FILE' in cleanup
  checks+=1
 print(f'comparison configuration contracts: {checks} examples passed; no provider initialized')
