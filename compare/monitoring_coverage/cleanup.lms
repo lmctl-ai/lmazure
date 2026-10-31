@@ -21,6 +21,6 @@ let destroyed = tofu.destroy(dir);
 file_write("build/lmcloud_monitoring_coverage/destroy.ok",str(destroyed));
 file_write("build/lmcloud_monitoring_coverage/after-destroy.txt",tofu.state_list(dir));
 end _lmcode_
-savedsl(c,"build/lmcloud_monitoring_coverage/recovery.dslb");
-r = system(concat(dsl_cli(c),["--lmcode","build/lmcloud_monitoring_coverage/recovery.dslb"]),180000);
-assert(r.code==0);
+
+r = run_lmcode(c);
+assert(r.ok, "lmcode host failed");
