@@ -105,9 +105,9 @@ let destroyed = tofu.destroy(dir);
 file_write("{base}/destroy.ok",str(destroyed));
 file_write("{base}/after-destroy.txt",tofu.state_list(dir));
 end _lmcode_
-savedsl(c,"{base}/recovery.dslb");
-r = system(concat(dsl_cli(c),["--lmcode","{base}/recovery.dslb"]),180000);
-assert(r.code==0);
+
+r = run_lmcode(c);
+assert(r.ok, "lmcode host failed");
 '''
  (sp.parent/'cleanup.lms').write_text('\n'.join(line.rstrip() for line in cleanup.splitlines())+'\n')
 print('Generated 72 self-contained guarded comparison and recovery programs.')
