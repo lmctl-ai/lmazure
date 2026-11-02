@@ -264,7 +264,7 @@ func (r *remote) Receive(ctx context.Context, q string, max, wait, vis int) ([]h
 func (r *remote) Ack(ctx context.Context, q, receipt string) error {
 	msgID, popReceipt, ok := DecodeReceipt(receipt)
 	if !ok {
-		return hostkit.Preflightf("invalid Azure queue receipt token")
+		return hostkit.ProviderError(hostkit.InvalidArgument, http.StatusBadRequest, "InvalidReceipt", "invalid Azure queue receipt token")
 	}
 	base := hostkit.EndpointFrom(ctx)
 	svc, cErr := r.newQueueServiceClient(base)
@@ -282,7 +282,7 @@ func (r *remote) Ack(ctx context.Context, q, receipt string) error {
 func (r *remote) Nack(ctx context.Context, q, receipt string, vis int) (string, error) {
 	msgID, popReceipt, ok := DecodeReceipt(receipt)
 	if !ok {
-		return "", hostkit.Preflightf("invalid Azure queue receipt token")
+		return "", hostkit.ProviderError(hostkit.InvalidArgument, http.StatusBadRequest, "InvalidReceipt", "invalid Azure queue receipt token")
 	}
 	base := hostkit.EndpointFrom(ctx)
 	svc, cErr := r.newQueueServiceClient(base)

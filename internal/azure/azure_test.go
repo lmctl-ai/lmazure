@@ -144,6 +144,188 @@ func TestRetry503ThreeAttemptsAndSendIdempotency(t *testing.T) {
 	}
 }
 
+func TestPostRetryRules429AndPostCommitEOF(t *testing.T) {
+	var post429Calls atomic.Int32
+	var postEOFCalls atomic.Int32
+	var mode atomic.Int32
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch mode.Load() {
+		case 5: // SolReviewer post-mode-5: POST 429 must be retried 3 times
+			post429Calls.Add(1)
+			w.Header().Set("Content-Type", "application/xml")
+			w.Header().Set("x-ms-error-code", "ServerBusy")
+			w.WriteHeader(http.StatusTooManyRequests)
+			_, _ = io.WriteString(w, `<Error><Code>ServerBusy</Code><Message>busy</Message></Error>`)
+		case 6: // SolReviewer post-mode-6: server accepts POST then closes (EOF) -> must NOT retry (1 attempt)
+			postEOFCalls.Add(1)
+			hj, ok := w.(http.Hijacker)
+			if !ok {
+				t.Errorf("ResponseWriter does not support Hijacker")
+				return
+			}
+			conn, _, err := hj.Hijack()
+			if err == nil {
+				_ = conn.Close()
+			}
+		case 7: // POST 429 twice then 201 Created on attempt 3
+			n := post429Calls.Add(1)
+			if n < 3 {
+				w.Header().Set("Content-Type", "application/xml")
+				w.Header().Set("x-ms-error-code", "ServerBusy")
+				w.WriteHeader(http.StatusTooManyRequests)
+				_, _ = io.WriteString(w, `<Error><Code>ServerBusy</Code><Message>busy</Message></Error>`)
+				return
+			}
+			w.Header().Set("Content-Type", "application/xml")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?><QueueMessagesList><QueueMessage><MessageId>msg-ok-3</MessageId><InsertionTime>Sun, 01 Nov 2026 00:00:00 GMT</InsertionTime><ExpirationTime>Sun, 08 Nov 2026 00:00:00 GMT</ExpirationTime><PopReceipt>pop-1</PopReceipt><TimeNextVisible>Sun, 01 Nov 2026 00:00:00 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>`)
+		}
+	}))
+	defer srv.Close()
+
+	fastRetry := &hostkit.RetryPolicy{
+		Sleep: func(_ context.Context, _ time.Duration) error { return nil },
+	}
+	a := New(&Options{
+		Getenv: func(string) string { return "" },
+		Retry:  fastRetry,
+	})
+	ctx := hostkit.WithEndpoint(context.Background(), srv.URL)
+
+	// Repro 1 (post-mode-5): POST 429 must be retried 3 times and fail with INTERNAL.
+	mode.Store(5)
+	_, err := a.Send(ctx, "valid-queue", "body")
+	if err == nil {
+		t.Fatalf("expected Send on persistent 429 to fail")
+	}
+	if ce := hostkit.AsCloudError(err); ce.Code != hostkit.Internal || ce.HTTPStatus != http.StatusTooManyRequests {
+		t.Fatalf("expected INTERNAL (429) after 3 attempts, got %+v", ce)
+	}
+	if got := post429Calls.Load(); got != 3 {
+		t.Fatalf("expected 3 attempts on POST 429, got %d", got)
+	}
+
+	// Repro 2 (post-mode-6): Server accepts POST then closes (EOF) -> must NOT retry (1 attempt).
+	mode.Store(6)
+	_, err = a.Send(ctx, "valid-queue", "body")
+	if err == nil {
+		t.Fatalf("expected Send on EOF to fail")
+	}
+	if got := postEOFCalls.Load(); got != 1 {
+		t.Fatalf("expected 1 attempt on post-send EOF for non-idempotent POST, got %d", got)
+	}
+
+	// Repro 3: POST 429 twice then 201 Created succeeds on attempt 3.
+	post429Calls.Store(0)
+	mode.Store(7)
+	id, err := a.Send(ctx, "valid-queue", "body")
+	if err != nil || id != "msg-ok-3" {
+		t.Fatalf("expected Send to succeed on attempt 3 after 2x 429, got id=%q err=%v", id, err)
+	}
+	if got := post429Calls.Load(); got != 3 {
+		t.Fatalf("expected 3 attempts on recovering POST 429, got %d", got)
+	}
+}
+
+func TestAmbientCredentialIsolationAndRedirectRefusal(t *testing.T) {
+	var sawAuthHeader atomic.Value
+	var sawPath atomic.Value
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		sawAuthHeader.Store(r.Header.Get("Authorization"))
+		sawPath.Store(r.URL.Path)
+		w.Header().Set("ETag", `"e1"`)
+		w.Header().Set("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer srv.Close()
+
+	// Set synthetic ambient AZURE_* env vars; loopback client must ignore all of them.
+	a := New(&Options{
+		Getenv: func(k string) string {
+			switch k {
+			case "AZURE_STORAGE_TOKEN":
+				return "ambient-secret-bearer-token"
+			case "AZURE_STORAGE_KEY":
+				return base64.StdEncoding.EncodeToString([]byte("ambient-secret-key-bytes-32-long"))
+			case "AZURE_STORAGE_ACCOUNT":
+				return "ambientaccount"
+			default:
+				return ""
+			}
+		},
+	})
+	ctx := hostkit.WithEndpoint(context.Background(), srv.URL)
+	if err := a.HeadBucket(ctx, "valid-bucket"); err != nil {
+		t.Fatalf("HeadBucket failed: %v", err)
+	}
+	authHdr, _ := sawAuthHeader.Load().(string)
+	if strings.Contains(authHdr, "ambient-secret-bearer-token") || strings.Contains(authHdr, "Bearer") {
+		t.Fatalf("ambient AZURE_STORAGE_TOKEN leaked to loopback simulator: Authorization=%q", authHdr)
+	}
+	if !strings.HasPrefix(authHdr, "SharedKey devstoreaccount1:") {
+		t.Fatalf("expected SharedKey devstoreaccount1:..., got Authorization=%q", authHdr)
+	}
+	pathStr, _ := sawPath.Load().(string)
+	if !strings.HasPrefix(pathStr, "/devstoreaccount1/") {
+		t.Fatalf("expected default devstoreaccount1 path, got %q", pathStr)
+	}
+
+	// Cross-port 307 redirect must be refused without contacting destination or forwarding Authorization.
+	var dstRequests atomic.Int32
+	var dstAuthForwarded atomic.Bool
+	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		dstRequests.Add(1)
+		if r.Header.Get("Authorization") != "" {
+			dstAuthForwarded.Store(true)
+		}
+		_, _ = io.WriteString(w, "x")
+	}))
+	defer target.Close()
+
+	redirect := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL+"/key", http.StatusTemporaryRedirect)
+	}))
+	defer redirect.Close()
+
+	_, err := a.GetObject(hostkit.WithEndpoint(context.Background(), redirect.URL), "valid-bucket", "key", 100)
+	if err == nil {
+		t.Fatalf("expected cross-port redirect to fail")
+	}
+	if dstRequests.Load() != 0 {
+		t.Fatalf("expected 0 destination requests on cross-port redirect, got %d", dstRequests.Load())
+	}
+	if dstAuthForwarded.Load() {
+		t.Fatalf("Authorization was forwarded to redirect destination")
+	}
+
+	// Same-origin redirect must also strip Authorization on the redirected hop.
+	var sameOriginRedirectedAuth atomic.Value
+	var sameOriginSrv *httptest.Server
+	sameOriginSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, "/redirected") {
+			sameOriginRedirectedAuth.Store(r.Header.Get("Authorization"))
+			w.Header().Set("Content-Type", "application/octet-stream")
+			w.Header().Set("ETag", `"e1"`)
+			w.Header().Set("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
+			w.WriteHeader(http.StatusOK)
+			_, _ = io.WriteString(w, "ok")
+			return
+		}
+		http.Redirect(w, r, sameOriginSrv.URL+"/devstoreaccount1/valid-bucket/redirected", http.StatusTemporaryRedirect)
+	}))
+	defer sameOriginSrv.Close()
+
+	_, err = a.GetObject(hostkit.WithEndpoint(context.Background(), sameOriginSrv.URL), "valid-bucket", "key", 100)
+	if err != nil {
+		t.Fatalf("expected same-origin redirect to succeed, got %v", err)
+	}
+	if gotAuth, _ := sameOriginRedirectedAuth.Load().(string); gotAuth != "" {
+		t.Fatalf("expected Authorization to be stripped on same-origin redirect, got %q", gotAuth)
+	}
+}
+
 func TestGetObjectOversizeRejected(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/octet-stream")

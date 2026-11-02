@@ -47,8 +47,6 @@ type Options struct {
 type Adapter struct {
 	router hostkit.Router
 	remote *remote
-	fake   *fakeadapter.Fake
-	getenv func(string) string
 }
 
 // New constructs an Adapter with the given options (or defaults when nil).
@@ -73,8 +71,6 @@ func New(opts *Options) *Adapter {
 	return &Adapter{
 		router: hostkit.Router{Pick: routes.Pick},
 		remote: rem,
-		fake:   fk,
-		getenv: o.Getenv,
 	}
 }
 

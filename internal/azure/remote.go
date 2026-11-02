@@ -5,7 +5,6 @@ package azure
 import (
 	"bytes"
 	"context"
-	"encoding/xml"
 	"io"
 	"net/http"
 	"net/url"
@@ -40,11 +39,29 @@ type remote struct {
 	msgBodies map[string]string
 }
 
+func wrapRedirectPolicy(hc *http.Client) *http.Client {
+	cloned := *hc
+	prev := cloned.CheckRedirect
+	sameOrigin := hostkit.SameOriginRedirects(3)
+	cloned.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		// Never forward Authorization on any redirect.
+		req.Header.Del("Authorization")
+		if prev != nil {
+			if err := prev(req, via); err != nil {
+				return err
+			}
+		}
+		return sameOrigin(req, via)
+	}
+	return &cloned
+}
+
 func newRemote(opts Options) *remote {
 	hc := opts.HTTPClient
 	if hc == nil {
-		hc = &http.Client{Timeout: 60 * time.Second}
+		hc = hostkit.NewHTTPClient(60 * time.Second)
 	}
+	hc = wrapRedirectPolicy(hc)
 	rp := hostkit.DefaultRetryPolicy()
 	if opts.Retry != nil {
 		rp = *opts.Retry
@@ -71,31 +88,26 @@ func (r *remote) compatProbe() bool {
 	return true
 }
 
+// accountName reads ONLY the explicit simulator variable LMAZURE_SIM_ACCOUNT,
+// defaulting to DefaultDevAccountName ("devstoreaccount1"). Ambient AZURE_*
+// variables are never consulted for the loopback simulator client (design 02 §3.3).
 func (r *remote) accountName() string {
 	if v := strings.TrimSpace(r.getenv("LMAZURE_SIM_ACCOUNT")); v != "" {
-		return v
-	}
-	if v := strings.TrimSpace(r.getenv("AZURE_STORAGE_ACCOUNT")); v != "" {
 		return v
 	}
 	return DefaultDevAccountName
 }
 
+// bearerToken reads ONLY LMAZURE_SIM_TOKEN. Ambient AZURE_STORAGE_TOKEN /
+// AZURE_* variables are never sent to loopback endpoints.
 func (r *remote) bearerToken() string {
-	if v := strings.TrimSpace(r.getenv("LMAZURE_SIM_TOKEN")); v != "" {
-		return v
-	}
-	if v := strings.TrimSpace(r.getenv("AZURE_STORAGE_TOKEN")); v != "" {
-		return v
-	}
-	return ""
+	return strings.TrimSpace(r.getenv("LMAZURE_SIM_TOKEN"))
 }
 
+// sharedKey reads ONLY LMAZURE_SIM_KEY (or DefaultDevAccountKey on loopback).
+// Ambient AZURE_STORAGE_KEY / AZURE_* variables are never sent to loopback endpoints.
 func (r *remote) sharedKey(base string) string {
 	if v := strings.TrimSpace(r.getenv("LMAZURE_SIM_KEY")); v != "" {
-		return v
-	}
-	if v := strings.TrimSpace(r.getenv("AZURE_STORAGE_KEY")); v != "" {
 		return v
 	}
 	if isLoopbackURL(base) {
@@ -180,91 +192,41 @@ func (visibilityOnlyUpdatePolicy) Do(req *policy.Request) (*http.Response, error
 	return req.Next()
 }
 
-// retryTransport implements policy.Transporter and executes HTTP requests
-// through hostkit.RetryPolicy with Azure SDK retries disabled.
-type retryTransport struct {
-	base  *http.Client
-	retry hostkit.RetryPolicy
+// hostkitTransporter implements policy.Transporter by delegating directly to
+// hostkit.RetryPolicy.DoHTTP with hostkit.IdempotentMethod(req.Method) and the
+// shared same-origin HTTP client.
+type hostkitTransporter struct {
+	client *http.Client
+	retry  hostkit.RetryPolicy
 }
 
-func isRetryableStatus(status int) bool {
-	switch status {
-	case http.StatusTooManyRequests,
-		http.StatusInternalServerError,
-		http.StatusBadGateway,
-		http.StatusServiceUnavailable,
-		http.StatusGatewayTimeout:
-		return true
-	default:
-		return false
-	}
-}
-
-func (t *retryTransport) Do(req *http.Request) (*http.Response, error) {
+func (t hostkitTransporter) Do(req *http.Request) (*http.Response, error) {
 	var bodyBytes []byte
 	if req.Body != nil && req.Body != http.NoBody {
 		b, err := io.ReadAll(req.Body)
 		_ = req.Body.Close()
 		if err != nil {
-			return nil, classifyAzureError(err)
+			return nil, err
 		}
 		bodyBytes = b
 	}
-
-	idempotent := req.Method != http.MethodPost
-	var lastResp *http.Response
-	last, _ := t.retry.Do(req.Context(), idempotent, func(ctx context.Context, _ int) hostkit.Attempt {
+	resp, _, err := t.retry.DoHTTP(req.Context(), t.client, hostkit.IdempotentMethod(req.Method), func(ctx context.Context) (*http.Request, error) {
 		attemptReq := req.Clone(ctx)
 		if bodyBytes != nil {
 			attemptReq.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 			attemptReq.ContentLength = int64(len(bodyBytes))
 		}
-		resp, err := t.base.Do(attemptReq)
-		if err != nil {
-			notSent := ctx.Err() == nil
-			return hostkit.Attempt{
-				NotSent: notSent,
-				Err:     classifyAzureError(err),
-			}
-		}
-		if !isRetryableStatus(resp.StatusCode) {
-			lastResp = resp
-			return hostkit.Attempt{Status: resp.StatusCode}
-		}
-
-		// Extract error code/message for RetryPolicy and close the transient body.
-		code := strings.TrimSpace(resp.Header.Get("x-ms-error-code"))
-		var msg string
-		if resp.Body != nil {
-			if b, readErr := io.ReadAll(io.LimitReader(resp.Body, 8192)); readErr == nil && len(b) > 0 {
-				var parsed azureXMLError
-				if xml.Unmarshal(b, &parsed) == nil {
-					if code == "" && parsed.Code != "" {
-						code = strings.TrimSpace(parsed.Code)
-					}
-					msg = strings.TrimSpace(parsed.Message)
-				}
-			}
-			_ = resp.Body.Close()
-		}
-		return hostkit.Attempt{
-			Status:     resp.StatusCode,
-			RetryAfter: resp.Header.Get("Retry-After"),
-			Err:        Classify(resp.StatusCode, code, msg),
-		}
+		return attemptReq, nil
 	})
-	if last.Err != nil {
-		return nil, last.Err
-	}
-	return lastResp, nil
+	return resp, err
 }
 
 func (r *remote) clientOptions(base string) policy.ClientOptions {
 	return policy.ClientOptions{
 		Retry: policy.RetryOptions{
-			MaxRetries: -1, // Disable SDK retries; hostkit.RetryPolicy owns retries.
+			MaxRetries: -1, // Disable SDK retries; hostkit.RetryPolicy.DoHTTP owns retries.
 		},
-		Transport:                       &retryTransport{base: r.httpClient, retry: r.retry},
+		Transport:                       hostkitTransporter{client: r.httpClient, retry: r.retry},
 		PerCallPolicies:                 []policy.Policy{visibilityOnlyUpdatePolicy{}},
 		InsecureAllowCredentialWithHTTP: isLoopbackURL(base),
 	}
