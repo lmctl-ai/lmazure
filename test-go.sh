@@ -8,8 +8,8 @@ cd "$ROOT"
 
 LMSCRIPT_BIN="${LMSCRIPT_BIN:-/home/ubuntu/lmctl-mono/lmscript/bin/lmscript}"
 LMCLOUD_DIR="${LMCLOUD_DIR:-/home/ubuntu/cloud/lmcloud}"
-SIM_SH="${SIM_SH:-/home/ubuntu/cloud/lmcloud-sims/scripts/sim.sh}"
-export LMCLOUD_SIM_DIR="${LMCLOUD_SIM_DIR:-/home/ubuntu/cloud/lmcloud-sims/.cache/sims}"
+SIM_SH="${SIM_SH:-${LMCLOUD_DIR}/scripts/sim.sh}"
+export LMCLOUD_SIM_DIR="${LMCLOUD_SIM_DIR:-${LMCLOUD_DIR}/.cache/sims}"
 SIM_NAME="${LMAZURE_SIM_NAME:-lmazure-test}"
 
 echo "==> [1/9] Building Go host bin/lmazure (CGO_ENABLED=0 -trimpath)"
@@ -42,8 +42,8 @@ VER=$("$BIN" --version)
 [[ "$VER" == "lmazure 0.1.5" ]] || { echo "unexpected --version: $VER" >&2; exit 1; }
 "$BIN" --help | grep -q "lmazure 0.1.5"
 "$BIN" --notices | grep -q "github.com/Azure/azure-sdk-for-go"
-grep -q "77932bf7134af4c330fa1eee16c7e10c1fb1a1d7" sdk.lock
-grep -q "77932bf7134a" go.mod
+grep -q "06cd9ae991d90fea9ad38f3b071da646c76832f4" sdk.lock
+grep -q "06cd9ae991d9" go.mod
 ./scripts/sync-lmcloud-schema.sh --verify
 
 echo "==> [4/9] Checking --lmcode-schema [--json] byte parity (top-level and 'cloud' subcommand)"

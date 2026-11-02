@@ -28,7 +28,7 @@ type Options struct {
 	//
 	// Defaults to true unless LMAZURE_COMPAT_PROBE_EXISTENCE=0.
 	// Removal condition: delete once an azuresim release containing commit
-	// 7903c9c is published and pinned by lmcloud-sims.
+	// 7903c9c is published and pinned by lmcloud/scripts/sims.lock.
 	CompatProbeMissingDelete *bool
 }
 
