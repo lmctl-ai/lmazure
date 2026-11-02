@@ -144,7 +144,21 @@ func (h *Host) BucketDelete(bucket string) (bool, error) {
 
 	ctx := context.Background()
 
-	// Pre-flight check: Azure DeleteContainer removes non-empty containers by default.
+	// Pre-flight check 1: probe existence via GetProperties (HEAD).
+	// In azuresim, DELETE /<bucket>?restype=container returns 202 even if the container does not exist.
+	// ContainerClient.GetProperties correctly returns 404 ContainerNotFound when absent.
+	containerClient := client.ServiceClient().NewContainerClient(bucket)
+	_, propErr := containerClient.GetProperties(ctx, nil)
+	if propErr != nil {
+		mapped := mapAzureError(propErr, "GetContainerPropertiesFailed")
+		if mapped.Code == CodeNotFound {
+			h.finishOKLocked()
+			return false, nil
+		}
+		return false, h.finishErrorLocked("bucket_delete", bucket, mapped)
+	}
+
+	// Pre-flight check 2: Azure DeleteContainer removes non-empty containers by default.
 	// The lmcloud spec requires failing with ErrorCode.CONFLICT when the container has blobs.
 	pager := client.NewListBlobsFlatPager(bucket, &azblob.ListBlobsFlatOptions{
 		MaxResults: toPtr(int32(1)),
