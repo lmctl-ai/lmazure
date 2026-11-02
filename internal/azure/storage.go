@@ -29,15 +29,30 @@ func (r *remote) CreateBucket(ctx context.Context, b string) (bool, error) {
 	if cErr != nil {
 		return false, cErr
 	}
-	_, err := client.CreateContainer(ctx, b, nil)
-	if err != nil {
-		if hasAzureErrorCode(err, "ContainerAlreadyExists") {
-			return false, nil
+	var opts *azblob.CreateContainerOptions
+	if tok := hostkit.CreateToken(ctx); tok != "" {
+		opts = &azblob.CreateContainerOptions{
+			Metadata: map[string]*string{createTokenMetaKey: &tok},
 		}
+	}
+	if _, err := client.CreateContainer(ctx, b, opts); err != nil {
 		return false, classifyAzureError(err)
 	}
-	r.recordBucketCreated(base, b)
 	return true, nil
+}
+
+func (r *remote) BucketCreateToken(ctx context.Context, b string) (string, error) {
+	base := hostkit.EndpointFrom(ctx)
+	client, cErr := r.newBlobClient(base)
+	if cErr != nil {
+		return "", cErr
+	}
+	cClient := client.ServiceClient().NewContainerClient(b)
+	props, err := cClient.GetProperties(ctx, nil)
+	if err != nil {
+		return "", classifyAzureError(err)
+	}
+	return readCreateTokenMeta(props.Metadata), nil
 }
 
 func (r *remote) DeleteBucket(ctx context.Context, b string) error {
@@ -75,7 +90,6 @@ func (r *remote) DeleteBucket(ctx context.Context, b string) error {
 	if _, err := cClient.Delete(ctx, nil); err != nil {
 		return classifyAzureError(err)
 	}
-	r.deleteBucketCreated(base, b)
 	return nil
 }
 
@@ -194,7 +208,7 @@ func (r *remote) GetObject(ctx context.Context, b, k string, limit int64) ([]byt
 			return nil, err
 		}
 	}
-	data, readErr := hostkit.ReadBounded(resp.Body, limit)
+	data, readErr := hostkit.ReadBoundedErr(resp.Body, limit)
 	if readErr != nil {
 		return nil, readErr
 	}

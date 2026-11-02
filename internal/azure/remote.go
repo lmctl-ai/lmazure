@@ -34,8 +34,6 @@ type remote struct {
 	compatProbeMissingDelete *bool
 
 	mu        sync.Mutex
-	bucketsAt map[string]time.Time
-	queuesAt  map[string]time.Time
 	msgBodies map[string]string
 }
 
@@ -71,8 +69,6 @@ func newRemote(opts Options) *remote {
 		httpClient:               hc,
 		retry:                    rp,
 		compatProbeMissingDelete: opts.CompatProbeMissingDelete,
-		bucketsAt:                make(map[string]time.Time),
-		queuesAt:                 make(map[string]time.Time),
 		msgBodies:                make(map[string]string),
 	}
 }
@@ -292,56 +288,30 @@ func (r *remote) newQueueServiceClient(base string) (*azqueue.ServiceClient, *ho
 	return c, nil
 }
 
-func (r *remote) recordBucketCreated(base, b string) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	r.bucketsAt[base+"\x00"+b] = time.Now().UTC()
-}
+// createTokenMetaKey is the container/queue metadata key where lmazure
+// atomically stores hostkit.CreateToken(ctx) on PUT create requests so
+// BucketCreateToken and QueueCreateToken can prove ownership after a conflict
+// (hostkit v3 risk 10).
+const createTokenMetaKey = "lmcloudcreatetoken"
 
-func (r *remote) deleteBucketCreated(base, b string) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	delete(r.bucketsAt, base+"\x00"+b)
-}
-
-func (r *remote) BucketCreatedAt(ctx context.Context, b string) (time.Time, error) {
-	base := hostkit.EndpointFrom(ctx)
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	t, ok := r.bucketsAt[base+"\x00"+b]
-	if !ok {
-		return time.Time{}, hostkit.ProviderError(hostkit.NotFound, http.StatusNotFound, "ContainerNotFound", "bucket creation time unknown").WithAbsent(hostkit.AbsentBucket)
+func readCreateTokenMeta(meta map[string]*string) string {
+	for k, v := range meta {
+		if strings.EqualFold(k, createTokenMetaKey) && v != nil {
+			return strings.TrimSpace(*v)
+		}
 	}
-	return t, nil
+	return ""
 }
 
-func (r *remote) recordQueueCreated(base, q string) {
+func (r *remote) deleteQueueMsgBodies(base, q string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	r.queuesAt[base+"\x00"+q] = time.Now().UTC()
-}
-
-func (r *remote) deleteQueueCreated(base, q string) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	delete(r.queuesAt, base+"\x00"+q)
 	prefix := base + "\x00" + q + "\x00"
 	for k := range r.msgBodies {
 		if strings.HasPrefix(k, prefix) {
 			delete(r.msgBodies, k)
 		}
 	}
-}
-
-func (r *remote) QueueCreatedAt(ctx context.Context, q string) (time.Time, error) {
-	base := hostkit.EndpointFrom(ctx)
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	t, ok := r.queuesAt[base+"\x00"+q]
-	if !ok {
-		return time.Time{}, hostkit.ProviderError(hostkit.NotFound, http.StatusNotFound, "QueueNotFound", "queue creation time unknown").WithAbsent(hostkit.AbsentQueue)
-	}
-	return t, nil
 }
 
 func (r *remote) storeMsgBody(base, q, msgID, rawB64 string) {

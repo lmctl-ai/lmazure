@@ -3,7 +3,6 @@
 package azure
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"errors"
@@ -11,12 +10,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/lmctl-ai/lmcloud/hostkit"
 	"github.com/lmctl-ai/lmcloud/hostkit/cloudhost"
+	"github.com/lmctl-ai/lmcloud/hostkit/httpguard"
 )
 
 func TestClassifyTable(t *testing.T) {
@@ -97,20 +98,13 @@ func TestReceiptCodecH1StrictTwoPart(t *testing.T) {
 }
 
 func TestRetry503ThreeAttemptsAndSendIdempotency(t *testing.T) {
-	var headCalls atomic.Int32
-	var postCalls atomic.Int32
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			postCalls.Add(1)
-		} else {
-			headCalls.Add(1)
-		}
-		w.Header().Set("Content-Type", "application/xml")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?><Error><Code>InternalError</Code><Message>transient 503</Message></Error>`)
-	}))
-	defer srv.Close()
+	srv := httpguard.New(t)
+	srv.Script(httpguard.Status(
+		http.StatusServiceUnavailable,
+		`<?xml version="1.0" encoding="utf-8"?><Error><Code>InternalError</Code><Message>transient 503</Message></Error>`,
+		"Content-Type: application/xml",
+		"x-ms-error-code: InternalError",
+	))
 
 	fastRetry := &hostkit.RetryPolicy{
 		Sleep: func(_ context.Context, _ time.Duration) error { return nil },
@@ -130,60 +124,17 @@ func TestRetry503ThreeAttemptsAndSendIdempotency(t *testing.T) {
 	if !errors.As(err, &ce) || ce.Code != hostkit.Internal {
 		t.Fatalf("expected INTERNAL CloudError, got %T %v", err, err)
 	}
-	if got := headCalls.Load(); got != 3 {
-		t.Fatalf("expected exactly 3 HTTP attempts for idempotent HeadBucket, got %d", got)
-	}
+	httpguard.AssertCount(t, srv, "GET", 3)
 
-	// Non-idempotent Send (POST /messages) must NOT be retried on 503 (hostkit v2 idempotent=false).
-	_, sErr := a.Send(ctx, "retry-queue", "hello")
-	if sErr == nil {
+	// Non-idempotent Send (POST /messages) must NOT be retried on 503 (idempotent=false).
+	if _, sErr := a.Send(ctx, "retry-queue", "hello"); sErr == nil {
 		t.Fatalf("expected Send to fail on 503")
 	}
-	if got := postCalls.Load(); got != 1 {
-		t.Fatalf("expected exactly 1 HTTP attempt for non-idempotent Send on 503, got %d", got)
-	}
+	httpguard.AssertCount(t, srv, "POST", 1)
 }
 
 func TestPostRetryRules429AndPostCommitEOF(t *testing.T) {
-	var post429Calls atomic.Int32
-	var postEOFCalls atomic.Int32
-	var mode atomic.Int32
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch mode.Load() {
-		case 5: // SolReviewer post-mode-5: POST 429 must be retried 3 times
-			post429Calls.Add(1)
-			w.Header().Set("Content-Type", "application/xml")
-			w.Header().Set("x-ms-error-code", "ServerBusy")
-			w.WriteHeader(http.StatusTooManyRequests)
-			_, _ = io.WriteString(w, `<Error><Code>ServerBusy</Code><Message>busy</Message></Error>`)
-		case 6: // SolReviewer post-mode-6: server accepts POST then closes (EOF) -> must NOT retry (1 attempt)
-			postEOFCalls.Add(1)
-			hj, ok := w.(http.Hijacker)
-			if !ok {
-				t.Errorf("ResponseWriter does not support Hijacker")
-				return
-			}
-			conn, _, err := hj.Hijack()
-			if err == nil {
-				_ = conn.Close()
-			}
-		case 7: // POST 429 twice then 201 Created on attempt 3
-			n := post429Calls.Add(1)
-			if n < 3 {
-				w.Header().Set("Content-Type", "application/xml")
-				w.Header().Set("x-ms-error-code", "ServerBusy")
-				w.WriteHeader(http.StatusTooManyRequests)
-				_, _ = io.WriteString(w, `<Error><Code>ServerBusy</Code><Message>busy</Message></Error>`)
-				return
-			}
-			w.Header().Set("Content-Type", "application/xml")
-			w.WriteHeader(http.StatusCreated)
-			_, _ = io.WriteString(w, `<?xml version="1.0" encoding="utf-8"?><QueueMessagesList><QueueMessage><MessageId>msg-ok-3</MessageId><InsertionTime>Sun, 01 Nov 2026 00:00:00 GMT</InsertionTime><ExpirationTime>Sun, 08 Nov 2026 00:00:00 GMT</ExpirationTime><PopReceipt>pop-1</PopReceipt><TimeNextVisible>Sun, 01 Nov 2026 00:00:00 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>`)
-		}
-	}))
-	defer srv.Close()
-
+	srv := httpguard.New(t)
 	fastRetry := &hostkit.RetryPolicy{
 		Sleep: func(_ context.Context, _ time.Duration) error { return nil },
 	}
@@ -193,8 +144,16 @@ func TestPostRetryRules429AndPostCommitEOF(t *testing.T) {
 	})
 	ctx := hostkit.WithEndpoint(context.Background(), srv.URL)
 
+	busy429 := httpguard.Status(
+		http.StatusTooManyRequests,
+		`<Error><Code>ServerBusy</Code><Message>busy</Message></Error>`,
+		"Content-Type: application/xml",
+		"x-ms-error-code: ServerBusy",
+		"Retry-After: 0",
+	)
+
 	// Repro 1 (post-mode-5): POST 429 must be retried 3 times and fail with INTERNAL.
-	mode.Store(5)
+	srv.Script(busy429)
 	_, err := a.Send(ctx, "valid-queue", "body")
 	if err == nil {
 		t.Fatalf("expected Send on persistent 429 to fail")
@@ -202,44 +161,44 @@ func TestPostRetryRules429AndPostCommitEOF(t *testing.T) {
 	if ce := hostkit.AsCloudError(err); ce.Code != hostkit.Internal || ce.HTTPStatus != http.StatusTooManyRequests {
 		t.Fatalf("expected INTERNAL (429) after 3 attempts, got %+v", ce)
 	}
-	if got := post429Calls.Load(); got != 3 {
-		t.Fatalf("expected 3 attempts on POST 429, got %d", got)
-	}
+	httpguard.AssertCount(t, srv, "POST", 3)
 
-	// Repro 2 (post-mode-6): Server accepts POST then closes (EOF) -> must NOT retry (1 attempt).
-	mode.Store(6)
-	_, err = a.Send(ctx, "valid-queue", "body")
-	if err == nil {
+	// Repro 2 (post-mode-6): Server accepts POST then hangs up (EOF) -> must NOT retry (1 attempt).
+	srv.Script(httpguard.HangUp())
+	if _, err := a.Send(ctx, "valid-queue", "body"); err == nil {
 		t.Fatalf("expected Send on EOF to fail")
 	}
-	if got := postEOFCalls.Load(); got != 1 {
-		t.Fatalf("expected 1 attempt on post-send EOF for non-idempotent POST, got %d", got)
-	}
+	httpguard.AssertCount(t, srv, "POST", 1)
 
 	// Repro 3: POST 429 twice then 201 Created succeeds on attempt 3.
-	post429Calls.Store(0)
-	mode.Store(7)
+	srv.Script(
+		busy429,
+		busy429,
+		httpguard.Status(
+			http.StatusCreated,
+			`<?xml version="1.0" encoding="utf-8"?><QueueMessagesList><QueueMessage><MessageId>msg-ok-3</MessageId><InsertionTime>Sun, 01 Nov 2026 00:00:00 GMT</InsertionTime><ExpirationTime>Sun, 08 Nov 2026 00:00:00 GMT</ExpirationTime><PopReceipt>pop-1</PopReceipt><TimeNextVisible>Sun, 01 Nov 2026 00:00:00 GMT</TimeNextVisible></QueueMessage></QueueMessagesList>`,
+			"Content-Type: application/xml",
+		),
+	)
 	id, err := a.Send(ctx, "valid-queue", "body")
 	if err != nil || id != "msg-ok-3" {
 		t.Fatalf("expected Send to succeed on attempt 3 after 2x 429, got id=%q err=%v", id, err)
 	}
-	if got := post429Calls.Load(); got != 3 {
-		t.Fatalf("expected 3 attempts on recovering POST 429, got %d", got)
-	}
+	httpguard.AssertCount(t, srv, "POST", 3)
 }
 
 func TestAmbientCredentialIsolationAndRedirectRefusal(t *testing.T) {
-	var sawAuthHeader atomic.Value
-	var sawPath atomic.Value
-
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		sawAuthHeader.Store(r.Header.Get("Authorization"))
-		sawPath.Store(r.URL.Path)
-		w.Header().Set("ETag", `"e1"`)
-		w.Header().Set("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer srv.Close()
+	srv := httpguard.New(t)
+	srv.Script(httpguard.Status(
+		http.StatusOK,
+		"",
+		`ETag: "e1"`,
+		"Last-Modified: "+time.Now().UTC().Format(http.TimeFormat),
+		"x-ms-lease-state: available",
+		"x-ms-lease-status: unlocked",
+		"x-ms-has-immutability-policy: false",
+		"x-ms-has-legal-hold: false",
+	))
 
 	// Set synthetic ambient AZURE_* env vars; loopback client must ignore all of them.
 	a := New(&Options{
@@ -260,81 +219,56 @@ func TestAmbientCredentialIsolationAndRedirectRefusal(t *testing.T) {
 	if err := a.HeadBucket(ctx, "valid-bucket"); err != nil {
 		t.Fatalf("HeadBucket failed: %v", err)
 	}
-	authHdr, _ := sawAuthHeader.Load().(string)
+	reqs := srv.Requests()
+	if len(reqs) != 1 {
+		t.Fatalf("expected 1 request, got %d", len(reqs))
+	}
+	authHdr := reqs[0].Authorization
 	if strings.Contains(authHdr, "ambient-secret-bearer-token") || strings.Contains(authHdr, "Bearer") {
 		t.Fatalf("ambient AZURE_STORAGE_TOKEN leaked to loopback simulator: Authorization=%q", authHdr)
 	}
 	if !strings.HasPrefix(authHdr, "SharedKey devstoreaccount1:") {
 		t.Fatalf("expected SharedKey devstoreaccount1:..., got Authorization=%q", authHdr)
 	}
-	pathStr, _ := sawPath.Load().(string)
-	if !strings.HasPrefix(pathStr, "/devstoreaccount1/") {
-		t.Fatalf("expected default devstoreaccount1 path, got %q", pathStr)
+	if !strings.HasPrefix(reqs[0].Path, "/devstoreaccount1/") {
+		t.Fatalf("expected default devstoreaccount1 path, got %q", reqs[0].Path)
 	}
 
 	// Cross-port 307 redirect must be refused without contacting destination or forwarding Authorization.
-	var dstRequests atomic.Int32
-	var dstAuthForwarded atomic.Bool
-	target := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		dstRequests.Add(1)
-		if r.Header.Get("Authorization") != "" {
-			dstAuthForwarded.Store(true)
-		}
-		_, _ = io.WriteString(w, "x")
-	}))
-	defer target.Close()
+	foreign := httpguard.New(t)
+	origin := httpguard.New(t)
+	origin.Script(httpguard.RedirectTo(foreign.URL + "/key"))
 
-	redirect := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, target.URL+"/key", http.StatusTemporaryRedirect)
-	}))
-	defer redirect.Close()
-
-	_, err := a.GetObject(hostkit.WithEndpoint(context.Background(), redirect.URL), "valid-bucket", "key", 100)
-	if err == nil {
+	if _, err := a.GetObject(hostkit.WithEndpoint(context.Background(), origin.URL), "valid-bucket", "key", 100); err == nil {
 		t.Fatalf("expected cross-port redirect to fail")
 	}
-	if dstRequests.Load() != 0 {
-		t.Fatalf("expected 0 destination requests on cross-port redirect, got %d", dstRequests.Load())
-	}
-	if dstAuthForwarded.Load() {
-		t.Fatalf("Authorization was forwarded to redirect destination")
-	}
+	httpguard.AssertCount(t, foreign, "", 0)
+	httpguard.AssertNoCredentials(t, foreign)
 
 	// Same-origin redirect must also strip Authorization on the redirected hop.
-	var sameOriginRedirectedAuth atomic.Value
-	var sameOriginSrv *httptest.Server
-	sameOriginSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasSuffix(r.URL.Path, "/redirected") {
-			sameOriginRedirectedAuth.Store(r.Header.Get("Authorization"))
-			w.Header().Set("Content-Type", "application/octet-stream")
-			w.Header().Set("ETag", `"e1"`)
-			w.Header().Set("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
-			w.WriteHeader(http.StatusOK)
-			_, _ = io.WriteString(w, "ok")
-			return
-		}
-		http.Redirect(w, r, sameOriginSrv.URL+"/devstoreaccount1/valid-bucket/redirected", http.StatusTemporaryRedirect)
-	}))
-	defer sameOriginSrv.Close()
-
-	_, err = a.GetObject(hostkit.WithEndpoint(context.Background(), sameOriginSrv.URL), "valid-bucket", "key", 100)
-	if err != nil {
+	sameOrigin := httpguard.New(t)
+	sameOrigin.Script(
+		httpguard.RedirectTo("/devstoreaccount1/valid-bucket/redirected"),
+		httpguard.Status(
+			http.StatusOK,
+			"ok",
+			"Content-Type: application/octet-stream",
+			`ETag: "e1"`,
+			"Last-Modified: "+time.Now().UTC().Format(http.TimeFormat),
+		),
+	)
+	if _, err := a.GetObject(hostkit.WithEndpoint(context.Background(), sameOrigin.URL), "valid-bucket", "key", 100); err != nil {
 		t.Fatalf("expected same-origin redirect to succeed, got %v", err)
 	}
-	if gotAuth, _ := sameOriginRedirectedAuth.Load().(string); gotAuth != "" {
-		t.Fatalf("expected Authorization to be stripped on same-origin redirect, got %q", gotAuth)
+	sameReqs := sameOrigin.Requests()
+	if len(sameReqs) != 2 || sameReqs[0].Authorization == "" || sameReqs[1].Authorization != "" {
+		t.Fatalf("expected Authorization on hop 1 and stripped on hop 2, got %+v", sameReqs)
 	}
 }
 
 func TestGetObjectOversizeRejected(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/octet-stream")
-		w.Header().Set("ETag", `"etag-1"`)
-		w.Header().Set("Last-Modified", time.Now().UTC().Format(http.TimeFormat))
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(bytes.Repeat([]byte("A"), 128))
-	}))
-	defer srv.Close()
+	srv := httpguard.New(t)
+	srv.Script(httpguard.Oversize(128))
 
 	a := New(&Options{Getenv: func(string) string { return "" }})
 	ctx := hostkit.WithEndpoint(context.Background(), srv.URL)
@@ -545,5 +479,231 @@ func TestCompatProbeToggle(t *testing.T) {
 	}
 	if got := headCount.Load(); got != 1 {
 		t.Fatalf("expected 1 GetProperties probe when compat probe enabled, got %d", got)
+	}
+}
+
+func TestCreateOwnershipTokensBucketAndQueue(t *testing.T) {
+	var mu sync.Mutex
+	containerTokens := map[string]string{}
+	queueTokens := map[string]string{}
+	var dropFirstContainerPut atomic.Bool
+	var dropFirstQueuePut atomic.Bool
+
+	srv := httpguard.New(t)
+	srv.Script(func(w http.ResponseWriter, r *http.Request) {
+		isQueue := strings.Contains(r.URL.Path, "-queue/")
+		parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+		name := ""
+		if len(parts) >= 2 {
+			name = parts[1]
+		}
+		reqTok := strings.TrimSpace(r.Header.Get("x-ms-meta-" + createTokenMetaKey))
+
+		mu.Lock()
+		if !isQueue && r.URL.Query().Get("restype") == "container" {
+			if r.Method == http.MethodPut {
+				if _, exists := containerTokens[name]; exists {
+					mu.Unlock()
+					httpguard.Status(
+						http.StatusConflict,
+						`<Error><Code>ContainerAlreadyExists</Code><Message>The specified container already exists.</Message></Error>`,
+						"Content-Type: application/xml",
+						"x-ms-error-code: ContainerAlreadyExists",
+					)(w, r)
+					return
+				}
+				containerTokens[name] = reqTok
+				mu.Unlock()
+				if dropFirstContainerPut.CompareAndSwap(true, false) {
+					httpguard.HangUp()(w, r)
+					return
+				}
+				httpguard.Status(
+					http.StatusCreated,
+					"",
+					`ETag: "c-etag"`,
+					"Last-Modified: "+time.Now().UTC().Format(http.TimeFormat),
+				)(w, r)
+				return
+			}
+			// GET/HEAD container properties
+			tok, exists := containerTokens[name]
+			mu.Unlock()
+			if !exists {
+				httpguard.Status(
+					http.StatusNotFound,
+					`<Error><Code>ContainerNotFound</Code><Message>Not found.</Message></Error>`,
+					"Content-Type: application/xml",
+					"x-ms-error-code: ContainerNotFound",
+				)(w, r)
+				return
+			}
+			hdrs := []string{
+				`ETag: "c-etag"`,
+				"Last-Modified: " + time.Now().UTC().Format(http.TimeFormat),
+				"x-ms-lease-state: available",
+				"x-ms-lease-status: unlocked",
+				"x-ms-has-immutability-policy: false",
+				"x-ms-has-legal-hold: false",
+			}
+			if tok != "" {
+				hdrs = append(hdrs, "x-ms-meta-"+createTokenMetaKey+": "+tok)
+			}
+			httpguard.Status(http.StatusOK, "", hdrs...)(w, r)
+			return
+		}
+
+		if isQueue {
+			if r.Method == http.MethodPut {
+				if _, exists := queueTokens[name]; exists {
+					mu.Unlock()
+					httpguard.Status(
+						http.StatusConflict,
+						`<Error><Code>QueueAlreadyExists</Code><Message>The specified queue already exists.</Message></Error>`,
+						"Content-Type: application/xml",
+						"x-ms-error-code: QueueAlreadyExists",
+					)(w, r)
+					return
+				}
+				queueTokens[name] = reqTok
+				mu.Unlock()
+				if dropFirstQueuePut.CompareAndSwap(true, false) {
+					httpguard.HangUp()(w, r)
+					return
+				}
+				httpguard.Status(http.StatusCreated, "")(w, r)
+				return
+			}
+			// GET/HEAD queue metadata
+			tok, exists := queueTokens[name]
+			mu.Unlock()
+			if !exists {
+				httpguard.Status(
+					http.StatusNotFound,
+					`<Error><Code>QueueNotFound</Code><Message>Not found.</Message></Error>`,
+					"Content-Type: application/xml",
+					"x-ms-error-code: QueueNotFound",
+				)(w, r)
+				return
+			}
+			hdrs := []string{"x-ms-approximate-messages-count: 0"}
+			if tok != "" {
+				hdrs = append(hdrs, "x-ms-meta-"+createTokenMetaKey+": "+tok)
+			}
+			httpguard.Status(http.StatusOK, "", hdrs...)(w, r)
+			return
+		}
+		mu.Unlock()
+		httpguard.Status(http.StatusNotFound, "")(w, r)
+	})
+
+	// Seed pre-existing resources with no create token (created outside this call).
+	containerTokens["preexisting-bucket"] = ""
+	queueTokens["preexisting-queue"] = ""
+
+	fastRetry := &hostkit.RetryPolicy{
+		Sleep: func(_ context.Context, _ time.Duration) error { return nil },
+	}
+	a := New(&Options{
+		Getenv: func(k string) string {
+			if k == "LMCLOUD_ENDPOINT" {
+				return srv.URL
+			}
+			return ""
+		},
+		Retry: fastRetry,
+	})
+	h := cloudhost.New(cloudhost.Config{
+		Provider: "azure",
+		Store:    a,
+		Queue:    a,
+		Endpoints: &hostkit.EndpointResolver{
+			Prefix: "LMAZURE",
+			Getenv: func(k string) string {
+				if k == "LMCLOUD_ENDPOINT" {
+					return srv.URL
+				}
+				return ""
+			},
+		},
+	})
+
+	// 1. Create succeeds -> true (token stored atomically in metadata).
+	created, err := h.BucketCreate(false, "fresh-bucket")
+	if err != nil || !created {
+		t.Fatalf("fresh bucket_create: created=%v err=%v", created, err)
+	}
+	mu.Lock()
+	if containerTokens["fresh-bucket"] == "" {
+		t.Fatalf("expected non-empty create token stored in container metadata")
+	}
+	mu.Unlock()
+
+	created, err = h.QueueCreate(false, "fresh-queue")
+	if err != nil || !created {
+		t.Fatalf("fresh queue_create: created=%v err=%v", created, err)
+	}
+	mu.Lock()
+	if queueTokens["fresh-queue"] == "" {
+		t.Fatalf("expected non-empty create token stored in queue metadata")
+	}
+	mu.Unlock()
+
+	// 2. Conflict on pre-existing resource (no token or another call's token) -> false, OK.
+	for _, b := range []string{"preexisting-bucket", "fresh-bucket"} {
+		created, err = h.BucketCreate(false, b)
+		if err != nil || created || h.LastError().Code != hostkit.OK {
+			t.Fatalf("conflict bucket_create(%q): created=%v err=%v last=%+v", b, created, err, h.LastError())
+		}
+	}
+	for _, q := range []string{"preexisting-queue", "fresh-queue"} {
+		created, err = h.QueueCreate(false, q)
+		if err != nil || created || h.LastError().Code != hostkit.OK {
+			t.Fatalf("conflict queue_create(%q): created=%v err=%v last=%+v", q, created, err, h.LastError())
+		}
+	}
+
+	// 3. Lost-reply create: server commits resource with OUR token on attempt 1,
+	// hangs up (EOF), then returns 409 on retry -> BucketCreateToken/QueueCreateToken
+	// reads back our token and returns created=true.
+	dropFirstContainerPut.Store(true)
+	created, err = h.BucketCreate(false, "lost-reply-bucket")
+	if err != nil || !created || h.LastError().Code != hostkit.OK {
+		t.Fatalf("lost-reply bucket_create: created=%v err=%v last=%+v", created, err, h.LastError())
+	}
+
+	dropFirstQueuePut.Store(true)
+	created, err = h.QueueCreate(false, "lost-reply-queue")
+	if err != nil || !created || h.LastError().Code != hostkit.OK {
+		t.Fatalf("lost-reply queue_create: created=%v err=%v last=%+v", created, err, h.LastError())
+	}
+}
+
+func TestOfflineReceiveFollowsRouteCaps(t *testing.T) {
+	a := New(&Options{Getenv: func(string) string { return "" }})
+	h := cloudhost.New(cloudhost.Config{
+		Provider:     "azure",
+		Store:        a,
+		Queue:        a,
+		PollInterval: 50 * time.Millisecond,
+		Endpoints:    &hostkit.EndpointResolver{Prefix: "LMAZURE", Getenv: func(string) string { return "" }},
+	})
+	if _, err := h.QueueCreate(false, "offline-wait-q"); err != nil {
+		t.Fatal(err)
+	}
+	start := time.Now()
+	msgs, err := h.QueueReceive(false, "offline-wait-q", 1, 1, 30)
+	elapsed := time.Since(start)
+	if err != nil || len(msgs) != 0 {
+		t.Fatalf("offline QueueReceive: msgs=%v err=%v", msgs, err)
+	}
+	if elapsed < 900*time.Millisecond || elapsed > 3*time.Second {
+		t.Fatalf("offline QueueReceive(wait=1) took %v, want ~1s", elapsed)
+	}
+}
+
+func TestEnumsDeclaredForDryRun(t *testing.T) {
+	if !cloudhost.EnumsDeclared() {
+		t.Fatalf("expected cloudhost.EnumsDeclared() == true with lmcode-go-patched replace in go.mod")
 	}
 }

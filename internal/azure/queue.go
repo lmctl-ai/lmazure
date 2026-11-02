@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue"
 	"github.com/lmctl-ai/lmcloud/hostkit"
 )
@@ -63,26 +64,43 @@ func (r *remote) CreateQueue(ctx context.Context, q string) (bool, error) {
 	}
 	qClient := svc.NewQueueClient(q)
 
-	// Azure Queue REST returns 201 Created for a new queue and 204 No Content
-	// when the queue already exists with identical metadata, and azqueue.QueueClient.Create
-	// returns err == nil for both. Probe GetProperties first to distinguish
-	// newly-created (true) from already-existing (false).
-	_, propErr := qClient.GetProperties(ctx, nil)
-	if propErr == nil {
-		return false, nil
-	}
-	if !isQueueNotFoundError(propErr) && !isStatus(propErr, http.StatusNotFound) {
-		return false, classifyAzureError(propErr)
-	}
-
-	if _, err := qClient.Create(ctx, nil); err != nil {
-		if hasAzureErrorCode(err, "QueueAlreadyExists") {
-			return false, nil
+	tok := hostkit.CreateToken(ctx)
+	var opts *azqueue.CreateOptions
+	if tok != "" {
+		opts = &azqueue.CreateOptions{
+			Metadata: map[string]*string{createTokenMetaKey: &tok},
 		}
+	}
+	var rawResp *http.Response
+	reqCtx := policy.WithCaptureResponse(ctx, &rawResp)
+	if _, err := qClient.Create(reqCtx, opts); err != nil {
 		return false, classifyAzureError(err)
 	}
-	r.recordQueueCreated(base, q)
+	if rawResp != nil && rawResp.StatusCode == http.StatusNoContent {
+		if tok == "" {
+			return false, nil
+		}
+		// Azure Queue REST returns 204 No Content when the queue already exists
+		// with identical metadata (or on older azuresim builds that ignore metadata
+		// on create). Report CONFLICT so cloudhost resolves ownership via
+		// LookupQueue + QueueCreateToken.
+		return false, hostkit.ProviderError(hostkit.Conflict, http.StatusConflict, "QueueAlreadyExists", "The specified queue already exists.")
+	}
 	return true, nil
+}
+
+func (r *remote) QueueCreateToken(ctx context.Context, q string) (string, error) {
+	base := hostkit.EndpointFrom(ctx)
+	svc, cErr := r.newQueueServiceClient(base)
+	if cErr != nil {
+		return "", cErr
+	}
+	qClient := svc.NewQueueClient(q)
+	props, err := qClient.GetProperties(ctx, nil)
+	if err != nil {
+		return "", classifyAzureError(err)
+	}
+	return readCreateTokenMeta(props.Metadata), nil
 }
 
 func (r *remote) DeleteQueue(ctx context.Context, q string) error {
@@ -104,7 +122,7 @@ func (r *remote) DeleteQueue(ctx context.Context, q string) error {
 	if _, err := qClient.Delete(ctx, nil); err != nil {
 		return classifyAzureError(err)
 	}
-	r.deleteQueueCreated(base, q)
+	r.deleteQueueMsgBodies(base, q)
 	return nil
 }
 

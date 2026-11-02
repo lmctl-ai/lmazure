@@ -9,7 +9,6 @@ import (
 	"context"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/lmctl-ai/lmcloud/hostkit"
 	"github.com/lmctl-ai/lmcloud/hostkit/fakeadapter"
@@ -34,8 +33,8 @@ type Options struct {
 }
 
 // Adapter implements hostkit.ObjectStore, hostkit.Queue,
-// hostkit.QueueCapsProvider, hostkit.BucketCreationTimer, and
-// hostkit.QueueCreationTimer by delegating through hostkit.Router and
+// hostkit.QueueCapsProvider, hostkit.BucketCreateTokenReader, and
+// hostkit.QueueCreateTokenReader by delegating through hostkit.Router and
 // hostkit.EndpointRoutes:
 //   - "" and LMAZURE_LIVE unset: offline in-process fake (hostkit fakeadapter);
 //   - "" with LMAZURE_LIVE=1, or any non-loopback endpoint: live Azure, which
@@ -134,14 +133,14 @@ func (a *Adapter) ListObjects(ctx context.Context, b, prefix string, max int, to
 	return a.router.ListObjects(ctx, b, prefix, max, token)
 }
 
-// --- hostkit.BucketCreationTimer & hostkit.QueueCreationTimer ---
+// --- hostkit.BucketCreateTokenReader & hostkit.QueueCreateTokenReader ---
 
-func (a *Adapter) BucketCreatedAt(ctx context.Context, b string) (time.Time, error) {
-	return a.router.BucketCreatedAt(ctx, b)
+func (a *Adapter) BucketCreateToken(ctx context.Context, b string) (string, error) {
+	return a.router.BucketCreateToken(ctx, b)
 }
 
-func (a *Adapter) QueueCreatedAt(ctx context.Context, q string) (time.Time, error) {
-	return a.router.QueueCreatedAt(ctx, q)
+func (a *Adapter) QueueCreateToken(ctx context.Context, q string) (string, error) {
+	return a.router.QueueCreateToken(ctx, q)
 }
 
 // --- hostkit.Queue & hostkit.QueueCapsProvider ---
