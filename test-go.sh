@@ -91,13 +91,27 @@ p = _lmcode_ s;
 end _lmcode_
 r_real = run_lmcode(p, {command:["./bin/lmazure", "--lmcode", "$DSLFILE"]});
 assert(r_real.ok && r_real.result.prov == "azure" && r_real.result.created && r_real.result.exists && r_real.result.deleted, "real smoke failed");
-r_dry = run_lmcode(p, {command:["./bin/lmazure", "cloud", "--dry", "--lmcode", "$DSLFILE"]});
-assert(r_dry.ok && r_dry.result.prov == "azure" && !r_dry.result.exists, "dry smoke failed");
+'
+"$LMSCRIPT_BIN" --dry-run -e '
+s = load_schema(schema="schema/lmcloud.dsl.json");
+p = _lmcode_ s;
+  let prov = cloud.provider();
+  let c = cloud.bucket_create("lmazure-smoke-bucket");
+  let ex = cloud.bucket_exists("lmazure-smoke-bucket");
+  let d = cloud.bucket_delete("lmazure-smoke-bucket");
+  lmcode_return_put("prov", prov);
+  lmcode_return_put("created", c);
+  lmcode_return_put("exists", ex);
+  lmcode_return_put("deleted", d);
+end _lmcode_
+r_dry = run_lmcode(p, {command:["./bin/lmazure", "cloud", "--lmcode", "$DSLFILE"]});
+assert(r_dry.ok && r_dry.dry && r_dry.result.prov == "azure" && r_dry.result.created && r_dry.result.exists && r_dry.result.deleted, "dry smoke failed");
 '
 
-echo "==> [8/9] Running go vet ./... and go test ./..."
+echo "==> [8/9] Running go vet ./..., go test -race -count=3 ./..., and HTTP dry-run spy"
 go vet ./...
-go test ./...
+go test -race -count=3 ./...
+python3 "$ROOT/scripts/test-dry-spy.py" "$LMSCRIPT_BIN" "$BIN" "$LMCLOUD_DIR/schema/lmcloud.dsl.json"
 
 if [[ -x "$SIM_SH" && -x "$LMCLOUD_DIR/tests/run-conformance.sh" ]]; then
   echo "==> [9/9] Running lmcloud object-storage + queue conformance against azuresim"

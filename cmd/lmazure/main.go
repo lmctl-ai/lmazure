@@ -1,285 +1,133 @@
+// SPDX-License-Identifier: MIT
+
+// Command lmazure serves the shared lmcloud schema for Azure. Everything
+// provider-neutral comes from github.com/lmctl-ai/lmcloud/hostkit; this binary
+// adds the Azure Blob/Queue adapter (internal/azure), lmazure's CLI surface,
+// and its memory watchdog.
 package main
 
 import (
-	"encoding/json"
 	"fmt"
+	"io"
 	"os"
-	"strings"
 
-	lmcode "github.com/lmctl-ai/lmcode-go"
-
-	"github.com/lmctl-ai/lmazure/internal/host"
-	"github.com/lmctl-ai/lmazure/internal/invoke"
+	"github.com/lmctl-ai/lmazure/internal/azure"
 	"github.com/lmctl-ai/lmazure/internal/membudget"
-	"github.com/lmctl-ai/lmazure/internal/safety"
-	"github.com/lmctl-ai/lmazure/schema"
+	"github.com/lmctl-ai/lmcloud/hostkit/cloudhost"
+	"github.com/lmctl-ai/lmcloud/hostkit/invoke"
+	"github.com/lmctl-ai/lmcloud/schema"
 )
 
 const Version = "0.1.5"
 
-func main() {
-	os.Exit(run(os.Args[1:]))
-}
+func main() { os.Exit(run(os.Args[1:], os.Stdout)) }
 
-func run(args []string) int {
-	// Support the documented subcommand-per-schema pattern:
-	//   lmazure cloud --lmcode FILE | --lmcode-schema [--json] | --lmcode-signatures [--without-std]
-	// During the Go port pilot (Phases A-C), top-level lmazure also serves the shared lmcloud schema
-	// so conformance runners invoking `<host> --lmcode FILE` work directly.
-	if len(args) > 0 && args[0] == "cloud" {
-		args = args[1:]
-	}
-
-	if len(args) == 0 {
-		printHelp(os.Stdout)
-		return 0
-	}
-
-	// 1. Metadata flags (no memory budget watchdog required).
-	var (
-		wantVersion    bool
-		wantHelp       bool
-		wantNotices    bool
-		wantSchema     bool
-		wantSchemaJSON bool
-		wantSignatures bool
-		withoutStd     bool
-		wantSweep      bool
-		sweepArg       string
-		lmcodeFiles    []string
-		manifestPath   string
-		endpointFlag   string
-		regionFlag     string
-		forceDry       bool
-	)
-
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
-		switch {
-		case arg == "--version" || arg == "-V":
-			wantVersion = true
-		case arg == "--help" || arg == "-h":
-			wantHelp = true
-		case arg == "--notices":
-			wantNotices = true
-		case arg == "--lmcode-schema":
-			wantSchema = true
-		case arg == "--json":
-			wantSchemaJSON = true
-		case arg == "--lmcode-signatures":
-			wantSignatures = true
-		case arg == "--without-std":
-			withoutStd = true
-		case arg == "--sweep":
-			wantSweep = true
-			if i+1 < len(args) && !strings.HasPrefix(args[i+1], "-") {
-				i++
-				sweepArg = args[i]
-			}
-		case arg == "--dry":
+func run(args []string, out io.Writer) int {
+	// Support explicit `--dry` flag in addition to LMCODE_INVOCATION_FILE.
+	forceDry := false
+	filtered := make([]string, 0, len(args))
+	for _, a := range args {
+		if a == "--dry" {
 			forceDry = true
-		case arg == "--lmcode":
-			if i+1 >= len(args) {
-				return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "--lmcode requires a bytecode path"))
-			}
-			for i+1 < len(args) && !strings.HasPrefix(args[i+1], "--") {
-				i++
-				lmcodeFiles = append(lmcodeFiles, args[i])
-			}
-			if len(lmcodeFiles) == 0 {
-				return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "--lmcode requires a bytecode path"))
-			}
-		case strings.HasPrefix(arg, "--lmcode="):
-			val := strings.TrimPrefix(arg, "--lmcode=")
-			if val == "" {
-				return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "--lmcode requires a bytecode path"))
-			}
-			lmcodeFiles = append(lmcodeFiles, val)
-		case arg == "--manifest":
-			if i+1 >= len(args) {
-				return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "--manifest requires a file path"))
-			}
-			i++
-			manifestPath = args[i]
-		case strings.HasPrefix(arg, "--manifest="):
-			manifestPath = strings.TrimPrefix(arg, "--manifest=")
-			if manifestPath == "" {
-				return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "--manifest requires a file path"))
-			}
-		case arg == "--endpoint":
-			if i+1 >= len(args) {
-				return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "--endpoint requires a URL"))
-			}
-			i++
-			endpointFlag = args[i]
-		case strings.HasPrefix(arg, "--endpoint="):
-			endpointFlag = strings.TrimPrefix(arg, "--endpoint=")
-		case arg == "--region":
-			if i+1 >= len(args) {
-				return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "--region requires a value"))
-			}
-			i++
-			regionFlag = args[i]
-		case strings.HasPrefix(arg, "--region="):
-			regionFlag = strings.TrimPrefix(arg, "--region=")
-		default:
-			return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, fmt.Sprintf("unknown option: %s", arg)))
+			continue
+		}
+		filtered = append(filtered, a)
+	}
+	args = filtered
+	if forceDry && os.Getenv("LMCODE_INVOCATION_FILE") == "" {
+		if f, err := os.CreateTemp("", "lmazure-dry-*.json"); err == nil {
+			_, _ = f.WriteString(`{"dry":true}`)
+			_ = f.Close()
+			defer os.Remove(f.Name())
+			_ = os.Setenv("LMCODE_INVOCATION_FILE", f.Name())
+			defer os.Unsetenv("LMCODE_INVOCATION_FILE")
 		}
 	}
 
-	if wantVersion {
-		fmt.Printf("lmazure %s\n", Version)
-		return 0
-	}
-	if wantHelp {
-		printHelp(os.Stdout)
-		return 0
-	}
-	if wantNotices {
-		printNotices(os.Stdout)
-		return 0
-	}
-	if wantSchema {
-		_ = wantSchemaJSON
-		_, _ = os.Stdout.Write(schema.EmbeddedCloudSchema)
-		return 0
-	}
-	if wantSignatures {
-		var reg *lmcode.Registry
-		if withoutStd {
-			reg = lmcode.NewRegistryWithoutStd()
-		} else {
-			reg = lmcode.NewRegistry()
-		}
-		if err := host.Register(reg, host.New(host.Options{})); err != nil {
-			return lmcode.FailureFrame(os.Stderr, "register", err)
-		}
-		var sigs []string
-		if withoutStd {
-			sigs = reg.HostSignatures()
-		} else {
-			sigs = reg.Signatures()
-		}
-		for _, s := range sigs {
-			fmt.Println(s)
-		}
-		return 0
-	}
-	if wantSweep {
-		return runSweep(sweepArg)
-	}
-
-	if len(lmcodeFiles) == 0 {
-		return lmcode.FailureFrame(os.Stderr, "cli", lmcode.NewError(lmcode.CLI_USAGE, "missing --lmcode FILE"))
-	}
-
-	// 2. Apply memory budget and start watchdog before loading/executing bytecode.
-	if _, err := membudget.InitFromEnv(); err != nil {
-		return invoke.Failure("cli", lmcode.NewError(lmcode.CLI_USAGE, err.Error()))
-	}
-
-	if forceDry {
-		_ = os.Setenv("LMCODE_DRY", "1")
-	}
-
-	var manifestPtr *string
-	if manifestPath != "" {
-		manifestPtr = &manifestPath
-	}
-
-	results, err := lmcode.InvocationResultsFromManifest(lmcodeFiles, manifestPtr)
-	if err != nil {
-		return invoke.Failure("cli", err)
-	}
-	contract, err := lmcode.ResultContractFromSchema(schema.EmbeddedCloudSchema)
-	if err != nil {
-		return invoke.Failure("load", err)
-	}
-
-	reg := lmcode.NewRegistry()
-	ctx := lmcode.NewContext()
-	ctx.SetDry(results.Dry() || forceDry)
-	ledger := defaultLedger()
-	h := host.New(host.Options{
-		DefaultEndpoint: endpointFlag,
-		Region:          regionFlag,
-		Ledger:          ledger,
-	})
-	if err := host.Register(reg, h); err != nil {
-		return invoke.Failure("load", err)
-	}
-	ctx.Set("cloud", h)
-
-	runner := &invoke.Runner{
-		Results:  results,
-		Registry: reg,
-		Schema:   schema.EmbeddedCloudSchema,
-		Contract: contract,
-		Context:  ctx,
-		Dry:      results.Dry(),
+	prog := cloudhost.Program{
+		Name:    "lmazure",
+		Version: Version,
+		Schema:  schema.Bytes,
+		NewConfig: func(_ bool) (cloudhost.Config, error) {
+			adapter := azure.New(nil)
+			return cloudhost.Config{
+				Provider:  "azure",
+				Store:     adapter,
+				Queue:     adapter,
+				Endpoints: azure.Endpoints(),
+			}, nil
+		},
+		Out: out,
 		Hooks: invoke.Hooks{
 			BeforeRun:     membudget.ResetRun,
 			StartWatchdog: membudget.StartWatchdog,
 		},
+		Init: func() error {
+			_, err := membudget.InitFromEnv()
+			return err
+		},
+		Help:    helpText(),
+		Notices: noticesText,
+		Commands: map[string]func([]string, io.Writer) int{
+			"--sweep": func(_ []string, w io.Writer) int {
+				fmt.Fprintln(w, `{"ok":true,"swept":0,"mode":"sim-or-fake-only"}`)
+				return 0
+			},
+		},
 	}
-	return runner.Execute()
+	return prog.Main(args)
 }
 
-func defaultLedger() *safety.RunLedger {
-	return safety.NewRunLedger()
-}
-
-func runSweep(runID string) int {
-	_ = runID
-	l := defaultLedger()
-	entries := l.Snapshot()
-	out := map[string]any{
-		"ok":      true,
-		"swept":   len(entries),
-		"entries": entries,
-	}
-	enc := json.NewEncoder(os.Stdout)
-	_ = enc.Encode(out)
-	return 0
-}
-
-func printHelp(w *os.File) {
-	fmt.Fprintf(w, `lmazure %s — Go lmcode host for Azure (shared lmcloud schema)
+func helpText() string {
+	return fmt.Sprintf(`lmazure %s — Go lmcode host for Azure (shared lmcloud schema, built on lmcloud hostkit)
 
 Usage:
-  lmazure [cloud] --lmcode FILE [--manifest FILE] [--endpoint URL] [--region REGION] [--dry]
+  lmazure [cloud] [--lmcode|--first|--last] FILE ...
   lmazure [cloud] --lmcode-schema [--json]
   lmazure [cloud] --lmcode-signatures [--without-std]
   lmazure --sweep [RUN_ID]
-  lmazure --notices
-  lmazure --version | -V
-  lmazure --help | -h
+  lmazure --notices | --version | -V | --help | -h
 
-Subcommands:
-  cloud                 Select the shared lmcloud provider-neutral schema (default in pilot).
+Dry runs come from the caller's invocation manifest (lmscript --dry-run).
 
-Environment Variables:
-  LMAZURE_ENDPOINT            Loopback/simulator or custom Azure endpoint URL
-  LMAZURE_STORAGE_ENDPOINT    Azure Blob Storage endpoint override
-  LMAZURE_QUEUE_ENDPOINT      Azure Queue Storage endpoint override
-  LMAZURE_SIM_ACCOUNT         Simulator account name (default: devstoreaccount1)
-  LMAZURE_SIM_KEY             Simulator SharedKey base64 credential
-  LMAZURE_SIM_TOKEN           Simulator Bearer token credential
-  LMAZURE_LIVE                Set to 1 to allow live Azure calls when no endpoint is set
-  LMAZURE_ALLOW_LIVE_IN_CI    Set to 1 alongside LMAZURE_LIVE=1 to allow live calls in CI
-  LMAZURE_MAX_MEMORY_MB       Memory ceiling in MiB (16..65536, default: 4096)
+Endpoints (validated; plain http only for loopback; see lmcloud design 02 §3.3):
+  set_endpoint(service|"all", url) > LMCLOUD_<SVC>_ENDPOINT > LMAZURE_<SVC>_ENDPOINT >
+  LMCLOUD_ENDPOINT > LMAZURE_ENDPOINT >
+  AZURE_STORAGE_BLOB_ENDPOINT / AZURE_STORAGE_QUEUE_ENDPOINT > AZURE_STORAGE_ENDPOINT / AZURE_ENDPOINT
+  No endpoint: offline in-process fake. LMAZURE_LIVE=1 or a non-loopback endpoint:
+  not supported yet (live DefaultAzureCredential support is a future phase).
+
+Simulator credentials and scope (loopback endpoints only):
+  LMAZURE_SIM_ACCOUNT             Storage account name (default: devstoreaccount1)
+  LMAZURE_SIM_KEY                 Base64 SharedKey (default: Azurite/azuresim dev key)
+  LMAZURE_SIM_TOKEN               Bearer token override
+  LMAZURE_COMPAT_PROBE_EXISTENCE  Pre-operation existence probes for pre-7903c9c azuresim (default: 1)
+
+Other:
+  LMAZURE_MAX_MEMORY_MB           Memory ceiling in MiB (default 4096)
 `, Version)
 }
 
-func printNotices(w *os.File) {
-	fmt.Fprintln(w, `lmazure Third-Party Software Notices
+const noticesText = `lmazure Third-Party Software Notices
 ====================================
 
 1. github.com/lmctl-ai/lmcode-go
    License: MIT
    Copyright (c) lmctl-ai
 
-2. github.com/Azure/azure-sdk-for-go
+2. github.com/lmctl-ai/lmcloud (hostkit)
    License: MIT
-   Copyright (c) Microsoft Corporation`)
-}
+   Copyright (c) lmctl-ai
+
+3. github.com/Azure/azure-sdk-for-go/sdk/azcore
+   License: MIT
+   Copyright (c) Microsoft Corporation
+
+4. github.com/Azure/azure-sdk-for-go/sdk/storage/azblob
+   License: MIT
+   Copyright (c) Microsoft Corporation
+
+5. github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue
+   License: MIT
+   Copyright (c) Microsoft Corporation
+`

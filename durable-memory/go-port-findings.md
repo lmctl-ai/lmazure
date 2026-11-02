@@ -65,3 +65,32 @@ Following the `lmcode` multi-schema subcommand pattern established in `lmoci`:
 ### Finding 11 — Safe Nil-Receiver Handlers for `abort_on_error(false)`
 - **Behavior:** When `cloud.set_abort_on_error(false)` is enabled and an operation fails (e.g., `object_head` on a policy-denied container under `--auth enforce`), the `_lmcode_` runtime assigns `None` (`nil` object) to the result variable. Subsequent method calls on that variable (such as `h.exists()`) invoke the registered Go method with `self == nil`.
 - **Implementation in `lmazure`:** All object accessor methods in `internal/host/register.go` (`ObjectMeta`, `ObjectSummary`, `ObjectListPage`, `QueueMessage`, `QueueMessageList`, `CloudError`) defensively check `if self == nil` and return safe default values (e.g., `exists() -> false`) rather than nil-pointer panicking.
+
+---
+
+## 12. Migration onto `lmcloud/hostkit` v2 (`72a891b`)
+
+### 12.1 Architecture & Deleted Duplication
+- Removed duplicated provider-neutral packages (`internal/invoke/`, `internal/host/`, `internal/safety/`, `schema/embed.go`).
+- Added `internal/azure` (`adapter.go`, `classify.go`, `remote.go`, `storage.go`, `queue.go`, `azure_test.go`) implementing `hostkit.ObjectStore`, `hostkit.Queue`, `hostkit.QueueCapsProvider`, `hostkit.BucketCreationTimer`, and `hostkit.QueueCreationTimer`.
+- `cmd/lmazure/main.go` uses `cloudhost.Program.Main` directly with `Hooks: invoke.Hooks{BeforeRun: membudget.ResetRun, StartWatchdog: membudget.StartWatchdog}`, `Init: membudget.InitFromEnv`, `Help`, `Notices`, and `Commands["--sweep"]`.
+- `Adapter` routes per-call through `hostkit.Router` + `hostkit.EndpointRoutes`:
+  - Offline (`""` and `LMAZURE_LIVE` unset): `fakeadapter.New` (`QueueCaps{LongPoll: false, TextOnlyWire: true}`).
+  - Loopback simulator (`azuresim`): `remote` (`QueueCaps{LongPoll: false, TextOnlyWire: false}`).
+  - Live (`LMAZURE_LIVE=1` or non-loopback endpoint): explicit `UNAUTHENTICATED` (`LiveCredentialsNotImplemented`) until `DefaultAzureCredential` is wired.
+
+### 12.2 Spec H1 Strict Two-Part Receipt Token
+- `EncodeReceipt(messageID, popReceipt)` encodes strictly `base64url(messageID + "\n" + popReceipt)` (2 parts only; `MessageText` is never embedded in the receipt token).
+- `DecodeReceipt` rejects any token that does not decode to exactly two non-empty lines (`messageID` and `popReceipt`).
+- For visibility-only updates (`Receive` with `vis=0` and `Nack`), `visibilityOnlyUpdatePolicy` (an `azcore` `PerCallPolicy` that runs before `SharedKeyCredential` signing) rewrites empty-message-text `<QueueMessage><MessageText></MessageText></QueueMessage>` payloads to `<QueueMessage></QueueMessage>` so `azuresim` (`7903c9c`+) and Azure Queue REST preserve the existing message body.
+
+### 12.3 Pre-`7903c9c` `azuresim` Compatibility Option (`LMAZURE_COMPAT_PROBE_EXISTENCE`)
+- Commit `7903c9c` on `/home/ubuntu/cloud/azuresim` (`branch fix-azure-semantics`) fixes `deleteContainer`, `listBlobs`, `getBlob`, `deleteBlob`, `getBlobMetadata`, and `deleteQueue` on missing containers/queues to return `404 ContainerNotFound` / `404 QueueNotFound`, and fixes `updateMessage` to preserve message content when `<MessageText>` is omitted.
+- Because the cached prebuilt binary in `lmcloud-sims` (`v0.2.0`) predates `7903c9c`, `Options.CompatProbeMissingDelete` (env `LMAZURE_COMPAT_PROBE_EXISTENCE`, default `1`) isolates the pre-`7903c9c` existence probes and in-process `UpdateMessage` body echo.
+- Setting `LMAZURE_COMPAT_PROBE_EXISTENCE=0` disables all compatibility probes against `azuresim` `7903c9c`+.
+- **Removal condition:** Delete `CompatProbeMissingDelete` / `LMAZURE_COMPAT_PROBE_EXISTENCE` once an `azuresim` release containing commit `7903c9c` is published and pinned by `lmcloud-sims`.
+
+### 12.4 `hostkit` v2 Gap Verification
+1. **M5 Receipt Precedence (`hostkit.ReceiptPrecedence`):** Verified fixed in `hostkit` v2. `hostkit.Receipt(r)` only rejects `r == ""` preflight; non-empty malformed receipts reach `Adapter.Ack`/`Nack`, which return `INVALID_ARGUMENT`, and `hostkit.ReceiptPrecedence` probes `LookupQueue` so a missing queue takes `NOT_FOUND` precedence over `INVALID_ARGUMENT`.
+2. **`ReadBounded` / `NilIfTyped`:** `hostkit` v2 added `NilIfTyped(err)` and `guardStore`/`guardQueue` wrappers around `ObjectStore`/`Queue` in `cloudhost.New`, preventing typed-nil `*CloudError` values returned across the adapter boundary from being treated as errors. Inside adapters, `hostkit.ReadBounded` still returns `([]byte, *CloudError)`, so callers should bind the error to a concrete `*hostkit.CloudError` variable before returning `error`.
+3. **Retry Idempotency (`RetryPolicy.Do(ctx, idempotent, fn)`):** Verified fixed in `hostkit` v2. `retryTransport` passes `idempotent = req.Method != http.MethodPost`, so idempotent operations (`GET`, `HEAD`, `PUT`, `DELETE`) retry transient `500/502/503/504` up to 3 attempts while non-idempotent `Send` (`POST /messages`) does not retry on `5xx`.
