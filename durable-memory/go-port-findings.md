@@ -24,12 +24,13 @@ Following the `lmcode` multi-schema subcommand pattern established in `lmoci`:
   - On `azuresim` loopback path-style (`http://127.0.0.1:4577`), `azuresim` routes Blob Storage at `/<account>/<container>` and Queue Storage at **`/<account>-queue/<queue>`** (e.g., `/devstoreaccount1-queue/<queue>`).
 - **Implementation in `lmazure`:** `formatBlobServiceURL` ensures path has `/<account>` suffix, while `formatQueueServiceURL` automatically formats `/<account>-queue` on loopback hosts when `.queue.` is absent from the hostname.
 
-### Finding 3 — Composite Receipt Token & Pop-Receipt Rotation
+### Finding 3 — Composite Receipt Token, Message Body Preservation, & Pop-Receipt Rotation
 - **Azure Queue REST contract:** Azure `DeleteMessage` and `UpdateMessage` require both `MessageId` and `PopReceipt`. Every `UpdateMessage` rotates the `PopReceipt` (`x-ms-popreceipt` response header).
-- **Implementation in `lmazure`:**
-  - Receipts are encoded as `base64url(MessageId + "\n" + PopReceipt)` without storing `MessageText`.
-  - `queue_nack` updates message visibility and returns the rotated composite receipt token.
-  - When a caller requests `visibility_timeout == 0` on `queue_receive`, `lmazure` dequeues with `visibilitytimeout=1` (since Azure requires `1 <= visibilitytimeout <= 604800` on dequeue) and immediately issues `UpdateMessage(0)` to obtain the rotated `PopReceipt` for immediate redelivery.
+- **Official Azure REST API vs azqueue SDK & azuresim quirk:**
+  - Official Azure Storage REST API states: when updating visibility timeout only, the request body should be empty with `Content-Length: 0`.
+  - In `azuresim` (Floci-AZ 0.15.0), `PUT /<account>-queue/<queue>/messages/<id>` with an empty body fails with `HTTP 500 Internal Server Error` (Floci-AZ's XML parser fails on empty input).
+  - When sent with `<QueueMessage><MessageText>`, `azuresim` succeeds with `204 No Content` and returns `x-ms-popreceipt`. However, if `<MessageText>` is empty, `azuresim` overwrites the message text with empty string.
+  - To prevent message corruption across visibility updates and nacks, `lmazure` encodes `(MessageId, PopReceipt, WireBase64)` inside the composite receipt token (`base64url(MessageId + "\n" + PopReceipt + "\n" + WireBase64)`). On `queue_nack` and visibility-0 `queue_receive`, the existing payload is echoed back into `UpdateMessage`, preserving the exact body and returning the rotated receipt.
 
 ### Finding 4 — Missing Queue (`NOT_FOUND`) vs Invalid Receipt Precedence (M5)
 - **Spec requirement:** When `queue_ack` or `queue_nack` is given an invalid/malformed non-empty receipt, missing queue must return `ErrorCode.NOT_FOUND` before reporting `ErrorCode.INVALID_ARGUMENT`.
@@ -41,3 +42,26 @@ Following the `lmcode` multi-schema subcommand pattern established in `lmoci`:
 
 ### Finding 6 — `lmcode.RegisterTesting` vs `print(bool|float|int)` Overloads
 - **Parity with `schema/lmcloud.dsl.json`:** `host.Register` registers `print(bool)`, `print(float)`, and `print(int)` in addition to `lmcode.RegisterTesting`'s `print(string)` so host signatures are 100% byte-identical to `lmscript --lmcode-signatures schema/lmcloud.dsl.json`.
+
+### Finding 7 — Azuresim Container DELETE Returns 202 on Non-Existent Container
+- **Spec requirement:** `bucket_delete` on an already-deleted or never-created container must return `false` with `ErrorCode.OK`.
+- **Azuresim behavior:** `DELETE /devstoreaccount1/<container>?restype=container` returns `HTTP 202 Accepted` even when the container does not exist.
+- **Implementation in `lmazure`:** `BucketDelete` executes a pre-flight probe using `ContainerClient.GetProperties` (HEAD). If it returns `404 ContainerNotFound`, `BucketDelete` immediately returns `false, nil` without issuing `DeleteContainer`.
+
+### Finding 8 — Azuresim Queue DELETE Returns 204 on Non-Existent Queue
+- **Spec requirement:** `queue_delete` on an already-deleted or never-created queue must return `false` with `ErrorCode.OK`.
+- **Azuresim behavior:** `DELETE /devstoreaccount1-queue/<queue>` returns `HTTP 204 No Content` even when the queue does not exist.
+- **Implementation in `lmazure`:** `QueueDelete` probes `QueueClient.GetProperties` (GET metadata) first. If it returns `404 QueueNotFound`, `QueueDelete` returns `false, nil`.
+
+### Finding 9 — Queue Create Idempotency & SDK Status Code Suppression
+- **Spec requirement:** `queue_create` returns `true` if newly created, `false` if already existed.
+- **Azure REST & azqueue SDK behavior:** Azure Queue REST `PUT /<queue>` returns `201 Created` if newly created, or `204 No Content` if already existed. However, the Azure Go SDK method `QueueClient.Create` suppresses the response status code, treating both 201 and 204 as successful (`err == nil`) and returning an opaque `QueueClientCreateResponse` with only headers (`Date`, `RequestID`, `Version`).
+- **Implementation in `lmazure`:** `QueueCreate` probes `QueueClient.GetProperties` before attempting creation. If the queue exists (200 OK), it returns `false, nil`. If it does not exist (404), it proceeds to call `Create` and returns `true, nil`.
+
+### Finding 10 — Non-TLS HTTP Credentials in Official Azure SDK (`azcore`)
+- **SDK behavior:** The Azure Go SDK `azcore` library includes `runtime.checkHTTPSForAuth`, which rejects sending credentials over plain HTTP with `"authorized requests are not permitted for non-TLS protected (https) endpoints"` unless `InsecureAllowCredentialWithHTTP: true` is explicitly configured.
+- **Implementation in `lmazure`:** Since `lmazure` operates in loopback/simulator mode, all client constructors (`createBlobClient`, `createQueueServiceClient`, `createQueueClient`) configure `ClientOptions.InsecureAllowCredentialWithHTTP = true`.
+
+### Finding 11 — Safe Nil-Receiver Handlers for `abort_on_error(false)`
+- **Behavior:** When `cloud.set_abort_on_error(false)` is enabled and an operation fails (e.g., `object_head` on a policy-denied container under `--auth enforce`), the `_lmcode_` runtime assigns `None` (`nil` object) to the result variable. Subsequent method calls on that variable (such as `h.exists()`) invoke the registered Go method with `self == nil`.
+- **Implementation in `lmazure`:** All object accessor methods in `internal/host/register.go` (`ObjectMeta`, `ObjectSummary`, `ObjectListPage`, `QueueMessage`, `QueueMessageList`, `CloudError`) defensively check `if self == nil` and return safe default values (e.g., `exists() -> false`) rather than nil-pointer panicking.

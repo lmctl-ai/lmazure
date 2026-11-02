@@ -109,6 +109,35 @@ if [[ -x "$SIM_SH" && -x "$LMCLOUD_DIR/tests/run-conformance.sh" ]]; then
   LMSCRIPT_BIN="$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/run-conformance.sh" "$BIN" "$ENDPOINT" all
   cleanup_sim
   trap - EXIT
+
+  AUTH_CONFIG="/home/ubuntu/cloud/azuresim/examples/auth.json"
+  SIM_BIN="$LMCLOUD_SIM_DIR/azuresim"
+  if [[ -f "$AUTH_CONFIG" && -x "$SIM_BIN" ]]; then
+    echo "==> [9b] Running scenarios 12 and 13 under azuresim --auth enforce"
+    ENFORCE_PORT=4595
+    "$SIM_BIN" serve --auth enforce --auth-config "$AUTH_CONFIG" --port "$ENFORCE_PORT" >/dev/null 2>&1 &
+    ENFORCE_PID=$!
+    cleanup_enforce() {
+      kill -TERM "$ENFORCE_PID" >/dev/null 2>&1 || true
+      wait "$ENFORCE_PID" >/dev/null 2>&1 || true
+    }
+    trap cleanup_enforce EXIT
+    for _ in $(seq 1 30); do
+      if curl -s "http://127.0.0.1:$ENFORCE_PORT/devstoreaccount1?comp=list" >/dev/null 2>&1 || curl -s "http://127.0.0.1:$ENFORCE_PORT" >/dev/null 2>&1; then
+        break
+      fi
+      sleep 0.1
+    done
+    LMCLOUD_ENFORCE_DENIED_AZURE_TOKEN="local-demo-token" \
+    LMCLOUD_ENFORCE_DENIED_AZURE_KEY="YWp1c3QtbG9jYWwtZGV2ZWxvcG1lbnQta2V5IQ==" \
+    "$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/conformance/object-storage/12-auth-enforced-denial.lms" "$BIN" "http://127.0.0.1:$ENFORCE_PORT" "enf-blob"
+    LMCLOUD_ENFORCE_DENIED_AZURE_TOKEN="local-demo-token" \
+    LMCLOUD_ENFORCE_DENIED_AZURE_KEY="YWp1c3QtbG9jYWwtZGV2ZWxvcG1lbnQta2V5IQ==" \
+    "$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/conformance/queue/13-queue-auth-enforced-denial.lms" "$BIN" "http://127.0.0.1:$ENFORCE_PORT" "enf-queue"
+    cleanup_enforce
+    trap - EXIT
+    echo "Auth enforce scenarios 12 & 13 passed cleanly"
+  fi
 else
   echo "==> [9/9] Skipping azuresim conformance (sim.sh or lmcloud repo not found)"
 fi

@@ -12,23 +12,34 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue"
 )
 
-func encodeAzureReceipt(messageID, popReceipt string) string {
-	return base64.RawURLEncoding.EncodeToString([]byte(messageID + "\n" + popReceipt))
+func encodeAzureReceipt(messageID, popReceipt string, rawB64 ...string) string {
+	b64 := ""
+	if len(rawB64) > 0 {
+		b64 = rawB64[0]
+	}
+	if b64 == "" {
+		return base64.RawURLEncoding.EncodeToString([]byte(messageID + "\n" + popReceipt))
+	}
+	return base64.RawURLEncoding.EncodeToString([]byte(messageID + "\n" + popReceipt + "\n" + b64))
 }
 
-func decodeAzureReceipt(receipt string) (messageID, popReceipt string, ok bool) {
+func decodeAzureReceipt(receipt string) (messageID, popReceipt, rawB64 string, ok bool) {
 	data, err := base64.RawURLEncoding.DecodeString(receipt)
 	if err != nil {
 		// Also try standard base64 if raw URL failed
 		if data, err = base64.StdEncoding.DecodeString(receipt); err != nil {
-			return "", "", false
+			return "", "", "", false
 		}
 	}
-	parts := strings.Split(string(data), "\n")
-	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
-		return "", "", false
+	parts := strings.SplitN(string(data), "\n", 3)
+	if len(parts) < 2 || parts[0] == "" || parts[1] == "" {
+		return "", "", "", false
 	}
-	return parts[0], parts[1], true
+	b64 := ""
+	if len(parts) >= 3 {
+		b64 = parts[2]
+	}
+	return parts[0], parts[1], b64, true
 }
 
 // QueueCreate ensures queue exists. Returns true if newly created, false if already existed.
@@ -66,6 +77,19 @@ func (h *Host) QueueCreate(queue string) (bool, error) {
 	}
 
 	ctx := context.Background()
+
+	// Probe existence first: Azure Queue REST PUT returns 204 No Content if already exists,
+	// but the official Go SDK azqueue suppresses the 201 vs 204 status code (both return err == nil).
+	_, propErr := qClient.GetProperties(ctx, nil)
+	if propErr == nil {
+		h.finishOKLocked()
+		return false, nil
+	}
+	mappedProp := mapAzureError(propErr, "GetQueuePropertiesFailed")
+	if mappedProp.Code != CodeNotFound {
+		return false, h.finishErrorLocked("queue_create", queue, mappedProp)
+	}
+
 	_, err = qClient.Create(ctx, nil)
 	if err == nil {
 		h.finishOKLocked()
@@ -112,6 +136,19 @@ func (h *Host) QueueDelete(queue string) (bool, error) {
 	}
 
 	ctx := context.Background()
+
+	// Pre-flight check: in azuresim, DELETE /<account>-queue/<queue> returns 204 No Content
+	// even when the queue does not exist. GetProperties returns 404 QueueNotFound.
+	_, propErr := qClient.GetProperties(ctx, nil)
+	if propErr != nil {
+		mapped := mapAzureError(propErr, "GetQueuePropertiesFailed")
+		if mapped.Code == CodeNotFound {
+			h.finishOKLocked()
+			return false, nil
+		}
+		return false, h.finishErrorLocked("queue_delete", queue, mapped)
+	}
+
 	_, err = qClient.Delete(ctx, nil)
 	if err == nil {
 		h.finishOKLocked()
@@ -378,9 +415,14 @@ func (h *Host) QueueReceive(queue string, maxMessages, waitSeconds, visibilityTi
 		msgID := *m.MessageID
 		popReceipt := *m.PopReceipt
 
+		rawB64 := ""
+		if m.MessageText != nil {
+			rawB64 = *m.MessageText
+		}
+
 		// If caller wanted visibility 0 (immediate redelivery): update message now
 		if visibilityTimeoutSeconds == 0 {
-			upResp, upErr := qClient.UpdateMessage(ctx, msgID, popReceipt, "", &azqueue.UpdateMessageOptions{
+			upResp, upErr := qClient.UpdateMessage(ctx, msgID, popReceipt, rawB64, &azqueue.UpdateMessageOptions{
 				VisibilityTimeout: toPtr(int32(0)),
 			})
 			if upErr == nil && upResp.PopReceipt != nil {
@@ -389,16 +431,15 @@ func (h *Host) QueueReceive(queue string, maxMessages, waitSeconds, visibilityTi
 		}
 
 		wireBody := ""
-		if m.MessageText != nil {
-			b64 := *m.MessageText
-			if decoded, decErr := base64.StdEncoding.DecodeString(b64); decErr == nil {
+		if rawB64 != "" {
+			if decoded, decErr := base64.StdEncoding.DecodeString(rawB64); decErr == nil {
 				wireBody = string(decoded)
 			} else {
-				wireBody = b64
+				wireBody = rawB64
 			}
 		}
 		body := DecodeQueueBody(wireBody)
-		rcpt := encodeAzureReceipt(msgID, popReceipt)
+		rcpt := encodeAzureReceipt(msgID, popReceipt, rawB64)
 
 		items = append(items, &QueueMessage{
 			ID:      msgID,
@@ -428,7 +469,7 @@ func (h *Host) QueueAck(queue, receipt string) error {
 		return h.finishErrorLocked("queue_ack", queue, cerr)
 	}
 
-	msgID, popReceipt, validReceipt := decodeAzureReceipt(receipt)
+	msgID, popReceipt, _, validReceipt := decodeAzureReceipt(receipt)
 
 	if useFake {
 		q, exists := h.fakeQueues[queue]
@@ -508,7 +549,7 @@ func (h *Host) QueueNack(queue, receipt string, visibilityTimeoutSeconds int64) 
 		return "", h.finishErrorLocked("queue_nack", queue, cerr)
 	}
 
-	msgID, popReceipt, validReceipt := decodeAzureReceipt(receipt)
+	msgID, popReceipt, rawB64, validReceipt := decodeAzureReceipt(receipt)
 
 	if useFake {
 		q, exists := h.fakeQueues[queue]
@@ -525,7 +566,7 @@ func (h *Host) QueueNack(queue, receipt string, visibilityTimeoutSeconds int64) 
 			if m.receipt == receipt {
 				h.fakeReceiptSeq++
 				newPop := fmt.Sprintf("fake-pop-%d", h.fakeReceiptSeq)
-				m.receipt = encodeAzureReceipt(msgID, newPop)
+				m.receipt = encodeAzureReceipt(msgID, newPop, rawB64)
 				m.visibleAfter = time.Now().Add(time.Duration(visibilityTimeoutSeconds) * time.Second)
 				h.finishOKLocked()
 				return m.receipt, nil
@@ -552,7 +593,7 @@ func (h *Host) QueueNack(queue, receipt string, visibilityTimeoutSeconds int64) 
 		return "", h.finishErrorLocked("queue_nack", queue, cerr)
 	}
 
-	resp, err := qClient.UpdateMessage(ctx, msgID, popReceipt, "", &azqueue.UpdateMessageOptions{
+	resp, err := qClient.UpdateMessage(ctx, msgID, popReceipt, rawB64, &azqueue.UpdateMessageOptions{
 		VisibilityTimeout: toPtr(int32(visibilityTimeoutSeconds)),
 	})
 	if err == nil {
@@ -560,7 +601,7 @@ func (h *Host) QueueNack(queue, receipt string, visibilityTimeoutSeconds int64) 
 		if resp.PopReceipt != nil {
 			newPop = *resp.PopReceipt
 		}
-		newRcpt := encodeAzureReceipt(msgID, newPop)
+		newRcpt := encodeAzureReceipt(msgID, newPop, rawB64)
 		h.finishOKLocked()
 		return newRcpt, nil
 	}

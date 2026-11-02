@@ -629,45 +629,75 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("CloudError", "ok", nil, "bool",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Bool(true), nil
+			}
 			return lmcode.Bool(self.(*CloudError).OK), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Bool(true), nil
+			}
 			return lmcode.Bool(self.(*CloudError).OK), nil
 		}),
 	))
 
 	must(reg.Method("CloudError", "code", nil, "ErrorCode",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(CodeOK), nil
+			}
 			return lmcode.String(self.(*CloudError).Code), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(CodeOK), nil
+			}
 			return lmcode.String(self.(*CloudError).Code), nil
 		}),
 	))
 
 	must(reg.Method("CloudError", "http_status", nil, "int",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(int64(self.(*CloudError).HTTPStatus)), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(int64(self.(*CloudError).HTTPStatus)), nil
 		}),
 	))
 
 	must(reg.Method("CloudError", "provider_code", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*CloudError).ProviderCode), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*CloudError).ProviderCode), nil
 		}),
 	))
 
 	must(reg.Method("CloudError", "message", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*CloudError).Message), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*CloudError).Message), nil
 		}),
 	))
@@ -676,64 +706,162 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("ObjectMeta", "exists", nil, "bool",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.Bool(self.(*ObjectMeta).Exists), nil
+			if self == nil {
+				return lmcode.Bool(false), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.Bool(false), nil
+			}
+			return lmcode.Bool(meta.Exists), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.Bool(self.(*ObjectMeta).Exists), nil
+			if self == nil {
+				return lmcode.Bool(false), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.Bool(false), nil
+			}
+			return lmcode.Bool(meta.Exists), nil
 		}),
 	))
 
 	must(reg.Method("ObjectMeta", "bucket", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).Bucket), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.Bucket), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).Bucket), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.Bucket), nil
 		}),
 	))
 
 	must(reg.Method("ObjectMeta", "key", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).Key), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.Key), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).Key), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.Key), nil
 		}),
 	))
 
 	must(reg.Method("ObjectMeta", "size", nil, "int",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.Int(self.(*ObjectMeta).Size), nil
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.Int(0), nil
+			}
+			return lmcode.Int(meta.Size), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.Int(self.(*ObjectMeta).Size), nil
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.Int(0), nil
+			}
+			return lmcode.Int(meta.Size), nil
 		}),
 	))
 
 	must(reg.Method("ObjectMeta", "etag", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).ETag), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.ETag), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).ETag), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.ETag), nil
 		}),
 	))
 
 	must(reg.Method("ObjectMeta", "content_type", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).ContentType), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.ContentType), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return lmcode.String(self.(*ObjectMeta).ContentType), nil
+			if self == nil {
+				return lmcode.String(""), nil
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return lmcode.String(""), nil
+			}
+			return lmcode.String(meta.ContentType), nil
 		}),
 	))
 
 	must(reg.Method("ObjectMeta", "metadata", nil, "StrMap",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return makeStrMapValue(reg, self.(*ObjectMeta).Metadata)
+			if self == nil {
+				return makeStrMapValue(reg, map[string]string{})
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return makeStrMapValue(reg, map[string]string{})
+			}
+			return makeStrMapValue(reg, meta.Metadata)
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
-			return makeStrMapValue(reg, self.(*ObjectMeta).Metadata)
+			if self == nil {
+				return makeStrMapValue(reg, map[string]string{})
+			}
+			meta, _ := self.(*ObjectMeta)
+			if meta == nil {
+				return makeStrMapValue(reg, map[string]string{})
+			}
+			return makeStrMapValue(reg, meta.Metadata)
 		}),
 	))
 
@@ -741,27 +869,45 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("ObjectSummary", "key", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*ObjectSummary).Key), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*ObjectSummary).Key), nil
 		}),
 	))
 
 	must(reg.Method("ObjectSummary", "size", nil, "int",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(self.(*ObjectSummary).Size), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(self.(*ObjectSummary).Size), nil
 		}),
 	))
 
 	must(reg.Method("ObjectSummary", "etag", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*ObjectSummary).ETag), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*ObjectSummary).ETag), nil
 		}),
 	))
@@ -770,15 +916,24 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("ObjectListPage", "len", nil, "int",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(int64(len(self.(*ObjectListPage).Items))), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(int64(len(self.(*ObjectListPage).Items))), nil
 		}),
 	))
 
 	must(reg.Method("ObjectListPage", "at", []string{"int"}, "ObjectSummary",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.None(), fmt.Errorf("ObjectListPage is nil")
+			}
 			page := self.(*ObjectListPage)
 			idx := args[0].Int
 			if idx < 0 || idx >= int64(len(page.Items)) {
@@ -787,6 +942,9 @@ func Register(reg *lmcode.Registry, h *Host) error {
 			return lmcode.Obj("ObjectSummary", page.Items[idx]), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Obj("ObjectSummary", &ObjectSummary{}), nil
+			}
 			page := self.(*ObjectListPage)
 			idx := args[0].Int
 			if idx >= 0 && idx < int64(len(page.Items)) {
@@ -798,6 +956,9 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("ObjectListPage", "keys", nil, "StrList",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return makeStrListValue(reg, nil)
+			}
 			page := self.(*ObjectListPage)
 			keys := make([]string, len(page.Items))
 			for i, item := range page.Items {
@@ -806,6 +967,9 @@ func Register(reg *lmcode.Registry, h *Host) error {
 			return makeStrListValue(reg, keys)
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return makeStrListValue(reg, nil)
+			}
 			page := self.(*ObjectListPage)
 			keys := make([]string, len(page.Items))
 			for i, item := range page.Items {
@@ -817,18 +981,30 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("ObjectListPage", "has_more", nil, "bool",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Bool(false), nil
+			}
 			return lmcode.Bool(self.(*ObjectListPage).HasMore), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Bool(false), nil
+			}
 			return lmcode.Bool(self.(*ObjectListPage).HasMore), nil
 		}),
 	))
 
 	must(reg.Method("ObjectListPage", "next_token", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*ObjectListPage).NextToken), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*ObjectListPage).NextToken), nil
 		}),
 	))
@@ -837,27 +1013,45 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("QueueMessage", "id", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*QueueMessage).ID), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*QueueMessage).ID), nil
 		}),
 	))
 
 	must(reg.Method("QueueMessage", "body", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*QueueMessage).Body), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*QueueMessage).Body), nil
 		}),
 	))
 
 	must(reg.Method("QueueMessage", "receipt", nil, "string",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*QueueMessage).Receipt), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.String(""), nil
+			}
 			return lmcode.String(self.(*QueueMessage).Receipt), nil
 		}),
 	))
@@ -866,15 +1060,24 @@ func Register(reg *lmcode.Registry, h *Host) error {
 
 	must(reg.Method("QueueMessageList", "len", nil, "int",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(int64(len(self.(*QueueMessageList).Items))), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Int(0), nil
+			}
 			return lmcode.Int(int64(len(self.(*QueueMessageList).Items))), nil
 		}),
 	))
 
 	must(reg.Method("QueueMessageList", "at", []string{"int"}, "QueueMessage",
 		func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.None(), fmt.Errorf("QueueMessageList is nil")
+			}
 			list := self.(*QueueMessageList)
 			idx := args[0].Int
 			if idx < 0 || idx >= int64(len(list.Items)) {
@@ -883,6 +1086,9 @@ func Register(reg *lmcode.Registry, h *Host) error {
 			return lmcode.Obj("QueueMessage", list.Items[idx]), nil
 		},
 		lmcode.Dry[lmcode.Method](func(self any, args []lmcode.Value) (lmcode.Value, error) {
+			if self == nil {
+				return lmcode.Obj("QueueMessage", &QueueMessage{}), nil
+			}
 			list := self.(*QueueMessageList)
 			idx := args[0].Int
 			if idx >= 0 && idx < int64(len(list.Items)) {

@@ -315,7 +315,8 @@ func (h *Host) createBlobClient(baseEndpoint string) (*azblob.Client, error) {
 
 	opts := &azblob.ClientOptions{
 		ClientOptions: azcore.ClientOptions{
-			Transport: h.httpClient,
+			Transport:                       h.httpClient,
+			InsecureAllowCredentialWithHTTP: true,
 		},
 	}
 
@@ -338,7 +339,8 @@ func (h *Host) createQueueServiceClient(baseEndpoint string) (*azqueue.ServiceCl
 
 	opts := &azqueue.ClientOptions{
 		ClientOptions: azcore.ClientOptions{
-			Transport: h.httpClient,
+			Transport:                       h.httpClient,
+			InsecureAllowCredentialWithHTTP: true,
 		},
 	}
 
@@ -362,7 +364,8 @@ func (h *Host) createQueueClient(baseEndpoint, queueName string) (*azqueue.Queue
 
 	opts := &azqueue.ClientOptions{
 		ClientOptions: azcore.ClientOptions{
-			Transport: h.httpClient,
+			Transport:                       h.httpClient,
+			InsecureAllowCredentialWithHTTP: true,
 		},
 	}
 

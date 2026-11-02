@@ -152,12 +152,19 @@ func TestReceiptCodec(t *testing.T) {
 	msgID := "msg-12345"
 	pop := "pop-67890"
 	encoded := encodeAzureReceipt(msgID, pop)
-	gotMsg, gotPop, ok := decodeAzureReceipt(encoded)
-	if !ok || gotMsg != msgID || gotPop != pop {
-		t.Fatalf("receipt codec roundtrip mismatch: got (%q, %q, %v); want (%q, %q, true)", gotMsg, gotPop, ok, msgID, pop)
+	gotMsg, gotPop, gotB64, ok := decodeAzureReceipt(encoded)
+	if !ok || gotMsg != msgID || gotPop != pop || gotB64 != "" {
+		t.Fatalf("receipt codec roundtrip mismatch: got (%q, %q, %q, %v); want (%q, %q, \"\", true)", gotMsg, gotPop, gotB64, ok, msgID, pop)
 	}
 
-	_, _, ok = decodeAzureReceipt("not-valid-receipt")
+	b64Payload := "aGVsbG8td29ybGQ="
+	encodedWithBody := encodeAzureReceipt(msgID, pop, b64Payload)
+	gotMsg, gotPop, gotB64, ok = decodeAzureReceipt(encodedWithBody)
+	if !ok || gotMsg != msgID || gotPop != pop || gotB64 != b64Payload {
+		t.Fatalf("receipt codec with body mismatch: got (%q, %q, %q, %v); want (%q, %q, %q, true)", gotMsg, gotPop, gotB64, ok, msgID, pop, b64Payload)
+	}
+
+	_, _, _, ok = decodeAzureReceipt("not-valid-receipt")
 	if ok {
 		t.Fatalf("expected decodeAzureReceipt to fail for invalid string")
 	}
