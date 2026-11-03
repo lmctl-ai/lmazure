@@ -12,5 +12,7 @@ with tempfile.TemporaryDirectory() as d:
  subprocess.check_call([repo/'scripts/stamp-version.sh',version])
  assert (repo/'VERSION').read_text().strip()==version
  assert f'public const string Version = "{version}";' in (repo/'src/LmAzure/Program.cs').read_text()
+ assert f'<Version>{version}</Version>' in (repo/'src/LmAzure/LmAzure.csproj').read_text()
+ assert f'lmazure {version} — third-party notices' in (repo/'THIRD_PARTY_NOTICES').read_text()
  assert subprocess.check_output([calc,'--diagnostic'],text=True).strip()==version
  print('PASS lmazure run-derived version and stamp')
