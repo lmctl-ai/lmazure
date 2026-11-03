@@ -1,19 +1,44 @@
 name: ci
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 permissions:
   # No Azure OIDC, login action, or Azure credentials are permitted in CI.
   contents: read
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: false
 env:
   LMAZURE_LIVE: '0'
   LMAZURE_ALLOW_WRITES: '0'
   DOTNET_NOLOGO: '1'
   DOTNET_CLI_TELEMETRY_OPTOUT: '1'
 jobs:
+  version:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Verify release version contract
+        run: python3 scripts/test-release-version.py
+      - id: version
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main ]]; then
+            version="$(scripts/derive-release-version.sh "$GITHUB_RUN_NUMBER")"
+            release=true
+          else
+            version="$(scripts/derive-release-version.sh --diagnostic)"
+            release=false
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          echo "lmazure version $version (release=$release)"
+
   native:
+    needs: version
     name: ${{ matrix.name }}
     timeout-minutes: 45
     strategy:
@@ -33,6 +58,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
+      - name: Stamp CI release version
+        run: scripts/stamp-version.sh "${{ needs.version.outputs.version }}"
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
         with:
           dotnet-version: '10.0.402'
@@ -51,7 +78,7 @@ jobs:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/packages.lock.json') }}
       - name: Pinned lmscript compiler
-        run: timeout 180 npm install -g @lmctl-ai/lmctl@0.2.420
+        run: timeout 180 npm install -g @lmctl-ai/lmctl@0.2.458
       - name: Pinned source and managed fake tests
         timeout-minutes: 10
         run: bash test.sh
@@ -88,7 +115,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          timeout 180 npm install -g @lmctl-ai/lmctl@0.2.420
+          timeout 180 npm install -g @lmctl-ai/lmctl@0.2.458
           suffix=''
           if [[ "$RUNNER_OS" == Windows ]]; then suffix=.exe; fi
           mkdir -p build/lmcloud-tool
@@ -110,18 +137,25 @@ jobs:
           path: dist/*
           if-no-files-found: error
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: native
+    if: needs.version.outputs.release == 'true'
+    needs: [version, native]
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     permissions:
       contents: write
+    env:
+      RELEASE_VERSION: ${{ needs.version.outputs.version }}
     steps:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           pattern: lmazure-*
           merge-multiple: true
           path: dist
+      - name: Verify published binary version
+        run: |
+          chmod +x dist/lmazure-linux-x64
+          got="$(dist/lmazure-linux-x64 --version)"
+          test "$got" = "lmazure $RELEASE_VERSION" || { echo "expected lmazure $RELEASE_VERSION, got $got"; exit 1; }
       - name: Publish fake-validated preview for user live testing
         env:
           GH_TOKEN: ${{ github.token }}
@@ -129,4 +163,8 @@ jobs:
           cd dist
           test "$(find . -maxdepth 1 -type f -name 'lmazure-*' | wc -l)" -eq 5
           sha256sum lmazure-* > SHA256SUMS
-          timeout 240 gh release create "$GITHUB_REF_NAME" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME — READY TO TEST" --notes 'Adds explicit loopback-only Azure Storage SDK commands for local emulator integration, real SharedKey signing, configurable dummy Bearer tokens, and redacted service error envelopes. Existing cloud endpoint, write, budget and credential guards remain unchanged. Five NativeAOT executables validated by offline client suites; real Azure access remains untested and requires explicit opt-in. See docs/SIMULATOR.md. Linux requires glibc 2.35 or newer.'
+          if gh release view "v$RELEASE_VERSION" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "v$RELEASE_VERSION" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "v$RELEASE_VERSION" lmazure-* SHA256SUMS --repo "$GITHUB_REPOSITORY" --title "v$RELEASE_VERSION — READY TO TEST" --notes 'Adds explicit loopback-only Azure Storage SDK commands for local emulator integration, real SharedKey signing, configurable dummy Bearer tokens, and redacted service error envelopes. Existing cloud endpoint, write, budget and credential guards remain unchanged. Five NativeAOT executables validated by offline client suites; real Azure access remains untested and requires explicit opt-in. See docs/SIMULATOR.md. Linux requires glibc 2.35 or newer.'
+          fi
