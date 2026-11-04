@@ -22,13 +22,10 @@ type Options struct {
 	// CompatProbeMissingDelete enables pre-operation container/queue existence
 	// probes on DeleteBucket, ListObjects, HeadObject (on 404), DeleteObject
 	// (on 404), and DeleteQueue, plus in-process message-body caching for
-	// UpdateMessage, so released azuresim binaries built before commit 7903c9c
-	// return NOT_FOUND on missing containers/queues and preserve message bodies
-	// on visibility updates.
+	// UpdateMessage, when talking to legacy azuresim binaries built before
+	// commit 7903c9c (prior to v0.2.14).
 	//
-	// Defaults to true unless LMAZURE_COMPAT_PROBE_EXISTENCE=0.
-	// Removal condition: delete once an azuresim release containing commit
-	// 7903c9c is published and pinned by lmcloud/scripts/sims.lock.
+	// Defaults to false unless LMAZURE_COMPAT_PROBE_EXISTENCE=1.
 	CompatProbeMissingDelete *bool
 }
 

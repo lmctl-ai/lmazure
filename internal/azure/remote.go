@@ -78,10 +78,10 @@ func (r *remote) compatProbe() bool {
 		return *r.compatProbeMissingDelete
 	}
 	v := strings.TrimSpace(strings.ToLower(r.getenv("LMAZURE_COMPAT_PROBE_EXISTENCE")))
-	if v == "0" || v == "false" || v == "no" || v == "off" {
-		return false
+	if v == "1" || v == "true" || v == "yes" || v == "on" {
+		return true
 	}
-	return true
+	return false
 }
 
 // accountName reads ONLY the explicit simulator variable LMAZURE_SIM_ACCOUNT,
@@ -176,6 +176,9 @@ type visibilityOnlyUpdatePolicy struct{}
 
 func (visibilityOnlyUpdatePolicy) Do(req *policy.Request) (*http.Response, error) {
 	raw := req.Raw()
+	if raw.URL != nil && raw.URL.RawPath != "" {
+		raw.URL.RawPath = strings.ReplaceAll(strings.ReplaceAll(raw.URL.RawPath, "%2F", "/"), "%2f", "/")
+	}
 	if raw.Method == http.MethodPut && raw.URL != nil && raw.URL.Query().Get("popreceipt") != "" && req.Body() != nil {
 		b, err := io.ReadAll(req.Body())
 		_ = req.RewindBody()

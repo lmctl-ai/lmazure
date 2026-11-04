@@ -6,7 +6,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.3
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.0
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azqueue v1.0.1
-	github.com/lmctl-ai/lmcloud v0.1.0
+	github.com/lmctl-ai/lmcloud v0.1.1-0.20261104000805-0cc66983a4cd
 	github.com/lmctl-ai/lmcode-go v0.6.39-0.20261102140952-06cd9ae991d9
 )
 

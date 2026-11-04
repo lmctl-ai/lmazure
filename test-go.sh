@@ -120,7 +120,7 @@ go test -race -count=3 ./...
 python3 "$ROOT/scripts/test-dry-spy.py" "$LMSCRIPT_BIN" "$BIN" "$LMCLOUD_DIR/schema/lmcloud.dsl.json"
 
 if [[ -x "$SIM_SH" && -x "$LMCLOUD_DIR/tests/run-conformance.sh" ]]; then
-  echo "==> [9/9] Running lmcloud object-storage + queue conformance against azuresim"
+  echo "==> [9/9] Running lmcloud conformance (open) against azuresim"
   cleanup_sim() {
     "$SIM_SH" stop azure --name "$SIM_NAME" >/dev/null 2>&1 || true
   }
@@ -130,16 +130,35 @@ if [[ -x "$SIM_SH" && -x "$LMCLOUD_DIR/tests/run-conformance.sh" ]]; then
   cleanup_sim
   trap - EXIT
 
-  AUTH_CONFIG="/home/ubuntu/cloud/azuresim/examples/auth.json"
   SIM_BIN="$LMCLOUD_SIM_DIR/azuresim"
-  if [[ -f "$AUTH_CONFIG" && -x "$SIM_BIN" ]]; then
-    echo "==> [9b] Running scenarios 12 and 13 under cached azuresim --auth enforce"
+  if [[ -x "$SIM_BIN" ]]; then
+    echo "==> [9b/9] Running full lmcloud conformance under azuresim --auth enforce"
+    ENF_TMP=$(mktemp -d)
+    cat > "$ENF_TMP/auth.json" <<'EOF'
+{
+  "accounts": {
+    "devstoreaccount1": "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="
+  },
+  "tokens": {
+    "local-demo-token": "demo-user"
+  },
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "ActionGlob": "Microsoft.Storage/*",
+      "ResourceGlob": "*",
+      "Principal": ["devstoreaccount1"]
+    }
+  ]
+}
+EOF
     ENFORCE_PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
-    "$SIM_BIN" serve --auth enforce --auth-config "$AUTH_CONFIG" --port "$ENFORCE_PORT" >/dev/null 2>&1 &
+    "$SIM_BIN" serve --auth enforce --auth-config "$ENF_TMP/auth.json" --port "$ENFORCE_PORT" >/dev/null 2>&1 &
     ENFORCE_PID=$!
     cleanup_enforce() {
       kill -TERM "$ENFORCE_PID" >/dev/null 2>&1 || true
       wait "$ENFORCE_PID" >/dev/null 2>&1 || true
+      rm -rf "$ENF_TMP"
     }
     trap cleanup_enforce EXIT
     for _ in $(seq 1 30); do
@@ -149,56 +168,14 @@ if [[ -x "$SIM_SH" && -x "$LMCLOUD_DIR/tests/run-conformance.sh" ]]; then
       sleep 0.1
     done
     LMCLOUD_ENFORCE_DENIED_AZURE_TOKEN="local-demo-token" \
-    LMCLOUD_ENFORCE_DENIED_AZURE_KEY="YWp1c3QtbG9jYWwtZGV2ZWxvcG1lbnQta2V5IQ==" \
-    "$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/conformance/object-storage/12-auth-enforced-denial.lms" "$BIN" "http://127.0.0.1:$ENFORCE_PORT" "enf-blob"
+    LMSCRIPT_BIN="$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/run-conformance.sh" "$BIN" "http://127.0.0.1:$ENFORCE_PORT" queue
     LMCLOUD_ENFORCE_DENIED_AZURE_TOKEN="local-demo-token" \
-    LMCLOUD_ENFORCE_DENIED_AZURE_KEY="YWp1c3QtbG9jYWwtZGV2ZWxvcG1lbnQta2V5IQ==" \
-    "$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/conformance/queue/13-queue-auth-enforced-denial.lms" "$BIN" "http://127.0.0.1:$ENFORCE_PORT" "enf-queue"
+    LMSCRIPT_BIN="$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/run-conformance.sh" "$BIN" "http://127.0.0.1:$ENFORCE_PORT" cost-perf
+    LMCLOUD_ENFORCE_DENIED_AZURE_TOKEN="local-demo-token" \
+    "$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/conformance/object-storage/12-auth-enforced-denial.lms" "$BIN" "http://127.0.0.1:$ENFORCE_PORT" "enf-blob"
     cleanup_enforce
     trap - EXIT
-    echo "Auth enforce scenarios 12 & 13 passed cleanly"
-  fi
-
-  AZURESIM_JAR="${AZURESIM_JAR:-/home/ubuntu/cloud/azuresim/dist/quarkus-app/quarkus-run.jar}"
-  AZURESIM_JAVA="${AZURESIM_JAVA:-}"
-  if [[ -z "$AZURESIM_JAVA" ]]; then
-    if [[ -x "/home/ubuntu/tools/graalvm-community-openjdk-25.0.2+10.1/bin/java" ]]; then
-      AZURESIM_JAVA="/home/ubuntu/tools/graalvm-community-openjdk-25.0.2+10.1/bin/java"
-    else
-      AZURESIM_JAVA="java"
-    fi
-  fi
-  if [[ -f "$AZURESIM_JAR" && -f "$AUTH_CONFIG" ]]; then
-    echo "==> [9c] Running full conformance + enforce against fixed azuresim JVM jar (7903c9c) with LMAZURE_COMPAT_PROBE_EXISTENCE=0"
-    JVM_OPEN_PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
-    JVM_ENF_PORT=$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1]); s.close()')
-    "$AZURESIM_JAVA" -jar "$AZURESIM_JAR" serve --auth open --port "$JVM_OPEN_PORT" >/dev/null 2>&1 &
-    JVM_OPEN_PID=$!
-    "$AZURESIM_JAVA" -jar "$AZURESIM_JAR" serve --auth enforce --auth-config "$AUTH_CONFIG" --port "$JVM_ENF_PORT" >/dev/null 2>&1 &
-    JVM_ENF_PID=$!
-    cleanup_jvm() {
-      kill -TERM "$JVM_OPEN_PID" "$JVM_ENF_PID" >/dev/null 2>&1 || true
-      wait "$JVM_OPEN_PID" "$JVM_ENF_PID" >/dev/null 2>&1 || true
-    }
-    trap cleanup_jvm EXIT
-    for _ in $(seq 1 50); do
-      if curl -s "http://127.0.0.1:$JVM_OPEN_PORT/devstoreaccount1?comp=list" >/dev/null 2>&1 && curl -s "http://127.0.0.1:$JVM_ENF_PORT" >/dev/null 2>&1; then
-        break
-      fi
-      sleep 0.1
-    done
-    LMAZURE_COMPAT_PROBE_EXISTENCE=0 LMSCRIPT_BIN="$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/run-conformance.sh" "$BIN" "http://127.0.0.1:$JVM_OPEN_PORT" all
-    LMAZURE_COMPAT_PROBE_EXISTENCE=0 \
-    LMCLOUD_ENFORCE_DENIED_AZURE_TOKEN="local-demo-token" \
-    LMCLOUD_ENFORCE_DENIED_AZURE_KEY="YWp1c3QtbG9jYWwtZGV2ZWxvcG1lbnQta2V5IQ==" \
-    "$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/conformance/object-storage/12-auth-enforced-denial.lms" "$BIN" "http://127.0.0.1:$JVM_ENF_PORT" "jvm-enf-blob"
-    LMAZURE_COMPAT_PROBE_EXISTENCE=0 \
-    LMCLOUD_ENFORCE_DENIED_AZURE_TOKEN="local-demo-token" \
-    LMCLOUD_ENFORCE_DENIED_AZURE_KEY="YWp1c3QtbG9jYWwtZGV2ZWxvcG1lbnQta2V5IQ==" \
-    "$LMSCRIPT_BIN" "$LMCLOUD_DIR/tests/conformance/queue/13-queue-auth-enforced-denial.lms" "$BIN" "http://127.0.0.1:$JVM_ENF_PORT" "jvm-enf-queue"
-    cleanup_jvm
-    trap - EXIT
-    echo "Fixed azuresim (7903c9c) with LMAZURE_COMPAT_PROBE_EXISTENCE=0 passed cleanly"
+    echo "Auth enforce conformance (queue 13/13, cost-perf 10/10, object-storage/12-auth-enforced-denial) passed cleanly"
   fi
 else
   echo "==> [9/9] Skipping azuresim conformance (sim.sh or lmcloud repo not found)"

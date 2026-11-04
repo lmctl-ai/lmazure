@@ -240,8 +240,13 @@ func (r *remote) Receive(ctx context.Context, q string, max, wait, vis int) ([]h
 						updateBody = rawB64
 					}
 					zeroVis := int32(0)
-					upResp, upErr := qClient.UpdateMessage(ctx, msgID, popReceipt, updateBody, &azqueue.UpdateMessageOptions{
-						VisibilityTimeout: &zeroVis,
+					var upResp azqueue.UpdateMessageResponse
+					upErr := hostkit.RunSubOperation(ctx, hostkit.SubOperationSpec{Operation: "queue_nack"}, func(subCtx context.Context) error {
+						var err error
+						upResp, err = qClient.UpdateMessage(subCtx, msgID, popReceipt, updateBody, &azqueue.UpdateMessageOptions{
+							VisibilityTimeout: &zeroVis,
+						})
+						return err
 					})
 					if upErr == nil && upResp.PopReceipt != nil && *upResp.PopReceipt != "" {
 						popReceipt = *upResp.PopReceipt

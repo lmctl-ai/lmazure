@@ -455,30 +455,30 @@ func TestCompatProbeToggle(t *testing.T) {
 	}))
 	defer srv.Close()
 
-	// With LMAZURE_COMPAT_PROBE_EXISTENCE=0, DeleteQueue issues DELETE directly without GetProperties.
-	aNoProbe := New(&Options{
-		Getenv: func(k string) string {
-			if k == "LMAZURE_COMPAT_PROBE_EXISTENCE" {
-				return "0"
-			}
-			return ""
-		},
-	})
+	// Default (compat probe disabled for azuresim >= v0.2.14): DeleteQueue issues DELETE directly without GetProperties.
+	aNoProbe := New(&Options{Getenv: func(string) string { return "" }})
 	ctx := hostkit.WithEndpoint(context.Background(), srv.URL)
 	if err := aNoProbe.DeleteQueue(ctx, "test-q"); err != nil {
 		t.Fatalf("DeleteQueue (no probe) failed: %v", err)
 	}
 	if got := headCount.Load(); got != 0 {
-		t.Fatalf("expected 0 GetProperties probes when LMAZURE_COMPAT_PROBE_EXISTENCE=0, got %d", got)
+		t.Fatalf("expected 0 GetProperties probes by default, got %d", got)
 	}
 
-	// With default (compat probe enabled), DeleteQueue issues GetProperties before DELETE.
-	aProbe := New(&Options{Getenv: func(string) string { return "" }})
+	// With LMAZURE_COMPAT_PROBE_EXISTENCE=1, DeleteQueue issues GetProperties before DELETE.
+	aProbe := New(&Options{
+		Getenv: func(k string) string {
+			if k == "LMAZURE_COMPAT_PROBE_EXISTENCE" {
+				return "1"
+			}
+			return ""
+		},
+	})
 	if err := aProbe.DeleteQueue(ctx, "test-q"); err != nil {
 		t.Fatalf("DeleteQueue (with probe) failed: %v", err)
 	}
 	if got := headCount.Load(); got != 1 {
-		t.Fatalf("expected 1 GetProperties probe when compat probe enabled, got %d", got)
+		t.Fatalf("expected 1 GetProperties probe when LMAZURE_COMPAT_PROBE_EXISTENCE=1, got %d", got)
 	}
 }
 
