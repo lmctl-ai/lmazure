@@ -1,0 +1,42 @@
+# Access: Read-only against azuresim through the shared lmcloud schema (Go lmazure build)
+# What: Read-only snapshot of the storage account on the emulator: every container with its blob count and bytes, every queue, as JSON plus a count CSV
+# When: Before and after a sandbox run, or to check what an emulator started with --data-dir still holds
+# Emulator: azuresim (Blob and Queue Storage) on http://127.0.0.1:4577
+# Run: lmscript recipes/sim/inventory_snapshot.lms --cloud-host bin/lmazure
+# Arguments: --endpoint URL --cloud-host PATH --account NAME --key BASE64 --out DIR
+# Cleanup: nothing is created
+import "./lib/common.lms";
+
+o = sim_options("inventory_snapshot", {}, "usage: inventory_snapshot.lms [--endpoint URL] [--cloud-host PATH]");
+
+program = _lmcode_ schema="../../schema/lmcloud.dsl.json";
+  cloud.set_endpoint("all", ${o.endpoint});
+  let containers = cloud.bucket_list();
+  let rows = str_list();
+  let total_blobs = 0;
+  for (c in containers) {
+    let page = cloud.object_list(c, "", 1000, "");
+    let bytes = 0;
+    for (i in range(0, page.len())) { bytes = bytes + page.at(i).size(); }
+    total_blobs = total_blobs + page.len();
+    rows.add(c + "," + str(page.len()) + "," + str(bytes) + "," + str(page.has_more()));
+  }
+  let queues = cloud.queue_list();
+  lmcode_return_put("provider", cloud.provider());
+  lmcode_return_put("containers", containers.len());
+  lmcode_return_put("container_rows", rows.join("\n"));
+  lmcode_return_put("total_blobs", total_blobs);
+  lmcode_return_put("queues", queues.join(","));
+  lmcode_return_put("queue_count", queues.len());
+end _lmcode_
+
+r = sim_run(program, az_cloud_command(o)).result;
+rows = [];
+for (line in lines(r.container_rows)) {
+  if (trim(line) != "") { parts = split(line, ","); push(rows, {container: parts[0], blobs: num(parts[1]), bytes: num(parts[2]), truncated: parts[3]}); }
+}
+write_csv(o.out + "/containers.csv", rows);
+for (row in rows) { println(pad_end(row.container, 40) + str(row.blobs) + " blobs, " + str(row.bytes) + " bytes"); }
+println(o.account + " on " + o.endpoint + " (" + r.provider + "): " + str(r.containers) + " containers, " + str(r.total_blobs) + " blobs, " + str(r.queue_count) + " queues" + if_else(r.queue_count > 0, " (" + r.queues + ")", ""));
+sim_report(o, {endpoint: o.endpoint, host: "lmazure cloud", containers: rows, queues: split(r.queues, ","), summary: r});
+sim_pass(o);

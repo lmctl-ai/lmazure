@@ -1,0 +1,139 @@
+# Access: Write to an azuresim started with --auth enforce (shared lmcloud schema, Go lmazure build)
+# What: Permissions on the emulator: author azuresim's account-key/token policy file with a _json_ template (a Bearer administrator and the SharedKey site deployer), then prove the deployer's own container and queue work, blob writes and deletes in a protected container and deleting a protected queue fail with PERMISSION_DENIED (so the container itself can never be emptied and removed), and a wrong account key fails with UNAUTHENTICATED
+# When: Testing a web site's storage data-plane permissions locally before assigning RBAC roles in a real subscription
+# Emulator: azuresim serve --auth enforce --auth-config <out>/azuresim-auth.json (default endpoint http://127.0.0.1:4578)
+# Run: lmscript recipes/sim/auth_enforced_denial.lms --prepare; azuresim serve --port 4578 --auth enforce --auth-config data/sim/auth_enforced_denial/azuresim-auth.json; lmscript recipes/sim/auth_enforced_denial.lms --cloud-host bin/lmazure
+# Arguments: --endpoint URL --cloud-host PATH --account NAME --key BASE64 --admin-token TOKEN --run ID --out DIR [--prepare]
+# Cleanup: the administrator removes the protected container and queue; the deployer removes its own
+import "./lib/common.lms";
+
+o = sim_options("auth_enforced_denial", {
+  endpoint: {type: "string", default: getenv("AZURESIM_ENFORCE_ENDPOINT", "http://127.0.0.1:4578"), description: "enforce-mode azuresim origin"},
+  admin_token: {flag: "admin-token", type: "string", default: "site-admin-token", description: "dummy Bearer token mapped to the site-admin principal"},
+  prepare: {type: "boolean", description: "only write the auth config and exit"}
+}, "usage: auth_enforced_denial.lms [--prepare] [--endpoint URL] [--cloud-host PATH]");
+own_container = "lmazure-sim-deploy-" + o.run;
+own_queue = "lmazure-sim-jobs-" + o.run;
+protected_container = "lmazure-sim-protected-" + o.run;
+protected_queue = "lmazure-sim-protected-audit-" + o.run;
+blob_scope = expand("/${account}/blob/lmazure-sim-*", {account: o.account});
+queue_scope = expand("/${account}/queue/lmazure-sim-*", {account: o.account});
+blob_root = expand("/${account}/blob/", {account: o.account});
+queue_root = expand("/${account}/queue/", {account: o.account});
+protected_blob_scope = expand("/${account}/blob/lmazure-sim-protected*", {account: o.account});
+protected_queue_scope = expand("/${account}/queue/lmazure-sim-protected*", {account: o.account});
+
+# The SharedKey principal is the account name (the site deployer); the Bearer token maps to site-admin.
+auth = _json_;
+{
+  "accounts": {"devstoreaccount1": ${o.key}},
+  "tokens": {"site-admin-token": "site-admin"},
+  "Statement": [
+    {"Effect": "Allow", "ActionGlob": "Microsoft.Storage/*", "ResourceGlob": "*", "Principal": "site-admin"},
+    {"Effect": "Allow", "ActionGlob": "Microsoft.Storage/*", "ResourceGlob": [${blob_scope}, ${queue_scope}, ${blob_root}, ${queue_root}], "Principal": ${o.account}},
+    {"Effect": "Deny", "ActionGlob": "*/blobs/write", "ResourceGlob": ${protected_blob_scope}, "Principal": ${o.account}},
+    {"Effect": "Deny", "ActionGlob": "*/delete", "ResourceGlob": [${protected_blob_scope}, ${protected_queue_scope}], "Principal": ${o.account}}
+  ]
+}
+end _json_
+auth_path = o.out + "/azuresim-auth.json";
+config = auth.value();
+config.accounts = {};
+config.accounts[o.account] = o.key;
+config.tokens = {};
+config.tokens[o.admin_token] = "site-admin";
+write_json(auth_path, config);
+println("auth config: " + auth_path);
+if (o.prepare) { println("start the emulator with: azuresim serve --port 4578 --auth enforce --auth-config " + auth_path); exit(0); }
+
+setup = _lmcode_ schema="../../schema/lmcloud.dsl.json";
+  cloud.set_endpoint("all", ${o.endpoint});
+  cloud.bucket_create(${protected_container});
+  cloud.object_put(${protected_container}, "audit-2026.log", "immutable audit trail", "text/plain", str_map());
+  cloud.queue_create(${protected_queue});
+  lmcode_return_put("ok", true);
+end _lmcode_
+teardown = _lmcode_ schema="../../schema/lmcloud.dsl.json";
+  cloud.set_endpoint("all", ${o.endpoint});
+  cloud.set_abort_on_error(false);
+  cloud.object_delete(${protected_container}, "audit-2026.log");
+  cloud.object_delete(${protected_container}, "deploy.txt");
+  lmcode_return_put("container", cloud.bucket_delete(${protected_container}));
+  lmcode_return_put("queue", cloud.queue_delete(${protected_queue}));
+end _lmcode_
+deploy = _lmcode_ schema="../../schema/lmcloud.dsl.json";
+  cloud.set_endpoint("all", ${o.endpoint});
+  cloud.set_abort_on_error(false);
+  let created = cloud.bucket_create(${own_container});
+  let create_code = cloud.last_error().code();
+  cloud.object_put(${own_container}, "index.html", "<h1>deployed</h1>", "text/html", str_map());
+  let put_code = cloud.last_error().code();
+  let qcreated = cloud.queue_create(${own_queue});
+  let qcreate_code = cloud.last_error().code();
+  cloud.queue_send(${own_queue}, "{\"job\":1}");
+  let send_code = cloud.last_error().code();
+
+  cloud.object_put(${protected_container}, "deploy.txt", "tampered", "text/plain", str_map());
+  let protected_put_code = cloud.last_error().code();
+  let protected_put_status = cloud.last_error().http_status();
+  let audit = cloud.object_get(${protected_container}, "audit-2026.log");
+  let protected_get_code = cloud.last_error().code();
+  cloud.object_delete(${protected_container}, "audit-2026.log");
+  let protected_blob_delete_code = cloud.last_error().code();
+  cloud.bucket_delete(${protected_container});
+  let protected_delete_code = cloud.last_error().code();
+  cloud.queue_delete(${protected_queue});
+  let protected_queue_delete_code = cloud.last_error().code();
+
+  cloud.object_delete(${own_container}, "index.html");
+  let deleted = cloud.bucket_delete(${own_container});
+  let qdeleted = cloud.queue_delete(${own_queue});
+  lmcode_return_put("open_mode", protected_put_code == ErrorCode.OK);
+  lmcode_return_put("created", created);
+  lmcode_return_put("create_code", str(create_code));
+  lmcode_return_put("put_code", str(put_code));
+  lmcode_return_put("qcreate_code", str(qcreate_code));
+  lmcode_return_put("send_code", str(send_code));
+  lmcode_return_put("protected_put_code", str(protected_put_code));
+  lmcode_return_put("protected_put_status", protected_put_status);
+  lmcode_return_put("protected_get_code", str(protected_get_code));
+  lmcode_return_put("audit_readable", audit == "immutable audit trail");
+  lmcode_return_put("protected_blob_delete_code", str(protected_blob_delete_code));
+  lmcode_return_put("protected_delete_code", str(protected_delete_code));
+  lmcode_return_put("protected_queue_delete_code", str(protected_queue_delete_code));
+  lmcode_return_put("deleted", deleted);
+  lmcode_return_put("qdeleted", qdeleted);
+end _lmcode_
+unauth = _lmcode_ schema="../../schema/lmcloud.dsl.json";
+  cloud.set_endpoint("all", ${o.endpoint});
+  cloud.set_abort_on_error(false);
+  cloud.bucket_create(${own_container + "-x"});
+  let code = cloud.last_error().code();
+  if (code == ErrorCode.OK) { cloud.bucket_delete(${own_container + "-x"}); }
+  lmcode_return_put("code", str(code));
+  lmcode_return_put("status", cloud.last_error().http_status());
+end _lmcode_
+
+sim_run(setup, az_cloud_token_command(o, o.admin_token));
+r = sim_run(deploy, az_cloud_command(o)).result;
+deployer_key = o.key;
+o.key = "d3JvbmdrZXl1bmF1dGhlbnRpY2F0ZWQtd3Jvbmcta2V5";
+u = sim_run(unauth, az_cloud_command(o)).result;
+o.key = deployer_key;
+t = sim_run(teardown, az_cloud_token_command(o, o.admin_token)).result;
+if (r.open_mode) {
+  println("SKIP: " + o.endpoint + " let the deployer write into the protected container, so it is running in open mode; restart it with --auth enforce --auth-config " + auth_path);
+  exit(0);
+}
+assert(r.created && r.create_code == "OK" && r.put_code == "OK" && r.qcreate_code == "OK" && r.send_code == "OK", "the deployer's own container, blob and queue operations must succeed");
+assert(r.protected_put_code == "PERMISSION_DENIED" && r.protected_put_status == 403, "writing into the protected container must be denied, got " + r.protected_put_code);
+assert(r.protected_get_code == "OK" && r.audit_readable, "the deployer may still read the protected audit log");
+assert(r.protected_blob_delete_code == "PERMISSION_DENIED" && r.protected_queue_delete_code == "PERMISSION_DENIED", "deleting the protected blob and queue must be denied, got " + r.protected_blob_delete_code + "/" + r.protected_queue_delete_code);
+assert(r.protected_delete_code == "PERMISSION_DENIED" || r.protected_delete_code == "CONFLICT", "the protected container must survive: either the delete is denied or it is refused as non-empty because the blob could not be removed, got " + r.protected_delete_code);
+assert(r.deleted && r.qdeleted && t.container && t.queue, "deployer and administrator must clean up their resources");
+assert(u.code == "UNAUTHENTICATED" && u.status == 403, "a wrong account key must fail with UNAUTHENTICATED (AuthenticationFailed 403), got " + u.code + "/" + str(u.status));
+println("deployer (SharedKey " + o.account + ") allowed: " + own_container + " create/put/delete, queue " + own_queue + " create/send/delete, read of the protected audit log");
+println("deployer denied:  " + protected_container + " blob write and blob delete (PERMISSION_DENIED 403), container delete -> " + r.protected_delete_code + ", deleting " + protected_queue + " (PERMISSION_DENIED 403)");
+println("wrong account key: UNAUTHENTICATED 403; administrator (Bearer) removed the protected resources");
+sim_report(o, {endpoint: o.endpoint, host: "lmazure cloud", auth_config: auth_path, results: r, unauthenticated: u, teardown: t});
+sim_pass(o);

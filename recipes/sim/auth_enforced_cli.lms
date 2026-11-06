@@ -1,0 +1,50 @@
+# Access: Write to an azuresim started with --auth enforce through the released lmazure host's `--simulator` command
+# What: The same permission boundary seen from the CLI and the real Azure SDK: the Bearer administrator creates a protected container, the SharedKey deployer uploads to its own container, is refused when deleting the protected one (exit 3, HTTP 403, AuthorizationPermissionMismatch) and is refused outright with a wrong key (AuthenticationFailed)
+# When: Checking that a deploy script using the lmazure CLI fails closed under the storage policy
+# Emulator: azuresim serve --auth enforce --auth-config data/sim/auth_enforced_denial/azuresim-auth.json (the file written by auth_enforced_denial.lms --prepare; default endpoint http://127.0.0.1:4578)
+# Run: lmscript recipes/sim/auth_enforced_cli.lms
+# Arguments: --endpoint URL --host PATH --account NAME --key BASE64 --admin-token TOKEN --run ID --out DIR
+# Cleanup: the administrator deletes the protected container; the deployer deletes its own
+import "./lib/common.lms";
+
+o = sim_options("auth_enforced_cli", {
+  endpoint: {type: "string", default: getenv("AZURESIM_ENFORCE_ENDPOINT", "http://127.0.0.1:4578"), description: "enforce-mode azuresim origin"},
+  admin_token: {flag: "admin-token", type: "string", default: "site-admin-token", description: "dummy Bearer token mapped to the site-admin principal in the auth config"}
+}, "usage: auth_enforced_cli.lms [--endpoint URL] [--host PATH]");
+own_container = "lmazure-sim-deploy-" + o.run;
+protected_container = "lmazure-sim-protected-" + o.run;
+asset = o.out + "/index.html";
+write_file(asset, "<h1>deployed</h1>\n");
+
+az_cli_token_env(o, o.admin_token);
+az_cli_ok(o, ["container-create", protected_container]);
+az_cli_ok(o, ["blob-put", protected_container, "audit.log", asset]);
+
+az_cli_env(o);
+az_cli_ok(o, ["container-create", own_container]);
+az_cli_ok(o, ["blob-put", own_container, "index.html", asset]);
+denied = az_cli(o, ["container-delete", protected_container]);
+open_mode = denied.code == 0;
+tampered = az_cli(o, ["blob-put", protected_container, "deploy.txt", asset]);
+az_cli_ok(o, ["container-delete", own_container]);
+
+o.key = "d3JvbmdrZXl1bmF1dGhlbnRpY2F0ZWQtd3Jvbmcta2V5";
+az_cli_env(o);
+wrong_key = az_cli(o, ["container-create", own_container + "-x"]);
+
+az_cli_token_env(o, o.admin_token);
+if (open_mode) {
+  az_cli(o, ["container-delete", own_container + "-x"]);
+  println("SKIP: " + o.endpoint + " let the deployer delete the protected container, so it is running in open mode; restart it with --auth enforce --auth-config data/sim/auth_enforced_denial/azuresim-auth.json");
+  exit(0);
+}
+az_cli_ok(o, ["container-delete", protected_container]);
+
+assert(denied.code == 3 && getnum(denied.doc, "status") == 403 && getstr(denied.doc, "error") == "AuthorizationPermissionMismatch", "deleting the protected container must fail with exit 3 / 403 / AuthorizationPermissionMismatch: " + json_stringify(denied));
+assert(tampered.code == 3 && getstr(tampered.doc, "error") == "AuthorizationPermissionMismatch", "writing into the protected container must fail with AuthorizationPermissionMismatch: " + json_stringify(tampered));
+assert(wrong_key.code == 3 && getstr(wrong_key.doc, "error") == "AuthenticationFailed", "a wrong SharedKey must fail with AuthenticationFailed: " + json_stringify(wrong_key));
+println("deployer (SharedKey) allowed: " + own_container + " create, upload, delete");
+println("deployer denied:  " + protected_container + " delete and upload -> exit 3, HTTP " + str(getnum(denied.doc, "status")) + " " + getstr(denied.doc, "error"));
+println("wrong key: exit " + str(wrong_key.code) + " " + getstr(wrong_key.doc, "error") + "; administrator (Bearer) removed the protected container");
+sim_report(o, {endpoint: o.endpoint, host: "lmazure --simulator", denied: denied.doc, tampered: tampered.doc, wrong_key: wrong_key.doc});
+sim_pass(o);

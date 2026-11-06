@@ -1,0 +1,31 @@
+# Access: Write to azuresim with the released lmazure host's loopback `--simulator` storage command
+# What: Publish a static site with the real Azure Blob SDK: create a container, upload HTML/CSS/JS files, download them back byte for byte, delete the container
+# When: Checking a deploy script that calls the lmazure CLI rather than embedding lmcode
+# Emulator: azuresim (Blob Storage) on http://127.0.0.1:4577
+# Run: lmscript recipes/sim/blob_site_cli.lms
+# Arguments: --endpoint URL --host PATH --account NAME --key BASE64 --run ID --out DIR
+# Cleanup: the container is deleted
+import "./lib/common.lms";
+
+o = sim_options("blob_site_cli", {}, "usage: blob_site_cli.lms [--endpoint URL] [--host PATH]");
+container = "lmazure-sim-site-" + o.run;
+site_dir = o.out + "/site";
+dl_dir = o.out + "/download";
+mkdir(site_dir, true);
+mkdir(dl_dir, true);
+files = {"index.html": "<!doctype html><html><head><title>lmazure</title></head><body><h1>Hello from azuresim (雪)</h1></body></html>\n", "site.css": "body{font-family:system-ui;margin:2rem}\n", "app.js": "console.log('lmazure site');\n", "404.html": "<h1>Not found</h1>\n"};
+for (name in keys(files)) { write_file(site_dir + "/" + name, files[name]); }
+
+az_cli_env(o);
+az_cli_ok(o, ["container-create", container]);
+uploaded = [];
+for (name in keys(files)) {
+  az_cli_ok(o, ["blob-put", container, name, site_dir + "/" + name]);
+  az_cli_ok(o, ["blob-get", container, name, dl_dir + "/" + name]);
+  assert(read_file(dl_dir + "/" + name) == files[name], name + " must download byte for byte");
+  push(uploaded, {blob: name, bytes: len(files[name])});
+}
+az_cli_ok(o, ["container-delete", container]);
+println("container " + o.account + "/" + container + ": " + str(len(uploaded)) + " blobs uploaded through the Azure SDK and verified on download; container deleted");
+sim_report(o, {endpoint: o.endpoint, host: "lmazure --simulator", container: container, blobs: uploaded});
+sim_pass(o);

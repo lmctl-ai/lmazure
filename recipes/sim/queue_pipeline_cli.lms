@@ -1,0 +1,34 @@
+# Access: Write to azuresim with the released lmazure host's loopback `--simulator` storage command
+# What: Job queue for a web site with the real Azure Queue SDK: create the queue, send JSON jobs, peek without dequeuing, receive and delete by pop receipt until empty, delete the queue (order is not asserted: azuresim returns the newest message first)
+# When: Checking a worker script that calls the lmazure CLI
+# Emulator: azuresim (Queue Storage) on http://127.0.0.1:4577
+# Run: lmscript recipes/sim/queue_pipeline_cli.lms
+# Arguments: --endpoint URL --host PATH --account NAME --key BASE64 --run ID --out DIR
+# Cleanup: the queue is deleted
+import "./lib/common.lms";
+
+o = sim_options("queue_pipeline_cli", {}, "usage: queue_pipeline_cli.lms [--endpoint URL] [--host PATH]");
+queue = "lmazure-sim-jobs-" + o.run;
+jobs = [];
+for (i in range(1, 4)) { push(jobs, json_stringify({job: i, kind: if_else(i % 2 == 0, "send-email", "resize-image"), run: o.run})); }
+
+az_cli_env(o);
+az_cli_ok(o, ["queue-create", queue]);
+for (body in jobs) { az_cli_ok(o, ["queue-send", queue, body]); }
+peeked = az_cli_ok(o, ["queue-peek", queue]);
+peeked_job = json_parse(peeked.message).job;
+assert(peeked_job >= 1 && peeked_job <= len(jobs), "peek must show one of the queued jobs without dequeuing it");
+processed = [];
+for (i in range(0, len(jobs))) {
+  received = az_cli_ok(o, ["queue-receive", queue]);
+  assert(getstr(received, "id") != "" && getstr(received, "receipt") != "", "receive must return an id and a pop receipt");
+  az_cli_ok(o, ["queue-delete-message", queue, received.id, received.receipt]);
+  push(processed, json_parse(received.message).job);
+}
+empty = az_cli(o, ["queue-receive", queue]);
+assert(empty.code == 0 && getstr(empty.doc, "message") == "", "the queue must be empty after the worker finishes: " + json_stringify(empty.doc));
+assert(len(unique(processed)) == len(jobs), "every job must be processed exactly once (azuresim hands back the newest message first, so order is not asserted): " + json_stringify(processed));
+az_cli_ok(o, ["queue-delete", queue]);
+println("queue " + queue + ": " + str(len(jobs)) + " jobs sent, peeked job " + str(peeked_job) + ", processed " + json_stringify(processed) + ", queue empty and deleted");
+sim_report(o, {endpoint: o.endpoint, host: "lmazure --simulator", queue: queue, processed: processed});
+sim_pass(o);

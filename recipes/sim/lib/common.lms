@@ -1,0 +1,103 @@
+# Access: Read-only helpers; importing this file changes no files, processes or environment.
+# What: Shared argument parsing, emulator defaults, host invocation and report helpers for recipes/sim.
+# When: Import from every recipes/sim/*.lms entry. See recipes/sim/README.md.
+# Emulator: azuresim on http://127.0.0.1:4577 (Blob and Queue Storage for account devstoreaccount1, SharedKey/Bearer policies).
+
+fn sim_run_id() {
+  let stamp = str(now());
+  return substr(stamp, len(stamp) - 9, 9);
+}
+
+fn sim_flags(extra) {
+  let base = {
+    endpoint: {type: "string", default: getenv("AZURESIM_ENDPOINT", "http://127.0.0.1:4577"), description: "azuresim origin; plain http on 127.0.0.1 only"},
+    host: {type: "string", default: getenv("LMAZURE_BIN", "lmazure"), description: "released lmazure executable (.NET host) used for `lmazure --simulator` storage commands"},
+    cloud_host: {flag: "cloud-host", type: "string", default: getenv("LMAZURE_CLOUD_BIN", "lmazure"), description: "Go lmazure build serving the shared lmcloud schema (cmd/lmazure)"},
+    account: {type: "string", default: getenv("LMAZURE_SIM_ACCOUNT", "devstoreaccount1"), description: "storage account name served by azuresim"},
+    key: {type: "string", default: getenv("LMAZURE_SIM_KEY", "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw=="), description: "base64 SharedKey (the public development key; configure the same key in an enforce-mode emulator)"},
+    out: {type: "string", default: "", description: "report directory (default data/sim/<recipe>)"},
+    run: {type: "string", default: "", description: "run id suffix; digits or lowercase letters, default from the clock"}
+  };
+  return merge(base, extra);
+}
+
+fn sim_options(name, extra, usage) {
+  let parsed = args_parse(ARGV, sim_flags(extra), usage);
+  if (parsed.help_requested) { println(parsed.help); exit(0); }
+  let o = parsed.values;
+  o.name = name;
+  if (o.out == "") { o.out = "data/sim/" + name; }
+  if (o.run == "") { o.run = sim_run_id(); }
+  assert(regex_test(o.run, "^[a-z0-9]{1,16}$"), "--run must be 1..16 lowercase letters or digits");
+  assert(regex_test(o.endpoint, "^http://127\\.0\\.0\\.1(:[0-9]{1,5})?/?$"), "--endpoint must be a literal IPv4 loopback http origin such as http://127.0.0.1:4577 (the .NET simulator command accepts nothing else)");
+  o.endpoint = regex_replace(o.endpoint, "/$", "");
+  mkdir(o.out, true);
+  return o;
+}
+
+# Environment for `lmazure --simulator` (the released .NET host's loopback storage command).
+fn az_cli_env(o) {
+  set_env("LMAZURE_LIVE", "");
+  set_env("LMAZURE_SIM_ENDPOINT", o.endpoint);
+  set_env("LMAZURE_SIM_ACCOUNT", o.account);
+  set_env("LMAZURE_SIM_KEY", o.key);
+  set_env("LMAZURE_SIM_TOKEN", null);
+}
+
+# Environment for `lmazure --simulator` with a dummy Bearer token instead of the SharedKey.
+fn az_cli_token_env(o, token) {
+  az_cli_env(o);
+  set_env("LMAZURE_SIM_KEY", null);
+  set_env("LMAZURE_SIM_TOKEN", token);
+}
+
+# Run one `lmazure --simulator` operation; returns the parsed JSON envelope and the exit code.
+fn az_cli(o, args) {
+  let result = system(concat([o.host, "--simulator"], args), 120000);
+  let doc = {};
+  if (trim(result.stdout) != "") { doc = json_parse_safe(result.stdout, {}); }
+  return {code: result.code, ok: get(doc, "ok", false), doc: doc, stderr: result.stderr};
+}
+
+fn az_cli_ok(o, args) {
+  let r = az_cli(o, args);
+  if (r.code != 0 || !r.ok) { println("lmazure --simulator " + join(args, " ") + " failed: " + json_stringify(r)); exit(1); }
+  return r.doc;
+}
+
+# Command line for the Go lmazure build serving the shared lmcloud schema (container/blob/queue).
+fn az_cloud_command(o) {
+  set_env("LMAZURE_LIVE", "");
+  set_env("LMCLOUD_ENDPOINT", o.endpoint);
+  set_env("LMAZURE_ENDPOINT", o.endpoint);
+  set_env("LMAZURE_SIM_ACCOUNT", o.account);
+  set_env("LMAZURE_SIM_KEY", o.key);
+  set_env("LMAZURE_SIM_TOKEN", null);
+  return [o.cloud_host, "cloud", "--lmcode", "$DSLFILE"];
+}
+
+# Same command line, but authenticating with a dummy Bearer token (the host prefers the SharedKey when both are set).
+fn az_cloud_token_command(o, token) {
+  let command = az_cloud_command(o);
+  set_env("LMAZURE_SIM_KEY", null);
+  set_env("LMAZURE_SIM_TOKEN", token);
+  return command;
+}
+
+fn sim_run(program, command) {
+  let r = run_lmcode(program, {command: command});
+  if (!r.ok) {
+    println("host failed: " + json_stringify(r));
+    exit(1);
+  }
+  return r;
+}
+
+fn sim_report(o, data) {
+  let path = o.out + "/" + o.name + ".json";
+  write_json(path, data, 2);
+  println("report: " + path);
+  return path;
+}
+
+fn sim_pass(o) { println("PASS " + o.name); }
