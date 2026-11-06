@@ -57,6 +57,16 @@ ports, runs every recipe in a temporary directory and tears everything down. It 
 | `blob_site_cli.lms` | lmazure --simulator | Blob Storage | Container, HTML/CSS/JS uploads, byte-exact downloads, container delete |
 | `queue_pipeline_cli.lms` | lmazure --simulator | Queue Storage | Queue, JSON jobs, peek, receive and delete by pop receipt until empty, queue delete |
 | `inventory_snapshot.lms` | lmazure cloud | Blob and Queue Storage | Read-only: every container with blob count and bytes, every queue, as JSON plus CSV |
+| `smoke_test.lms` | lmazure cloud | Blob, Queue Storage | CI smoke test: emulator answers, container/blob/queue/message round trips, timed |
+| `error_handling.lms` | lmazure cloud | Blob, Queue Storage | Error contract: idempotent creates and deletes, false-not-fail probes, NOT_FOUND/CONFLICT with HTTP status, pre-flight INVALID_ARGUMENT guards |
+| `object_listing_pagination.lms` | lmazure cloud | Blob Storage | 120 blobs, continuation-token paging in pages of 50, ascending order, prefix counts, exhaustive list |
+| `binary_object_roundtrip.lms` | lmazure cloud | Blob Storage | PNG header, all 256 byte values, empty blob, UTF-8 text, 64 KiB file byte-exact with content types and ETags |
+| `queue_visibility_timeout.lms` | lmazure cloud | Queue Storage | In-flight messages invisible, redelivered after the visibility timeout with the same ids, nack(0) immediate redelivery with rotated pop receipt, drained |
+| `upload_thumbnail_pipeline.lms` | lmazure cloud | Blob, Queue Storage | Uploads enqueue jobs, a worker writes thumbnails with provenance metadata, every upload gets exactly one |
+| `blue_green_release.lms` | lmazure cloud | Blob Storage | Two release trees, a current.json pointer, instant switch, verified rollback, prune of the retired release |
+| `concurrent_uploaders.lms` | lmazure cloud | Blob Storage | Four host processes upload disjoint prefixes at once (parallel_map), one listing proves nothing lost |
+| `persistence_restart.lms` | lmazure cloud | Blob, Queue Storage | Write phase, emulator restart with --data-dir, verify phase: blobs intact, queue present (runner shows it as persistence_restart*) |
+| `cli_sdk_parity.lms` | lmazure --simulator + lmazure cloud | Blob, Queue Storage | Blobs written by one client read back byte-exact by the other; CLI queue messages readable through the schema (the schema's own payloads are base64 on the wire) |
 
 ## What azuresim cannot cover
 
@@ -84,3 +94,4 @@ Recorded while verifying against azuresim v0.2.15 and lmazure v0.1.5:
   the helpers unset the unused one. The Go build prefers the key when both are set.
 - A SharedKey principal is the account name, so the policy distinguishes the
   deployer (`devstoreaccount1`) from the administrator by a Bearer token mapping.
+- The shared schema base64-encodes queue payloads on the wire (so binary bodies survive), while `lmazure --simulator queue-send` sends raw text; a message sent through the schema is therefore shown base64-encoded by the CLI. `cli_sdk_parity.lms` documents this.
