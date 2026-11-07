@@ -131,6 +131,10 @@ jobs:
           PYCI
           export PATH="$PWD/artifacts/standalone:$PATH"
           timeout 900 python3 compare/run.py all --offline --native-binary "$PWD/artifacts/standalone/lmazure$suffix" --lmcloud-binary "$PWD/build/lmcloud-tool/lmcloud-${{ matrix.name }}$suffix" --output "$RUNNER_TEMP/lmazure-compare"
+      - name: Verify executable is native (not bytecode)
+        run: |
+          python3 scripts/verify-native-executable.py --self-test
+          python3 scripts/verify-native-executable.py dist/*
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: lmazure-${{ matrix.name }}
@@ -146,11 +150,18 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.version.outputs.version }}
     steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
           pattern: lmazure-*
           merge-multiple: true
           path: dist
+      - name: Verify published executables are native (not bytecode)
+        run: |
+          python3 scripts/verify-native-executable.py --self-test
+          python3 scripts/verify-native-executable.py dist/lmazure-*
       - name: Verify published binary version
         run: |
           chmod +x dist/lmazure-linux-x64
