@@ -12,7 +12,9 @@ locked mode. Azure package pins (all MIT):
 | Azure.Storage.Blobs | 12.30.1 |
 | Azure.Storage.Queues | 12.28.1 |
 
-`sdk.lock` pins lmcode-csharp commit `e68575a5463fc18a18de3045586ad34cd3131fb3`.
+`sdk.lock` pins `lmcode-go` commit `2027887521b3d34a44e67849070bf7e39df11b1d`, and
+`csharp-sdk.lock` pins `lmcode-csharp` commit `3c575d2dd9132010efdbe959b5716e6c2fab1811`
+(`lmcode_std_v3` with 226 standard signatures and 10 standard REST/CLI interfaces).
 `scripts/sync-sdk.py --ensure` verifies its archive/source hashes and the local VM
 allocation-checkpoint patch. SDK sources compile directly into the host; no
 separate lmcode managed assembly or .NET runtime installation is needed by users.

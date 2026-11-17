@@ -78,7 +78,7 @@ jobs:
           path: ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/packages.lock.json') }}
       - name: Pinned lmscript compiler
-        run: timeout 180 npm install -g @lmctl-ai/lmctl@0.2.458
+        run: timeout 180 npm install -g @lmctl-ai/lmctl@0.2.482
       - name: Pinned source and managed fake tests
         timeout-minutes: 10
         run: bash test.sh
@@ -115,7 +115,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          timeout 180 npm install -g @lmctl-ai/lmctl@0.2.458
+          timeout 180 npm install -g @lmctl-ai/lmctl@0.2.482
           suffix=''
           if [[ "$RUNNER_OS" == Windows ]]; then suffix=.exe; fi
           mkdir -p build/lmcloud-tool

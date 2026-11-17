@@ -42,8 +42,8 @@ VER=$("$BIN" --version)
 [[ "$VER" == "lmazure 0.1.5" ]] || { echo "unexpected --version: $VER" >&2; exit 1; }
 "$BIN" --help | grep -q "lmazure 0.1.5"
 "$BIN" --notices | grep -q "github.com/Azure/azure-sdk-for-go"
-grep -q "06cd9ae991d90fea9ad38f3b071da646c76832f4" sdk.lock
-grep -q "06cd9ae991d9" go.mod
+grep -q "2027887521b3d34a44e67849070bf7e39df11b1d" sdk.lock
+grep -q "2027887521b3" go.mod
 ./scripts/sync-lmcloud-schema.sh --verify
 
 echo "==> [4/9] Checking --lmcode-schema [--json] byte parity (top-level and 'cloud' subcommand)"

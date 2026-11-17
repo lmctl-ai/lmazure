@@ -9,7 +9,8 @@ import tarfile
 import urllib.request
 
 root = Path(__file__).resolve().parents[1]
-lock = json.loads((root / 'sdk.lock').read_text())
+lock_file = root / 'csharp-sdk.lock' if (root / 'csharp-sdk.lock').exists() else root / 'sdk.lock'
+lock = json.loads(lock_file.read_text())
 target = root / 'third_party/lmcode-csharp'
 manifest = target / 'manifest.json'
 if '--verify' in sys.argv or '--ensure' in sys.argv and manifest.exists():
