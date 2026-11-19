@@ -1,5 +1,7 @@
 # lmazure
 
+Documentation: [Quick reference](https://www.lmctl.com/tools/lmazure/) · [LLM skill](https://www.lmctl.com/tools/lmazure/skill.html) · [Guide](https://www.lmctl.com/tools/lmazure/guide.html) · [Reference](https://www.lmctl.com/tools/lmazure/reference.html)
+
 **A scriptable Azure metadata and owned-resource host for lmscript — 72 illustrated examples.**
 
 | Service Bus | Service counts by region | Regional ownership graph |
